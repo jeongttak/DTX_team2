@@ -1485,21 +1485,25 @@ function ScreenHome({ onNav = () => {} }) {
             </div>
             <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 36, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>대응</button>
           </div>
-
-          {/* Savings */}
-          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: 20, color: 'white', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(125,217,87,.18)' }}/>
-            <div style={{ position: 'absolute', right: 14, bottom: 14, opacity: .25 }}><Icon name="leaf" size={48} color="#A5E66B"/></div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#A5E66B', letterSpacing: '.05em', textTransform: 'uppercase' }}>지금까지 절약한 금액</div>
-            <div style={{ fontSize: 38, fontWeight: 800, marginTop: 6, letterSpacing: '-0.025em' }}>₩ 121,500</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.7)', marginTop: 2 }}>
-              하루 ₩4,500 × 27일 · <span style={{ color: '#A5E66B', fontWeight: 700 }}>+₩4,500 오늘</span>
+{/* Savings */}
+          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: '18px 20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', right: -20, top: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(125,217,87,.15)' }}/>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="wallet" size={14} color="#A5E66B"/>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#A5E66B', letterSpacing: '.05em', textTransform: 'uppercase' }}>절약한 금액</div>
             </div>
-            {/* small monthly bars */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 14, height: 28 }}>
-              {[8, 14, 18, 22, 26, 30, 27].map((h, i) => (
-                <div key={i} style={{ flex: 1, height: h + 'px', background: i === 6 ? '#A5E66B' : 'rgba(255,255,255,.25)', borderRadius: 4 }}/>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+              <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em' }}>121,500<span style={{ fontSize: 20, fontWeight: 700, marginLeft: 3 }}>원</span></div>
+              <div style={{ fontSize: 40, lineHeight: 1 }}>💰</div>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', marginTop: 2 }}>27일 × 4,500원 (한 갑 기준)</div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700 }}>
+                <span>☕</span> 아메리카노 40잔
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700 }}>
+                <span>🍗</span> 치킨 6마리
+              </div>
             </div>
           </div>
 
