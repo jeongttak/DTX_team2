@@ -1,0 +1,3058 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Purely:SOOM · 환자 앱 풀 플로우</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+/* Purely:SOOM design tokens */
+:root {
+  --green-700: #2F8A3E;
+  --green-600: #3FAA48;
+  --green-500: #5BC23B;   /* bright green primary */
+  --green-400: #7DD957;   /* kiwi */
+  --green-300: #A5E66B;
+  --green-200: #C9F08D;
+  --green-100: #E5F8D0;
+  --green-50:  #F2FBE6;
+
+  --teal-900: #0E3A2C;
+  --teal-700: #1B5240;
+  --lung-blue: #7FB8D9;
+  --lung-blue-50: #EBF4FB;
+
+  --ink:    #0F2A1E;
+  --ink-2:  #3F5A50;
+  --ink-3:  #8A9E94;
+  --ink-4:  #C6D0CB;
+  --line:   #E4EFE6;
+  --bg:     #F6FBF1;
+  --white:  #FFFFFF;
+
+  --warn:   #F2A93B;
+  --warn-bg: #FFF4DC;
+  --danger: #E65A4A;
+  --danger-bg: #FFE6E1;
+
+  --xp:     #FFB930;
+  --berry:  #6F44E2;
+
+  --shadow-sm: 0 1px 2px rgba(15,42,30,.04), 0 2px 8px rgba(15,42,30,.04);
+  --shadow-md: 0 2px 6px rgba(15,42,30,.05), 0 12px 28px rgba(15,42,30,.07);
+  --shadow-lg: 0 8px 24px rgba(15,42,30,.10), 0 24px 60px rgba(15,42,30,.12);
+
+  --r-card: 22px;
+  --r-pill: 999px;
+  --r-chip: 14px;
+}
+
+.ps-screen {
+  width: 390px;
+  height: 844px;
+  background: var(--white);
+  color: var(--ink);
+  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'ss02';
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  position: relative;
+  letter-spacing: -0.01em;
+}
+.ps-screen *, .ps-screen *::before, .ps-screen *::after { box-sizing: border-box; }
+.ps-screen h1, .ps-screen h2, .ps-screen h3, .ps-screen h4 {
+  margin: 0;
+  font-family: 'SF Pro Display', -apple-system, 'Pretendard', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.ps-screen button { font-family: inherit; }
+
+.ps-statusbar {
+  position: relative; z-index: 5;
+  height: 54px; padding: 18px 28px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'SF Pro Text', -apple-system, system-ui, sans-serif;
+  font-weight: 600; font-size: 17px; color: var(--ink);
+}
+.ps-statusbar .icons { display: flex; gap: 6px; align-items: center; }
+
+/* Bottom tab bar */
+.ps-tabbar {
+  position: absolute; left: 14px; right: 14px; bottom: 14px;
+  height: 70px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 12px;
+  box-shadow: 0 4px 14px rgba(15,42,30,.06), 0 14px 36px rgba(15,42,30,.10);
+  border: 1px solid rgba(255,255,255,0.8);
+  z-index: 10;
+}
+.ps-tab {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600;
+  color: var(--ink-3);
+  flex: 1; padding: 8px 4px; border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ps-tab.active { color: var(--green-700); }
+.ps-tab.active .ps-tabicon { background: var(--green-100); color: var(--green-700); }
+.ps-tabicon {
+  width: 36px; height: 36px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-3);
+}
+
+/* Glass pill button */
+.ps-pill {
+  height: 42px; padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow: 0 1px 2px rgba(15,42,30,.04), 0 4px 14px rgba(15,42,30,.06);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 14px; color: var(--ink);
+}
+
+/* Card */
+.ps-card {
+  background: var(--white);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 18px;
+}
+.ps-card-soft {
+  background: var(--green-50);
+  border-radius: var(--r-card);
+  padding: 18px;
+}
+
+/* Chip */
+.ps-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px;
+  background: var(--green-100); color: var(--green-700);
+  border-radius: var(--r-chip);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Primary CTA */
+.ps-cta {
+  height: 56px; width: 100%;
+  background: var(--ink);
+  color: var(--white);
+  border-radius: 999px;
+  border: none;
+  font-size: 17px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(15,42,30,.18);
+  cursor: pointer;
+}
+.ps-cta.green { background: var(--green-500); color: white; box-shadow: 0 8px 20px rgba(91,194,59,.32); }
+.ps-cta:disabled { background: var(--ink-4); box-shadow: none; cursor: not-allowed; }
+
+/* Gradient header bg */
+.ps-headergrad {
+  position: absolute; inset: 0 0 auto 0;
+  height: 340px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--green-200) 0%, var(--green-100) 35%, transparent 70%),
+    linear-gradient(180deg, var(--green-100) 0%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Text styles */
+.ps-h1 { font-size: 32px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; }
+.ps-h2 { font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -0.025em; }
+.ps-h3 { font-size: 18px; line-height: 1.2; font-weight: 700; }
+.ps-eyebrow {
+  font-size: 12px; font-weight: 700; color: var(--green-700);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.ps-muted { color: var(--ink-2); }
+.ps-tiny { font-size: 11px; color: var(--ink-3); font-weight: 600; }
+
+/* Scrollable content area */
+.ps-content { position: relative; z-index: 1; padding: 0 20px 110px; }
+.ps-content.scroll { height: calc(100% - 54px); overflow-y: auto; }
+.ps-content.scroll::-webkit-scrollbar { display: none; }
+
+/* Progress dots */
+.ps-dots { display: flex; gap: 6px; align-items: center; }
+.ps-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--ink-4); }
+.ps-dot.on { background: var(--green-500); width: 22px; }
+
+/* Avatar circle */
+.ps-avatar {
+  width: 36px; height: 36px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--lung-blue), var(--green-300));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(15,42,30,.10);
+}
+
+/* Number badge */
+.ps-numbadge {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  font-weight: 800;
+}
+
+/* Selectable card (likert) */
+.ps-likert {
+  flex: 1;
+  height: 56px;
+  border-radius: 18px;
+  border: 1.5px solid var(--line);
+  background: white;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--ink-2);
+  cursor: pointer;
+  gap: 2px;
+}
+.ps-likert .num { font-size: 18px; font-weight: 800; color: var(--ink); }
+.ps-likert.on {
+  background: var(--green-500); border-color: var(--green-500); color: white;
+  box-shadow: 0 6px 16px rgba(91,194,59,.30);
+}
+.ps-likert.on .num { color: white; }
+
+/* progress bar */
+.ps-progress {
+  height: 6px; background: var(--green-100); border-radius: 999px; overflow: hidden;
+}
+.ps-progress > div { height: 100%; background: var(--green-500); border-radius: 999px; transition: width .5s cubic-bezier(.2,.7,.3,1); }
+
+/* ── Animations ────────────────────────────────────────────────── */
+@keyframes ps-bob       { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes ps-bob-sm    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+@keyframes ps-pulse     { 0%,100%{transform:scale(1);opacity:.55} 50%{transform:scale(1.1);opacity:.25} }
+@keyframes ps-pulse-2   { 0%,100%{transform:scale(.9);opacity:.5} 50%{transform:scale(1.05);opacity:.2} }
+@keyframes ps-spin      { to { transform: rotate(360deg) } }
+@keyframes ps-fade-up   { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes ps-pop       { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+@keyframes ps-breath    { 0%,100%{transform:scale(.94)} 50%{transform:scale(1.06)} }
+@keyframes ps-shimmer   { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes ps-caret     { 50% { opacity: 0 } }
+@keyframes ps-slide-up  { from { transform: translateY(100%) } to { transform: translateY(0) } }
+
+.ps-anim-bob     { animation: ps-bob 4s ease-in-out infinite; }
+.ps-anim-bob-sm  { animation: ps-bob-sm 3s ease-in-out infinite; }
+.ps-anim-breath  { animation: ps-breath 5s ease-in-out infinite; transform-origin: center; }
+.ps-anim-pulse   { animation: ps-pulse 3s ease-in-out infinite; }
+.ps-anim-pop     { animation: ps-pop .35s cubic-bezier(.2,.9,.3,1.2) both; }
+.ps-anim-fade-up { animation: ps-fade-up .35s cubic-bezier(.2,.7,.3,1) both; }
+.ps-anim-spin    { animation: ps-spin 1s linear infinite; }
+
+/* Sheet/modal */
+.ps-sheet-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15,42,30,0.35);
+  z-index: 50;
+  animation: ps-fade-up .25s ease-out both;
+}
+.ps-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: white;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 32px rgba(15,42,30,.18);
+  padding: 12px 22px 28px;
+  z-index: 51;
+  animation: ps-slide-up .32s cubic-bezier(.2,.7,.3,1) both;
+}
+.ps-sheet-handle {
+  width: 38px; height: 4px; background: var(--ink-4); border-radius: 999px;
+  margin: 4px auto 12px;
+}
+
+/* CO measuring ring fill — pure CSS so it's compositor-driven and smooth */
+@keyframes ps-co-fill {
+  from { stroke-dashoffset: 691; }
+  to   { stroke-dashoffset: 0; }
+}
+.ps-co-ring {
+  animation: ps-co-fill 5s linear forwards;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+/* Tap feedback */
+.ps-tap { transition: transform .15s ease, box-shadow .15s ease; cursor: pointer; }
+.ps-tap:active { transform: scale(0.97); }
+    :root { color-scheme: light; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      background:
+        radial-gradient(80% 60% at 20% 0%, #E5F8D0 0%, transparent 60%),
+        radial-gradient(70% 60% at 100% 100%, #DCEEF8 0%, transparent 55%),
+        #F4F2EC;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .stage {
+      position: fixed; inset: 0;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+    }
+    .side {
+      padding: 28px 28px 24px;
+      display: flex; flex-direction: column; gap: 18px;
+      border-right: 1px solid rgba(15,42,30,0.07);
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(20px);
+      overflow-y: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 38px; }
+    .brand .t h1 { font-size: 15px; margin: 0; font-weight: 800; color: #0F2A1E; letter-spacing: -0.01em; }
+    .brand .t p  { font-size: 11px; margin: 2px 0 0; color: #4A5B55; font-weight: 700; }
+    .lead { font-size: 22px; font-weight: 800; color: #0F2A1E; letter-spacing: -0.02em; line-height: 1.25; text-wrap: pretty; }
+    .lead em { font-style: normal; background: linear-gradient(180deg, transparent 60%, #C8F0A0 60%); padding: 0 2px; }
+    .desc { font-size: 13px; color: #3A4A44; line-height: 1.6; font-weight: 500; }
+    .quick-label { font-size: 10px; font-weight: 800; letter-spacing: .12em; color: #4A5B55; text-transform: uppercase; margin-bottom: 4px; }
+    .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick button {
+      appearance: none; border: 1px solid rgba(15,42,30,0.08);
+      background: rgba(255,255,255,0.6);
+      padding: 10px 12px; border-radius: 12px;
+      font-family: inherit; font-size: 12px; font-weight: 700; color: #0F2A1E;
+      cursor: pointer; transition: all .15s; text-align: left;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .quick button:hover { background: white; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,42,30,0.06); }
+    .quick button.is-active { background: #0F2A1E; color: white; border-color: #0F2A1E; }
+    .quick button .dot { width: 8px; height: 8px; border-radius: 999px; background: #7DD957; box-shadow: 0 0 0 3px rgba(125,217,87,0.25); }
+    .quick button.is-active .dot { background: #A5E66B; box-shadow: 0 0 0 3px rgba(165,230,107,0.35); }
+    .footnote { margin-top: auto; padding-top: 18px; border-top: 1px dashed rgba(15,42,30,0.1); font-size: 11px; color: #6B7B75; font-weight: 600; line-height: 1.55; }
+    .footnote a { color: #2F8A3E; text-decoration: none; font-weight: 700; }
+    .phone-wrap { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .phone-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(40% 50% at 50% 50%, rgba(125,217,87,0.18) 0%, transparent 70%); pointer-events: none; }
+    .phone { width: 390px; height: 844px; background: #000; border-radius: 54px; padding: 12px; box-shadow: 0 1px 0 1px rgba(255,255,255,0.6) inset, 0 60px 100px -30px rgba(15,42,30,0.35), 0 20px 40px -10px rgba(15,42,30,0.2); position: relative; transform-origin: center center; }
+    .phone-screen { width: 100%; height: 100%; background: #f0eee9; border-radius: 44px; overflow: hidden; position: relative; }
+    .phone-notch { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 110px; height: 32px; background: #000; border-radius: 999px; z-index: 50; pointer-events: none; }
+    @media (max-width: 900px) { .stage { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .side { border-right: none; border-bottom: 1px solid rgba(15,42,30,0.07); } .phone { transform: scale(0.85); } }
+    @media (max-height: 900px) and (min-width: 901px) { .phone { transform: scale(0.88); } }
+    @media (max-height: 800px) { .phone { transform: scale(0.78); } }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <aside class="side">
+      <div class="brand">
+        <img src="netlify-deploy/assets/logo.png" alt="Purely:SOOM"/>
+        <div class="t">
+          <h1>Purely:SOOM</h1>
+          <p>DTX 퓨어리숨 · 환자 앱</p>
+        </div>
+      </div>
+      <div class="lead">흡연 욕구가 올라오는 <em>그 순간</em>,<br/>앱이 먼저 손을 내미는 디지털 치료제.</div>
+      <div class="desc">온보딩부터 홈 · 미션 · CO 측정 · 캐릭터 · 캘린더까지 — 모든 화면이 실제로 연결되어 있어요. 하단 탭바와 홈의 <strong>"대응"</strong> 버튼으로 자유롭게 돌아다닐 수 있습니다.</div>
+      <div>
+        <div class="quick-label">바로가기</div>
+        <div class="quick" id="quick">
+          <button data-route="splash" class="is-active"><span class="dot"></span>처음부터 (스플래시)</button>
+          <button data-route="login"><span class="dot"></span>로그인</button>
+          <button data-route="onboarding"><span class="dot"></span>온보딩</button>
+          <button data-route="home"><span class="dot"></span>홈</button>
+          <button data-route="mission"><span class="dot"></span>미션</button>
+          <button data-route="co"><span class="dot"></span>CO 측정</button>
+          <button data-route="char"><span class="dot"></span>캐릭터</button>
+          <button data-route="cal"><span class="dot"></span>달력</button>
+          <button data-route="trigger"><span class="dot"></span>트리거 플로우</button>
+          <button data-route="warnings"><span class="dot"></span>CO 경고 3단계</button>
+        </div>
+      </div>
+      <div class="footnote">
+        프로토타입 · 실 데이터 아님<br/>
+        의사용 화면은 <a href="netlify-deploy/share-doctor.html">의사 대시보드 →</a>
+      </div>
+    </aside>
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="screen"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- React + Babel via CDN -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+
+  <script type="text/babel">
+// tokens.jsx — shared atoms for Purely:SOOM screens
+// Exposes globally via window: StatusBar, TabBar, Soomi, Sprout, Lung, Icon, PSChip, PSPill
+// Plus character variants and small SVG icons.
+
+const { useState } = React;
+
+function StatusBar({ time = '9:41', dark = false }) {
+  const c = dark ? '#fff' : '#0F2A1E';
+  return (
+    <div className="ps-statusbar" style={{ color: c }}>
+      <span>{time}</span>
+      <div className="icons">
+        <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="0.7" fill={c}/><rect x="5" y="4.5" width="3" height="6.5" rx="0.7" fill={c}/><rect x="10" y="2" width="3" height="9" rx="0.7" fill={c}/><rect x="15" y="0" width="3" height="11" rx="0.7" fill={c}/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11"><path d="M8 3a8 8 0 0 1 5.7 2.3l1-1A9.4 9.4 0 0 0 8 1.6 9.4 9.4 0 0 0 1.3 4.3l1 1A8 8 0 0 1 8 3Z" fill={c}/><path d="M8 6.3a4.8 4.8 0 0 1 3.4 1.4l1-1A6.2 6.2 0 0 0 8 4.9a6.2 6.2 0 0 0-4.4 1.8l1 1A4.8 4.8 0 0 1 8 6.3Z" fill={c}/><circle cx="8" cy="9.5" r="1.4" fill={c}/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="22" height="11" rx="3.2" stroke={c} strokeOpacity=".4" fill="none"/><rect x="2" y="2" width="19" height="8" rx="2" fill={c}/><path d="M24 4v4c.8-.3 1.5-1 1.5-2s-.7-1.7-1.5-2Z" fill={c} fillOpacity=".5"/></svg>
+      </div>
+    </div>
+  );
+}
+
+// Tab bar — active tab is the one matching `active` prop
+function TabBar({ active = 'home', onChange = () => {} }) {
+  const items = [
+    { id: 'home',     label: '홈',     icon: 'home' },
+    { id: 'mission',  label: '미션',   icon: 'target' },
+    { id: 'co',       label: 'CO 측정', icon: 'pulse' },
+    { id: 'char',     label: '캐릭터', icon: 'paw' },
+    { id: 'cal',      label: '캘린더', icon: 'cal' },
+  ];
+  return (
+    <div className="ps-tabbar">
+      {items.map(it => (
+        <div key={it.id} className={'ps-tab' + (it.id === active ? ' active' : '')} onClick={() => onChange(it.id)}>
+          <div className="ps-tabicon"><TabIcon name={it.icon} /></div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TabIcon({ name }) {
+  const s = { width: 22, height: 22, fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  if (name === 'home')   return <svg {...s} viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1Z"/></svg>;
+  if (name === 'target') return <svg {...s} viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>;
+  if (name === 'pulse')  return <svg {...s} viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>;
+  if (name === 'paw')    return <svg {...s} viewBox="0 0 24 24"><circle cx="6" cy="10" r="2"/><circle cx="10" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="18" cy="10" r="2"/><path d="M7 18c0-3 2-5 5-5s5 2 5 5a3 3 0 0 1-3 3 4 4 0 0 1-2-.6 4 4 0 0 1-2 .6 3 3 0 0 1-3-3Z"/></svg>;
+  if (name === 'cal')    return <svg {...s} viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>;
+  return null;
+}
+
+// ── Soomi: the lung-leaf mascot ─────────────────────────────────
+// Variations by `mood` and `accent`. Renders as inline SVG.
+function Soomi({ size = 180, mood = 'happy', accent = '#7DD957', pose = 'idle' }) {
+  // Eyes per mood
+  const eyes = {
+    happy: <g><path d="M70 92 q5 -8 10 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/><path d="M120 92 q5 -8 10 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/></g>,
+    chill: <g><circle cx="75" cy="92" r="3.5" fill="#0F2A1E"/><circle cx="125" cy="92" r="3.5" fill="#0F2A1E"/></g>,
+    sleepy:<g><path d="M70 92 h10" stroke="#0F2A1E" strokeWidth="4" strokeLinecap="round"/><path d="M120 92 h10" stroke="#0F2A1E" strokeWidth="4" strokeLinecap="round"/></g>,
+    worried:<g><circle cx="75" cy="92" r="3.5" fill="#0F2A1E"/><circle cx="125" cy="92" r="3.5" fill="#0F2A1E"/></g>,
+    proud: <g><path d="M68 94 q7 -10 14 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/><path d="M118 94 q7 -10 14 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/></g>,
+  }[mood];
+  const mouth = {
+    happy: <path d="M88 112 q12 12 24 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/>,
+    chill: <path d="M92 114 h16" stroke="#0F2A1E" strokeWidth="4" strokeLinecap="round"/>,
+    sleepy:<path d="M94 115 q6 4 12 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/>,
+    worried:<path d="M88 118 q12 -10 24 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/>,
+    proud: <path d="M86 110 q14 16 28 0" stroke="#0F2A1E" strokeWidth="4" fill="none" strokeLinecap="round"/>,
+  }[mood];
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" style={{ filter: 'drop-shadow(0 6px 12px rgba(15,42,30,0.10))' }}>
+      <defs>
+        <radialGradient id={`bodyG-${accent}`} cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9"/>
+          <stop offset="55%" stopColor={accent} stopOpacity="0.95"/>
+          <stop offset="100%" stopColor={accent}/>
+        </radialGradient>
+        <linearGradient id="leafG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#A5E66B"/>
+          <stop offset="100%" stopColor="#3FAA48"/>
+        </linearGradient>
+        <radialGradient id="cheek" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FF9DBF" stopOpacity=".6"/>
+          <stop offset="100%" stopColor="#FF9DBF" stopOpacity="0"/>
+        </radialGradient>
+      </defs>
+      {/* leaf sprout */}
+      <path d="M100 30 q-18 -10 -22 6 q-2 18 18 18 q14 -1 18 -10 q-6 -10 -14 -14Z" fill="url(#leafG)"/>
+      <path d="M96 50 q4 -16 14 -22" stroke="#2F8A3E" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <path d="M100 48 v22" stroke="#2F8A3E" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* body — two lung lobes */}
+      <path d="M100 70
+               C 70 70, 50 86, 50 120
+               C 50 154, 72 172, 100 168
+               C 128 172, 150 154, 150 120
+               C 150 86, 130 70, 100 70 Z"
+            fill={`url(#bodyG-${accent})`}/>
+      {/* lobe seam */}
+      <path d="M100 78 v86" stroke="#FFFFFF" strokeOpacity=".55" strokeWidth="2" fill="none"/>
+      {/* cheeks */}
+      <circle cx="70" cy="118" r="10" fill="url(#cheek)"/>
+      <circle cx="130" cy="118" r="10" fill="url(#cheek)"/>
+      {/* face */}
+      {eyes}
+      {mouth}
+      {/* highlight */}
+      <ellipse cx="78" cy="86" rx="14" ry="8" fill="#FFFFFF" opacity=".55"/>
+    </svg>
+  );
+}
+
+// Tiny inline icon (24px) — single uniform set
+function Icon({ name, size = 22, color = 'currentColor', stroke = 2 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'flame':    return <svg {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/></svg>;
+    case 'wallet':   return <svg {...p}><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M3 10h18M16 15h2"/></svg>;
+    case 'lung':     return <svg {...p}><path d="M12 4v9M8 7s-4 1-4 7 3 5 4 4 0-6 0-11ZM16 7s4 1 4 7-3 5-4 4 0-6 0-11Z"/></svg>;
+    case 'heart':    return <svg {...p}><path d="M12 20s-7-4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6-7 10-7 10Z"/></svg>;
+    case 'wind':     return <svg {...p}><path d="M3 8h11a3 3 0 1 0-3-3M3 12h17a3 3 0 1 1-3 3M3 16h9a3 3 0 1 1-3 3"/></svg>;
+    case 'bolt':     return <svg {...p}><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>;
+    case 'check':    return <svg {...p}><path d="M5 12.5 10 17l9-10"/></svg>;
+    case 'plus':     return <svg {...p}><path d="M12 5v14M5 12h14"/></svg>;
+    case 'chev':     return <svg {...p}><path d="m9 6 6 6-6 6"/></svg>;
+    case 'chev-l':   return <svg {...p}><path d="m15 6-6 6 6 6"/></svg>;
+    case 'chev-d':   return <svg {...p}><path d="m6 9 6 6 6-6"/></svg>;
+    case 'chev-u':   return <svg {...p}><path d="m6 15 6-6 6 6"/></svg>;
+    case 'close':    return <svg {...p}><path d="M6 6l12 12M18 6 6 18"/></svg>;
+    case 'search':   return <svg {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>;
+    case 'bell':     return <svg {...p}><path d="M6 8a6 6 0 0 1 12 0c0 7 2 8 2 8H4s2-1 2-8ZM10 20a2 2 0 0 0 4 0"/></svg>;
+    case 'trophy':   return <svg {...p}><path d="M6 4h12v4a6 6 0 0 1-12 0V4ZM6 6H3a3 3 0 0 0 3 3M18 6h3a3 3 0 0 1-3 3M10 14h4v3h-4zM8 21h8M12 17v4"/></svg>;
+    case 'gift':     return <svg {...p}><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 13h18M12 8v13M12 8s-3-5-6-3 2 3 6 3ZM12 8s3-5 6-3-2 3-6 3Z"/></svg>;
+    case 'water':    return <svg {...p}><path d="M12 3s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13Z"/></svg>;
+    case 'walk':     return <svg {...p}><circle cx="13" cy="4" r="2"/><path d="m6 21 4-7-2-3 4-3 3 5 4 1M14 14l2 7"/></svg>;
+    case 'note':     return <svg {...p}><path d="M5 4a2 2 0 0 1 2-2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Z"/><path d="M14 2v5h5M9 13h6M9 17h4"/></svg>;
+    case 'mic':      return <svg {...p}><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>;
+    case 'cig':      return <svg {...p}><rect x="3" y="11" width="14" height="4" rx="1"/><path d="M19 11v4M7 11v4M17 8s2-1 2-3M20 8s2-1 2-3"/></svg>;
+    case 'sparkle':  return <svg {...p}><path d="M12 3v6M12 15v6M3 12h6M15 12h6M6 6l4 4M14 14l4 4M6 18l4-4M14 10l4-4"/></svg>;
+    case 'crown':    return <svg {...p}><path d="m3 18 2-10 5 5 2-8 2 8 5-5 2 10Z"/><path d="M3 21h18"/></svg>;
+    case 'star':     return <svg {...p}><path d="m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/></svg>;
+    case 'shield':   return <svg {...p}><path d="M12 3 4 6v6c0 5 4 8 8 9 4-1 8-4 8-9V6Z"/></svg>;
+    case 'leaf':     return <svg {...p}><path d="M3 21c0-9 7-16 18-18-2 11-9 18-18 18ZM3 21c4-4 9-7 14-9"/></svg>;
+    case 'fire-x2':  return <svg {...p}><path d="M12 3s4 4 4 8a4 4 0 0 1-8 0c0-2 1-3 1-3"/></svg>;
+    case 'kebab':    return <svg {...p}><circle cx="12" cy="5" r="1" fill={color}/><circle cx="12" cy="12" r="1" fill={color}/><circle cx="12" cy="19" r="1" fill={color}/></svg>;
+    case 'filter':   return <svg {...p}><path d="M4 5h16l-6 8v6l-4-2v-4Z"/></svg>;
+    case 'arrow-r':  return <svg {...p}><path d="M5 12h14M13 5l7 7-7 7"/></svg>;
+    case 'arrow-up': return <svg {...p}><path d="M12 19V5M5 12l7-7 7 7"/></svg>;
+    case 'arrow-dn': return <svg {...p}><path d="M12 5v14M5 12l7 7 7-7"/></svg>;
+    case 'eye':      return <svg {...p}><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg>;
+    case 'user':     return <svg {...p}><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>;
+    case 'sun':      return <svg {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M4.5 19.5l2-2M17.5 6.5l2-2"/></svg>;
+    case 'cloud':    return <svg {...p}><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 20 11a4 4 0 0 1-1 7Z"/></svg>;
+    case 'co':       return <svg {...p}><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/></svg>;
+    default: return null;
+  }
+}
+
+// Small reusable chips/elements
+function PSChip({ tone = 'green', children, icon }) {
+  const tones = {
+    green: { bg: 'var(--green-100)', fg: 'var(--green-700)' },
+    yellow:{ bg: '#FFF1C2', fg: '#A06A00' },
+    red:   { bg: 'var(--danger-bg)', fg: 'var(--danger)' },
+    blue:  { bg: 'var(--lung-blue-50)', fg: '#2A6FAA' },
+    ink:   { bg: '#1A2A22', fg: 'white' },
+    xp:    { bg: '#FFEFC8', fg: '#9A6A00' },
+  }[tone] || tones.green;
+  return (
+    <span className="ps-chip" style={{ background: tones && tones.bg, color: tones && tones.fg }}>
+      {icon ? <Icon name={icon} size={14} /> : null}
+      {children}
+    </span>
+  );
+}
+
+// Tiny coin / streak number badge that mimics "780 berries" style
+function StreakBadge({ days, color = '#FF8A3D' }) {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 28, padding: '0 12px 0 8px', borderRadius: 999, background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 1px 3px rgba(15,42,30,.06)' }}>
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 3s5 5 5 10a5 5 0 0 1-10 0c0-2 1-4 1-4s0 4 3 4 3-3 1-6c1 0 5 3 5 8a7 7 0 0 1-14 0c0-6 5-9 9-12Z" fill={color}/></svg>
+      <span style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 13 }}>{days}일</span>
+    </div>
+  );
+}
+
+Object.assign(window, { StatusBar, TabBar, Soomi, Icon, PSChip, StreakBadge });
+
+  </script>
+
+  <script type="text/babel">
+// screen-splash.jsx — App splash with logo, auto-advances after 3s
+
+function ScreenSplash({ onComplete = () => {} }) {
+  React.useEffect(() => {
+    const t = setTimeout(onComplete, 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="ps-screen" data-screen-label="00 스플래시" style={{
+      background: 'radial-gradient(120% 80% at 50% 30%, #E5F8D0 0%, #FFFFFF 50%, #EBF4FB 100%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* ambient breathing glow */}
+      <div style={{
+        position: 'absolute', width: 420, height: 420, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(125,217,87,.25) 0%, transparent 65%)',
+        animation: 'ps-breath 4s ease-in-out infinite',
+      }}/>
+
+      {/* logo */}
+      <div className="ps-anim-fade-up" style={{ position: 'relative', zIndex: 1, padding: '0 40px', textAlign: 'center' }}>
+        <img src="netlify-deploy/assets/logo.png" alt="Purely:SOOM" style={{
+          width: 280, maxWidth: '78%', height: 'auto', display: 'block', margin: '0 auto',
+        }}/>
+      </div>
+
+      {/* subtle loader at bottom */}
+      <div style={{
+        position: 'absolute', bottom: 70, left: 0, right: 0,
+        display: 'flex', justifyContent: 'center',
+      }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              width: 6, height: 6, borderRadius: 999,
+              background: 'var(--green-500)',
+              opacity: 0.4,
+              animation: `ps-bob 1.2s ease-in-out ${i * 0.15}s infinite`,
+            }}/>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        position: 'absolute', bottom: 36, left: 0, right: 0, textAlign: 'center',
+        fontSize: 11, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '.08em',
+      }}>
+        DIGITAL THERAPEUTICS · Ⓡ 2026
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenSplash });
+
+  </script>
+
+  <script type="text/babel">
+// screen-login.jsx — Login with patient/doctor role toggle
+// Patient: doctor-pairing code + ID + password
+// Doctor: ID + password
+
+function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {} }) {
+  const [role, setRole] = React.useState('patient'); // 'patient' | 'doctor'
+  const [doctorCode, setDoctorCode] = React.useState('');
+  const [id, setId] = React.useState('');
+  const [pw, setPw] = React.useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (role === 'doctor') onDoctorLogin();
+    else onPatientLogin();
+  };
+
+  // shared input style
+  const inputWrap = {
+    background: '#F4F7F5',
+    borderRadius: 16,
+    padding: '12px 16px',
+    border: '1.5px solid transparent',
+    transition: 'border-color .15s, background .15s',
+  };
+  const inputBase = {
+    width: '100%',
+    border: 'none',
+    background: 'transparent',
+    outline: 'none',
+    fontSize: 15,
+    fontWeight: 600,
+    color: 'var(--ink)',
+    fontFamily: 'inherit',
+    padding: 0,
+  };
+  const labelStyle = {
+    fontSize: 11, fontWeight: 800, color: 'var(--ink-3)',
+    letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 6,
+  };
+  const hintStyle = {
+    fontSize: 11, color: 'var(--ink-3)', marginTop: 6, fontWeight: 500, lineHeight: 1.4,
+  };
+
+  return (
+    <div className="ps-screen" data-screen-label="01 로그인" style={{
+      background: 'linear-gradient(180deg, #F2FBE6 0%, #FFFFFF 40%, #FFFFFF 100%)',
+      display: 'flex', flexDirection: 'column', position: 'relative',
+    }}>
+      <StatusBar />
+
+      <div style={{ flex: 1, overflow: 'auto', padding: '8px 28px 28px', display: 'flex', flexDirection: 'column' }}>
+        {/* Brand */}
+        <div className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 11,
+            background: 'linear-gradient(135deg, #7DD957, #5BC23B)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(91,194,59,.25)',
+          }}>
+            <Icon name="lung" size={20} color="white"/>
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em' }}>Purely:SOOM</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '.05em' }}>금연 디지털 치료제</div>
+          </div>
+        </div>
+
+        {/* Role toggle */}
+        <div className="ps-anim-fade-up" style={{
+          marginTop: 22,
+          background: '#EAF1EC',
+          borderRadius: 14, padding: 4,
+          display: 'flex', gap: 4,
+          animationDelay: '.05s',
+        }}>
+          {[
+            { v: 'patient', label: '환자' },
+            { v: 'doctor',  label: '의사' },
+          ].map(t => {
+            const on = role === t.v;
+            return (
+              <button
+                key={t.v}
+                type="button"
+                onClick={() => setRole(t.v)}
+                className="ps-tap"
+                style={{
+                  flex: 1, height: 40, border: 'none',
+                  borderRadius: 11,
+                  background: on ? 'white' : 'transparent',
+                  color: on ? 'var(--ink)' : 'var(--ink-3)',
+                  fontWeight: 800, fontSize: 13,
+                  boxShadow: on ? '0 2px 6px rgba(15,42,30,.06)' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                }}
+              >
+                <Icon name={t.v === 'doctor' ? 'shield' : 'heart'} size={14}/>
+                <span>{t.label}{on ? ' 로그인' : ''}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Title */}
+        <div className="ps-anim-fade-up" style={{ marginTop: 28, animationDelay: '.1s' }}>
+          <h1 className="ps-h1" style={{ fontSize: 28, lineHeight: 1.15 }}>
+            {role === 'doctor' ? <>다시 오신 것을<br/>환영합니다, 선생님</> : <>오늘도<br/>깨끗한 숨으로</>}
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, fontWeight: 500, lineHeight: 1.55 }}>
+            {role === 'doctor'
+              ? '환자 모니터링과 처방 화면으로 이동합니다.'
+              : '계정 정보를 입력해 시작해주세요.'}
+          </p>
+        </div>
+
+        {/* Form */}
+        <form key={role} onSubmit={handleSubmit} className="ps-anim-fade-up" style={{
+          marginTop: 22, display: 'flex', flexDirection: 'column', gap: 14, animationDelay: '.15s',
+        }}>
+          {role === 'patient' && (
+            <div>
+              <div style={labelStyle}>의사 코드</div>
+              <div style={inputWrap}>
+                <input
+                  type="text"
+                  value={doctorCode}
+                  onChange={e => setDoctorCode(e.target.value)}
+                  placeholder="예) DR-0427-MJ"
+                  style={inputBase}
+                />
+              </div>
+              <div style={hintStyle}>담당 의사가 발급한 코드 · 매칭 시에만 사용돼요</div>
+            </div>
+          )}
+
+          <div>
+            <div style={labelStyle}>아이디</div>
+            <div style={inputWrap}>
+              <input
+                type="text"
+                value={id}
+                onChange={e => setId(e.target.value)}
+                placeholder={role === 'doctor' ? '병원 이메일' : '아이디 또는 이메일'}
+                autoComplete="username"
+                style={inputBase}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div style={labelStyle}>비밀번호</div>
+            <div style={inputWrap}>
+              <input
+                type="password"
+                value={pw}
+                onChange={e => setPw(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                style={inputBase}
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="ps-cta green ps-tap" style={{ marginTop: 12, height: 54, fontSize: 16 }}>
+            로그인
+            <Icon name="chev" size={18} color="white"/>
+          </button>
+
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: 14, marginTop: 6, fontSize: 12, color: 'var(--ink-3)', fontWeight: 600,
+          }}>
+            <span style={{ cursor: 'pointer' }}>비밀번호 찾기</span>
+            <span style={{ width: 3, height: 3, borderRadius: 999, background: 'var(--ink-4)' }}/>
+            <span style={{ cursor: 'pointer', color: 'var(--green-700)' }}>
+              {role === 'doctor' ? '의사 회원가입' : '환자 가입하기'}
+            </span>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <div style={{ marginTop: 'auto', paddingTop: 24, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '.05em' }}>
+            식약처 인증 디지털 치료제 · v1.2.0
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenLogin });
+
+  </script>
+
+  <script type="text/babel">
+// screen-onboarding.jsx — Full 10Q interactive flow with scoring → result
+const onboardingStyles = {
+  bg: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #E5F8D0 0%, #F2FBE6 40%, #FFFFFF 100%)', zIndex: 0 },
+  resultBg: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #C9F08D 0%, #E5F8D0 30%, #FFFFFF 60%)', zIndex: 0 },
+  qcard: { background: 'white', borderRadius: 26, padding: 24, boxShadow: 'var(--shadow-md)', marginTop: 22 },
+  qnum:  { display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--green-700)', fontWeight: 800, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' },
+  qbody: { fontSize: 21, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.3, letterSpacing: '-0.02em', marginTop: 14, marginBottom: 22 },
+};
+
+// Type definitions
+const TYPES = {
+  stress: {
+    label: '스트레스 해소형', short: '스트레스 해소',
+    desc: '긴장·짜증·걱정을 진정시키려 흡연',
+    color: '#5BC23B', icon: 'flame',
+    insight: '담배 자체보다 스트레스를 낮추는 코칭이 필요해요',
+    coach: '담배를 피우기 전에, 먼저 몸의 긴장을 낮추는 미션을 해볼게요. 담배는 스트레스의 원인을 해결하기보다 잠깐 미루는 역할에 가까워요.',
+    missions: ['3분 호흡하기', '물 한 컵 마시기', '5분 산책', '노래 한 곡 듣기'],
+  },
+  neg: {
+    label: '부정적 해석형', short: '부정적 해석',
+    desc: '상황을 자동으로 부정적으로 해석',
+    color: '#7FB8D9', icon: 'cloud',
+    insight: '지금 떠오른 생각이 사실인지 함께 확인해볼게요',
+    coach: '"내가 싫어서 답장 안 하는 거야" — 정말 그것뿐일까요? 다른 가능성 2개를 함께 살펴보면 감정이 조금 가벼워질 수 있어요.',
+    missions: ['자동적 사고 적기', '반대 근거 찾기', '대안 생각 저장하기'],
+  },
+  effi: {
+    label: '자기효능감 부족형', short: '자기효능감 부족',
+    desc: '"이미 망했다 / 못 끊을 거야"',
+    color: '#A89BF5', icon: 'shield',
+    insight: '한 번 실패해도 모든 노력이 사라지는 것은 아니에요',
+    coach: '금연은 한 번에 완벽한 성공이 아니라, 실패 후 다시 시도하는 과정이에요. 지금 5분만 미루는 것도 성공 기록이에요.',
+    missions: ['5분 참기', '오늘 1개비 줄이기', '내일 행동 1개 정하기'],
+  },
+  social: {
+    label: '사회적 영향형', short: '사회적 영향',
+    desc: '회식·동료·분위기에 영향',
+    color: '#FFB930', icon: 'user',
+    insight: '거절은 분위기를 깨는 행동이 아니라, 내 건강을 지키는 행동이에요',
+    coach: '지금은 담배 자체보다 주변 분위기 때문에 욕구가 커질 수 있어요. 미리 정한 거절 문장을 사용해볼까요?',
+    missions: ['거절 멘트 연습', '대체 음료 주문', '자리 잠깐 비우기'],
+  },
+  habit: {
+    label: '습관 반복형', short: '습관 반복',
+    desc: '식후·퇴근 후 자동 흡연',
+    color: '#A5E66B', icon: 'sparkle',
+    insight: '의식적 흡연이 아니라, 몸에 익숙해진 루틴이에요',
+    coach: '식후 흡연 루틴을 식후 양치 루틴으로 바꿔볼까요? 같은 시간에 다른 행동을 넣는 게 핵심이에요.',
+    missions: ['식후 바로 양치', '물 마시기', '5분 걷기'],
+  },
+  rest: {
+    label: '휴식 확보형', short: '휴식 확보',
+    desc: '쉬는 시간을 확보하기 위한 흡연',
+    color: '#6BC9C2', icon: 'sun',
+    insight: '필요한 건 담배가 아니라 잠깐의 쉼이에요',
+    coach: '"담배 한 대 = 5분 쉬는 시간"으로 굳어져 있을 수 있어요. 같은 5분, 다른 방식으로 쉬어볼까요?',
+    missions: ['옥상 가서 하늘 보기', '눈 감고 5분 멍 때리기', '동료와 짧은 대화'],
+  },
+};
+
+const QUESTIONS = [
+  { type: 'stress', q: '스트레스를 받으면 담배를 피워야 마음이 진정된다고 느낀다.' },
+  { type: 'stress', q: '기분이 나쁘거나 화가 날 때 담배 생각이 가장 먼저 난다.' },
+  { type: 'neg',    q: '누군가 내 말을 무시하거나 반응하지 않으면 나를 싫어한다고 느낀다.' },
+  { type: 'effi',   q: '작은 실수에도 "나는 역시 안 된다"는 생각이 자주 든다.' },
+  { type: 'effi',   q: '금연을 시도해도 결국 실패할 것 같다는 생각이 든다.' },
+  { type: 'effi',   q: '한 번 담배를 피우면 "이미 망했다"고 생각해서 계속 피우게 된다.' },
+  { type: 'social', q: '친구나 주변 사람이 담배를 피우면 거절하기 어렵다.' },
+  { type: 'social', q: '술자리나 모임에서는 분위기상 담배를 피우게 된다.' },
+  { type: 'habit',  q: '식후, 수업 후, 퇴근 후처럼 특정 시간에는 습관적으로 담배가 생각난다.' },
+  { type: 'rest',   q: '담배를 피우러 나가야 잠깐 쉬는 느낌이 든다.' },
+];
+const LIKERT = ['전혀 아니다', '아니다', '보통', '그렇다', '매우 그렇다'];
+
+function ScreenOnboarding({ onComplete }) {
+  // step: 0..9 = question, 10 = result
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState(Array(10).fill(0));
+
+  // Pre-fill plausible answers as user navigates; we just store live picks
+  const setPick = (n) => {
+    const next = [...answers];
+    next[step] = n;
+    setAnswers(next);
+    // auto-advance after a short delay
+    setTimeout(() => {
+      setStep(s => Math.min(s + 1, 10));
+    }, 280);
+  };
+
+  if (step === 10) return <OnboardingResult answers={answers} onReset={() => { setStep(0); setAnswers(Array(10).fill(0)); }} onComplete={onComplete} />;
+
+  const Q = QUESTIONS[step];
+  const pick = answers[step];
+
+  return (
+    <div className="ps-screen" data-screen-label="01 Onboarding · 문항">
+      <div style={onboardingStyles.bg} />
+      <StatusBar />
+      <div className="ps-content" style={{ paddingBottom: 30, position: 'relative' }}>
+        {/* top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => setStep(s => Math.max(0, s - 1))} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,.85)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: step === 0 ? .4 : 1 }} disabled={step === 0}><Icon name="chev-l" size={20}/></button>
+          <div style={{ flex: 1 }}>
+            <div className="ps-progress"><div style={{ width: `${(step + 1) * 10}%` }}/></div>
+          </div>
+          <div className="ps-tiny" style={{ fontWeight: 700, color: 'var(--ink-2)' }}>{step + 1} / 10</div>
+        </div>
+
+        {/* Eyebrow + intro */}
+        <div style={{ marginTop: 26 }}>
+          <div style={onboardingStyles.qnum}>흡연 패턴 진단</div>
+          <h1 className="ps-h1" style={{ marginTop: 8 }}>당신에게<br/>해당되나요?</h1>
+          <div className="ps-muted" style={{ marginTop: 8, fontSize: 14 }}>5점 척도로 솔직하게 답해주세요. 결과는 맞춤 CBT 코스에 사용돼요.</div>
+        </div>
+
+        {/* Question card */}
+        <div key={step} style={onboardingStyles.qcard} className="ps-anim-fade-up">
+          <div style={onboardingStyles.qnum}>Q{step + 1} · {TYPES[Q.type].label}</div>
+          <div style={onboardingStyles.qbody}>{Q.q}</div>
+
+          {/* Likert scale */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[1,2,3,4,5].map(n => (
+              <button key={n} className={'ps-likert ps-tap' + (n === pick ? ' on' : '')} onClick={() => setPick(n)}>
+                <span className="num">{n}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>
+            <span>{LIKERT[0]}</span>
+            <span>{LIKERT[4]}</span>
+          </div>
+        </div>
+
+        {/* helper */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18, padding: 14, background: 'var(--lung-blue-50)', borderRadius: 16 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 999, background: '#7FB8D9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="shield" size={16} color="white"/></div>
+          <div style={{ fontSize: 12, color: 'var(--teal-700)', fontWeight: 600, lineHeight: 1.4 }}>답변은 의료진과 본인만 볼 수 있어요. 진단 외 용도로 사용되지 않습니다.</div>
+        </div>
+
+        {/* CTA */}
+        <button className="ps-cta green ps-tap" style={{ marginTop: 22, opacity: pick ? 1 : .55 }} disabled={!pick} onClick={() => setStep(s => Math.min(10, s + 1))}>
+          {step === 9 ? '결과 보기' : '다음'}
+          <Icon name="arrow-r" size={18}/>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function OnboardingResult({ answers, onReset, onComplete }) {
+  // Score by type
+  const totals = { stress: 0, neg: 0, effi: 0, social: 0, habit: 0, rest: 0 };
+  QUESTIONS.forEach((q, i) => {
+    const v = answers[i] || 0;
+    totals[q.type] += v;
+  });
+  const sum = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
+  let breakdown = Object.entries(totals)
+    .map(([k, v]) => ({ key: k, ...TYPES[k], pct: Math.round((v / sum) * 100) }))
+    .filter(t => t.pct > 0)
+    .sort((a, b) => b.pct - a.pct);
+  // Take top 3, redistribute so top 3 sums to 100
+  breakdown = breakdown.slice(0, 3);
+  const top3Sum = breakdown.reduce((s, t) => s + t.pct, 0) || 1;
+  breakdown = breakdown.map(t => ({ ...t, pct: Math.max(1, Math.round((t.pct / top3Sum) * 100)) }));
+  const drift = 100 - breakdown.reduce((s, t) => s + t.pct, 0);
+  if (breakdown[0]) breakdown[0].pct += drift;
+
+  const top = breakdown[0];
+  const summaryLine = breakdown.map(t => `${t.label} ${t.pct}%`).join(' + ');
+
+  return (
+    <div className="ps-screen" data-screen-label="01 Onboarding · 결과">
+      <div style={onboardingStyles.resultBg} />
+      <StatusBar />
+      <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
+        {/* Hero */}
+        <div style={{ textAlign: 'center', paddingTop: 4 }}>
+          <div className="ps-anim-bob"><Soomi size={150} mood="proud" accent={top?.color}/></div>
+          <div style={{ marginTop: -6, fontSize: 12, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 흡연 패턴</div>
+          <h1 className="ps-h1" style={{ marginTop: 8 }}>{top?.short} 중심형</h1>
+          <div className="ps-muted" style={{ marginTop: 6, fontSize: 14, padding: '0 8px', lineHeight: 1.45 }}>{top?.insight}.</div>
+        </div>
+
+        {/* Stacked bar */}
+        <div className="ps-anim-fade-up" style={{ marginTop: 22, height: 14, borderRadius: 999, overflow: 'hidden', display: 'flex', boxShadow: 'inset 0 0 0 1px rgba(15,42,30,.06)' }}>
+          {breakdown.map(t => <div key={t.key} style={{ width: t.pct + '%', background: t.color, transition: 'width .8s cubic-bezier(.2,.7,.3,1)' }} />)}
+        </div>
+
+        {/* One-liner summary card */}
+        <div style={{ marginTop: 16, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', borderLeft: `4px solid ${top?.color}` }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', textTransform: 'uppercase' }}>한 줄 요약</div>
+          <div style={{ fontSize: 13, marginTop: 4, color: 'var(--ink)', lineHeight: 1.5 }}>당신의 흡연 패턴은 <strong>{summaryLine}</strong>입니다.</div>
+        </div>
+
+        {/* Breakdown list */}
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {breakdown.map((t, i) => (
+            <div key={t.key} className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', animationDelay: (i * 80) + 'ms' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                <Icon name={t.icon} size={22}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)' }}>{t.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{t.desc}</div>
+              </div>
+              <div style={{ fontWeight: 800, fontSize: 22, color: 'var(--ink)', letterSpacing: '-0.02em' }}>{t.pct}<span style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 700 }}>%</span></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Coaching preview — Soomi quote */}
+        {top ? (
+          <div style={{ marginTop: 16, background: 'white', borderRadius: 22, padding: 16, boxShadow: 'var(--shadow-md)', border: '1.5px solid ' + top.color + '55' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: top.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="sparkle" size={16}/></div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: top.color, letterSpacing: '.05em', textTransform: 'uppercase' }}>맞춤 코칭 미리보기</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{top.label}을 위한 코칭</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--ink)', padding: '12px 14px', background: 'var(--green-50)', borderRadius: 14 }}>"{top.coach}"</div>
+
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 6 }}>추천 미션</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {top.missions.map((m, i) => (
+                  <span key={i} className="ps-chip" style={{ background: top.color + '22', color: top.color === '#FFB930' ? '#7A4A00' : top.color === '#A5E66B' ? '#2F8A3E' : top.color }}>{m}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Plan preview */}
+        <div className="ps-card-soft" style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--green-700)' }}><Icon name="note" size={20}/></div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>맞춤 4주 CBT 코스 준비 완료</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>{breakdown.map(t => t.short).join(' · ')} 모듈 포함</div>
+          </div>
+          <Icon name="chev" size={18} color="var(--ink-3)"/>
+        </div>
+
+        <button onClick={onComplete} className="ps-cta green ps-tap" style={{ marginTop: 16 }}>금연 여정 시작하기</button>
+        <button onClick={onReset} className="ps-tap" style={{ width: '100%', height: 48, marginTop: 8, background: 'transparent', border: 'none', color: 'var(--ink-2)', fontWeight: 600, fontSize: 14 }}>다시 풀어보기 ↺</button>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenOnboarding });
+
+  </script>
+
+  <script type="text/babel">
+// screen-trigger.jsx — Interactive 3-step flow: state check → trigger log → Socratic Q
+
+const trigStyles = {
+  bg: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #FFF4DC 0%, #FFFAF0 35%, #FFFFFF 70%)', zIndex: 0 },
+  bgBlue:{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #EBF4FB 0%, #F8FCF4 50%, #FFFFFF 100%)', zIndex: 0 },
+  step: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '.06em' },
+  card: { background: 'white', borderRadius: 24, padding: 22, boxShadow: 'var(--shadow-md)', marginTop: 18 },
+};
+
+function ScreenTriggerFlow({ onComplete }) {
+  const [step, setStep] = useState(1);   // 1 = state, 2 = log, 3 = socratic, 4 = done
+  const [urge, setUrge] = useState(7);
+  const [emo, setEmo]   = useState(['stress']);
+  const [where, setWhere] = useState('회의실');
+  const [who,   setWho]   = useState('혼자');
+  const [didSmoke, setDidSmoke] = useState(null);
+  const [socAnswer, setSocAnswer] = useState('회의 끝나고 옥상 가서 한 대 피우면 머리가 비워지니까. 근데 사실 5분 잠깐 자리 비우면 비슷한 효과가 있는 것 같기도 해.');
+
+  const next = () => setStep(s => Math.min(4, s + 1));
+  const prev = () => setStep(s => Math.max(1, s - 1));
+
+  return (
+    <div className="ps-screen" data-screen-label={`02 트리거 · ${step}단계`}>
+      <div style={step === 3 ? trigStyles.bgBlue : trigStyles.bg} />
+      <StatusBar />
+      <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
+        {/* Top: close + 3-segment progress */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, background: 'transparent', paddingBottom: 6 }}>
+          <button onClick={prev} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name={step === 1 ? 'close' : 'chev-l'} size={18}/>
+          </button>
+          <div style={{ flex: 1, display: 'flex', gap: 4 }}>
+            {[1,2,3].map(i => (
+              <div key={i} style={{ flex: 1, height: 4, borderRadius: 999, background: i <= step ? 'var(--green-500)' : 'rgba(15,42,30,.12)', transition: 'background .3s' }}/>
+            ))}
+          </div>
+        </div>
+
+        {step === 1 && <StepStateCheck urge={urge} setUrge={setUrge} emo={emo} setEmo={setEmo} onNext={next}/>}
+        {step === 2 && <StepTriggerLog where={where} setWhere={setWhere} who={who} setWho={setWho} didSmoke={didSmoke} setDidSmoke={setDidSmoke} onNext={next}/>}
+        {step === 3 && <StepSocratic answer={socAnswer} setAnswer={setSocAnswer} onNext={next}/>}
+        {step === 4 && <StepDone onReset={() => setStep(1)} onComplete={onComplete}/>}
+      </div>
+    </div>
+  );
+}
+
+function StepStateCheck({ urge, setUrge, emo, setEmo, onNext }) {
+  const emotions = [
+    { id: 'stress', label: '스트레스', icon: 'bolt', color: '#E65A4A' },
+    { id: 'anxiety', label: '불안',    icon: 'wind', color: '#F2A93B' },
+    { id: 'bored',   label: '지루함',  icon: 'cloud',color: '#7FB8D9' },
+    { id: 'tired',   label: '피곤',    icon: 'sun',  color: '#B89A5B' },
+    { id: 'angry',   label: '짜증',    icon: 'flame',color: '#D65A2B' },
+    { id: 'happy',   label: '기쁨',    icon: 'sparkle',color: '#5BC23B' },
+  ];
+  const toggle = id => setEmo(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
+  const onSlider = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    setUrge(Math.max(1, Math.min(10, Math.round(x * 10))));
+  };
+
+  return (
+    <div className="ps-anim-fade-up">
+      <div style={{ marginTop: 18 }}>
+        <div style={trigStyles.step}><span style={{ color: '#D08A3D' }}>● 트리거 감지 14:22</span></div>
+        <h1 className="ps-h2" style={{ marginTop: 10 }}>지금 어떤 상태예요?</h1>
+        <div className="ps-muted" style={{ fontSize: 13, marginTop: 6 }}>한 호흡 쉬고, 솔직하게 골라봐요.</div>
+      </div>
+
+      <div style={trigStyles.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>흡연 충동 강도</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--ink)' }}>{urge}<span style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 700 }}>/10</span></div>
+        </div>
+        <div onClick={onSlider} style={{ position: 'relative', marginTop: 14, height: 14, borderRadius: 999, background: 'linear-gradient(90deg, #C9F08D, #FFB930, #E65A4A)', cursor: 'pointer' }}>
+          <div style={{ position: 'absolute', left: `calc(${urge * 10}% - 12px)`, top: -5, width: 24, height: 24, borderRadius: 999, background: 'white', boxShadow: '0 2px 8px rgba(15,42,30,.18)', border: '3px solid var(--ink)', transition: 'left .15s' }}/>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-3)', marginTop: 8, fontWeight: 600 }}>
+          <span>약함</span><span>참을만함</span><span>매우 강함</span>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>지금 감정은? <span style={{ color: 'var(--ink-3)', fontWeight: 600 }}>(중복 선택)</span></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          {emotions.map(e => {
+            const on = emo.includes(e.id);
+            return (
+              <button key={e.id} onClick={() => toggle(e.id)} className="ps-tap" style={{ background: on ? 'var(--ink)' : 'white', color: on ? 'white' : 'var(--ink)', border: '1.5px solid ' + (on ? 'var(--ink)' : 'var(--line)'), borderRadius: 18, padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 12, background: on ? 'rgba(255,255,255,.12)' : e.color + '22', color: on ? 'white' : e.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name={e.icon} size={20}/></div>
+                <div style={{ fontSize: 12, fontWeight: 700 }}>{e.label}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <button onClick={onNext} className="ps-cta green ps-tap" style={{ marginTop: 22 }}>다음<Icon name="arrow-r" size={18}/></button>
+      <button onClick={onNext} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 6, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+    </div>
+  );
+}
+
+function StepTriggerLog({ where, setWhere, who, setWho, didSmoke, setDidSmoke, onNext }) {
+  const places = ['회의실', '사무실', '식당 후', '집', '술자리', '카페'];
+  const people = ['혼자', '동료와', '친구와', '가족과'];
+  return (
+    <div className="ps-anim-fade-up">
+      <div style={{ marginTop: 18 }}>
+        <div style={trigStyles.step}><span style={{ color: '#D08A3D' }}>② 트리거 기록</span></div>
+        <h1 className="ps-h2" style={{ marginTop: 10 }}>무슨 상황이었어요?</h1>
+        <div className="ps-muted" style={{ fontSize: 13, marginTop: 6 }}>패턴을 알수록 더 빨리 끊을 수 있어요.</div>
+      </div>
+
+      {/* Did smoke? */}
+      <div style={trigStyles.card}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-2)', marginBottom: 10 }}>지금 흡연했나요?</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[
+            { id: 'no',  label: '안 피웠어요', icon: 'check', tone: '#5BC23B' },
+            { id: 'yes', label: '피웠어요',    icon: 'cig',   tone: '#E65A4A' },
+          ].map(o => {
+            const on = didSmoke === o.id;
+            return (
+              <button key={o.id} onClick={() => setDidSmoke(o.id)} className="ps-tap" style={{ flex: 1, height: 64, background: on ? o.tone : 'white', color: on ? 'white' : 'var(--ink)', border: '1.5px solid ' + (on ? o.tone : 'var(--line)'), borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 13, fontWeight: 700 }}>
+                <Icon name={o.icon} size={20}/>
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Where */}
+      <div style={{ marginTop: 14 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>📍 어디에서?</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {places.map(p => {
+            const on = where === p;
+            return (
+              <button key={p} onClick={() => setWhere(p)} className="ps-tap" style={{ height: 34, padding: '0 12px', borderRadius: 999, background: on ? 'var(--ink)' : 'white', color: on ? 'white' : 'var(--ink-2)', border: '1px solid ' + (on ? 'var(--ink)' : 'var(--line)'), fontSize: 13, fontWeight: 700 }}>{p}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* With whom */}
+      <div style={{ marginTop: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>👥 누구와 함께?</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {people.map(p => {
+            const on = who === p;
+            return (
+              <button key={p} onClick={() => setWho(p)} className="ps-tap" style={{ height: 34, padding: '0 12px', borderRadius: 999, background: on ? 'var(--ink)' : 'white', color: on ? 'white' : 'var(--ink-2)', border: '1px solid ' + (on ? 'var(--ink)' : 'var(--line)'), fontSize: 13, fontWeight: 700 }}>{p}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Free note */}
+      <div style={{ marginTop: 16, background: 'white', borderRadius: 18, padding: 14, border: '1px solid var(--line)' }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em' }}>한 줄 메모 (선택)</div>
+        <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ink-3)' }}>3시 회의 끝나고 옥상 갈 뻔…</div>
+      </div>
+
+      <button onClick={onNext} className="ps-cta green ps-tap" style={{ marginTop: 18 }}>다음<Icon name="arrow-r" size={18}/></button>
+      <button onClick={onNext} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 4, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+    </div>
+  );
+}
+
+function StepSocratic({ answer, setAnswer, onNext }) {
+  return (
+    <div className="ps-anim-fade-up">
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 18 }}>
+        <div className="ps-anim-bob-sm"><Soomi size={84} mood="chill" accent="#7FB8D9"/></div>
+        <div style={{ flex: 1, background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--lung-blue)', letterSpacing: '.05em', textTransform: 'uppercase' }}>SOCRATIC · 3 / 3</div>
+          <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35, letterSpacing: '-0.02em' }}>지금 흡연하면, 5분 뒤 당신은 어떤 모습일까요?</div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 14, padding: '10px 14px', border: '1px solid var(--line)' }}>
+          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q1 · 어떤 생각이 떠올랐나요?</div>
+          <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"한 대만 피우면 진정될 거야"</div>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 14, padding: '10px 14px', border: '1px solid var(--line)' }}>
+          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q2 · 그 생각이 사실이라는 근거는?</div>
+          <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"지금까지 진정됐던 기억이 많아서"</div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 14, background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)', border: '2px solid var(--green-400)' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 답변</div>
+        <textarea
+          value={answer}
+          onChange={e => setAnswer(e.target.value)}
+          rows={5}
+          style={{ width: '100%', marginTop: 8, fontSize: 14, lineHeight: 1.5, color: 'var(--ink)', border: 'none', outline: 'none', resize: 'none', fontFamily: 'inherit', background: 'transparent' }}
+        />
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: 'var(--green-50)', border: 'none', color: 'var(--green-700)', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="mic" size={14}/>음성 입력</button>
+          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: 'var(--green-50)', border: 'none', color: 'var(--green-700)', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="sparkle" size={14}/>예시 보기</button>
+        </div>
+      </div>
+
+      <button onClick={onNext} className="ps-cta green ps-tap" style={{ marginTop: 18 }}>완료 · +30 XP<Icon name="check" size={18}/></button>
+      <button onClick={onNext} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 4, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+    </div>
+  );
+}
+
+function StepDone({ onReset, onComplete }) {
+  return (
+    <div className="ps-anim-fade-up" style={{ textAlign: 'center', padding: '40px 0 0' }}>
+      <div className="ps-anim-pop"><Soomi size={180} mood="proud"/></div>
+      <div className="ps-eyebrow" style={{ marginTop: 8 }}>충동 넘기기 성공</div>
+      <h1 className="ps-h1" style={{ marginTop: 8 }}>잘 버텼어요!</h1>
+      <div className="ps-muted" style={{ fontSize: 14, marginTop: 8 }}>충동은 보통 3–5분이면 사라져요.<br/>한 번 더 폐가 회복할 시간을 벌었어요.</div>
+
+      <div style={{ marginTop: 26, display: 'flex', gap: 10, padding: '0 4px' }}>
+        <div style={{ flex: 1, background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>획득 XP</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#9A6A00', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}><Icon name="bolt" size={18}/>+90</div>
+        </div>
+        <div style={{ flex: 1, background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>스트릭</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green-700)', marginTop: 2 }}>27일</div>
+        </div>
+      </div>
+
+      <button onClick={onComplete} className="ps-cta green ps-tap" style={{ marginTop: 20 }}>홈으로</button>
+      <button onClick={onReset} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 6, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>다시 보기 ↺</button>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenTriggerFlow });
+
+  </script>
+
+  <script type="text/babel">
+// screen-home.jsx — Home: streak, savings, health metrics, trigger alert, ranking, lung game CTA
+
+const homeStyles = {
+  hero: {
+    position: 'relative',
+    background: 'linear-gradient(180deg, #C9F08D 0%, #E5F8D0 100%)',
+    paddingBottom: 28,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+  },
+  glow: {
+    position: 'absolute', left: '50%', top: 70, transform: 'translateX(-50%)',
+    width: 200, height: 110, borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(255,255,255,.45) 0%, rgba(255,255,255,0) 70%)',
+    pointerEvents: 'none',
+  },
+  metric: {
+    flex: 1,
+    background: 'white',
+    borderRadius: 20,
+    padding: '14px 14px 12px',
+    boxShadow: 'var(--shadow-sm)',
+    display: 'flex', flexDirection: 'column', gap: 4,
+  },
+  metricIcon: (bg, fg) => ({ width: 32, height: 32, borderRadius: 10, background: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }),
+};
+
+function ScreenHome({ onNav = () => {} }) {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  return (
+    <div className="ps-screen" data-screen-label="03 홈">
+      <div className="ps-content scroll" style={{ padding: 0 }}>
+        <div style={homeStyles.hero}>
+          <StatusBar />
+
+          {/* Top pill row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 20px 0', position: 'relative', zIndex: 20 }}>
+            <button
+              onClick={() => setMenuOpen(v => !v)}
+              className="ps-avatar ps-tap"
+              aria-label="내 메뉴"
+              style={{ border: '2px solid white', padding: 0, cursor: 'pointer' }}
+            >M</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div className="ps-pill" style={{ padding: '0 14px 0 10px', height: 36, gap: 6 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#FFB930"/><circle cx="12" cy="12" r="6" fill="#FFCB5C"/></svg>
+                <span>1,240</span>
+              </div>
+              <button className="ps-pill" style={{ width: 36, height: 36, padding: 0, justifyContent: 'center' }}>
+                <Icon name="bell" size={18}/>
+                <span style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 999, background: 'var(--danger)', border: '1.5px solid white' }}/>
+              </button>
+            </div>
+
+            {/* Avatar dropdown menu */}
+            {menuOpen && (
+              <>
+                <div
+                  onClick={() => setMenuOpen(false)}
+                  style={{ position: 'absolute', inset: '-200px -400px -2000px -400px', zIndex: 18 }}
+                />
+                <div className="ps-anim-fade-up" style={{
+                  position: 'absolute', top: 52, left: 20, zIndex: 19,
+                  width: 240, background: 'white', borderRadius: 18,
+                  boxShadow: '0 12px 32px rgba(15,42,30,.18), 0 2px 8px rgba(15,42,30,.06)',
+                  border: '1px solid rgba(15,42,30,0.06)',
+                  padding: 6,
+                  overflow: 'hidden',
+                }}>
+                  {/* Profile header */}
+                  <div style={{ padding: '10px 12px 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--line)' }}>
+                    <div className="ps-avatar" style={{ width: 40, height: 40, fontSize: 15 }}>M</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em' }}>김민준</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 600, marginTop: 1 }}>스트레스 해소형 · 5일째</div>
+                    </div>
+                  </div>
+
+                  {/* Items */}
+                  {[
+                    { icon: 'pulse',  label: '흡연 패턴 진단 다시하기', onClick: () => { setMenuOpen(false); onNav('onboarding'); } },
+                    { icon: 'shield', label: '나의 정보 변경',            onClick: () => { setMenuOpen(false); } },
+                    { icon: 'close',  label: '로그아웃', danger: true,        onClick: () => { setMenuOpen(false); onNav('login'); } },
+                  ].map((it, i) => (
+                    <button
+                      key={i}
+                      onClick={it.onClick}
+                      className="ps-tap"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        width: '100%', padding: '11px 12px',
+                        background: 'transparent', border: 'none',
+                        borderRadius: 12,
+                        fontSize: 14, fontWeight: 700,
+                        color: it.danger ? 'var(--danger)' : 'var(--ink)',
+                        cursor: 'pointer', textAlign: 'left',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = it.danger ? '#FFE6E1' : 'var(--green-50)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div style={{
+                        width: 30, height: 30, borderRadius: 9,
+                        background: it.danger ? '#FFE6E1' : 'var(--green-50)',
+                        color: it.danger ? 'var(--danger)' : 'var(--green-700)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Icon name={it.icon} size={16}/>
+                      </div>
+                      <span style={{ flex: 1 }}>{it.label}</span>
+                      <Icon name="chev" size={14} color="var(--ink-3)"/>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Character + streak */}
+          <div style={{ position: 'relative', textAlign: 'center', marginTop: 8, paddingBottom: 6 }}>
+            <div style={{ position: 'relative', display: 'inline-block' }} className="ps-anim-bob">
+              <Soomi size={170} mood="happy" />
+            </div>
+            <div style={{ marginTop: 4, position: 'relative', zIndex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.06em', textTransform: 'uppercase' }}>5일째 깨끗한 숨</div>
+              <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 4, color: 'var(--ink)' }}>잘하고 있어요, 민준</h1>
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 4, fontWeight: 600 }}>7일 뱃지까지 <strong style={{ color: 'var(--ink)' }}>2일</strong> · 한 주 코앞 🔥</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content below hero */}
+        <div style={{ padding: '18px 20px 0' }}>
+
+          {/* Streak card — new */}
+          <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
+          {/* Trigger alert banner */}
+          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #FFF4DC 0%, #FFE6E1 100%)', borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(242,169,59,.3)' }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D08A3D', flexShrink: 0 }}><Icon name="bolt" size={22}/></div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#D08A3D', letterSpacing: '.05em', textTransform: 'uppercase' }}>오늘의 트리거 감지</div>
+              <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: 'var(--ink)' }}>점심 직후, 충동이 올 시간이에요</div>
+            </div>
+            <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 36, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>대응</button>
+          </div>
+
+          {/* Savings */}
+          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: 20, color: 'white', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(125,217,87,.18)' }}/>
+            <div style={{ position: 'absolute', right: 14, bottom: 14, opacity: .25 }}><Icon name="leaf" size={48} color="#A5E66B"/></div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#A5E66B', letterSpacing: '.05em', textTransform: 'uppercase' }}>지금까지 절약한 금액</div>
+            <div style={{ fontSize: 38, fontWeight: 800, marginTop: 6, letterSpacing: '-0.025em' }}>₩ 121,500</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.7)', marginTop: 2 }}>
+              하루 ₩4,500 × 27일 · <span style={{ color: '#A5E66B', fontWeight: 700 }}>+₩4,500 오늘</span>
+            </div>
+            {/* small monthly bars */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 14, height: 28 }}>
+              {[8, 14, 18, 22, 26, 30, 27].map((h, i) => (
+                <div key={i} style={{ flex: 1, height: h + 'px', background: i === 6 ? '#A5E66B' : 'rgba(255,255,255,.25)', borderRadius: 4 }}/>
+              ))}
+            </div>
+          </div>
+
+          {/* Health recovery — 4 metrics */}
+          <div style={{ marginTop: 22, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <h2 className="ps-h3">건강 회복 지표</h2>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-700)' }}>전체 보기 →</span>
+          </div>
+
+          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <MetricCard icon="lung" iconBg="#E5F8D0" iconFg="#3FAA48" label="폐 기능" value="84" unit="%" trend="+12%" sparklineUp/>
+            <MetricCard icon="co"   iconBg="#EBF4FB" iconFg="#2A6FAA" label="혈중 CO" value="3" unit="ppm" trend="−5 ppm" sparklineUp/>
+            <MetricCard icon="heart" iconBg="#FFE6E1" iconFg="#E65A4A" label="심박수" value="68" unit="bpm" trend="안정"/>
+            <MetricCard icon="shield" iconBg="#FFF1C2" iconFg="#9A6A00" label="자기효능감" value="72" unit="/100" trend="+8"/>
+          </div>
+
+          {/* Daily CO check CTA */}
+          <button onClick={() => onNav('co')} className="ps-tap" style={{ marginTop: 16, width: '100%', background: 'linear-gradient(135deg, #7DD957 0%, #5BC23B 100%)', border: 'none', borderRadius: 24, padding: '18px 18px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 10px 24px rgba(91,194,59,.30)', color: 'white', textAlign: 'left' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 18, background: 'rgba(255,255,255,.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon name="wind" size={28} color="white"/>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, opacity: .9, letterSpacing: '.05em', textTransform: 'uppercase' }}>오늘의 측정</div>
+              <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', marginTop: 2 }}>오늘 호기측정하기! 🌬️</div>
+              <div style={{ fontSize: 12, opacity: .9, marginTop: 2 }}>1분 · 인증하면 +50 XP</div>
+            </div>
+            <Icon name="chev" size={22} color="white"/>
+          </button>
+
+          {/* Ranking */}
+          <div style={{ marginTop: 22, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <h2 className="ps-h3">금연방</h2>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-700)' }}>전체 보기 →</span>
+          </div>
+
+          <div style={{ marginTop: 12, background: 'white', borderRadius: 22, padding: '8px 0', boxShadow: 'var(--shadow-sm)' }}>
+            {[
+              { rk: 1, name: '지우',     days: 14, mine: false, color: '#FFB930' },
+              { rk: 2, name: '하준',     days: 9,  mine: false, color: '#B0BAC0' },
+              { rk: 3, name: '민준 (나)', days: 5,  mine: true,  color: '#D08A3D' },
+              { rk: 4, name: '서연',     days: 3,  mine: false, color: 'transparent' },
+            ].map(r => (
+              <div key={r.rk} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: r.mine ? 'var(--green-50)' : 'transparent', borderRadius: 14, margin: '2px 8px' }}>
+                <div style={{ width: 28, height: 28, borderRadius: 9, background: r.color === 'transparent' ? 'var(--green-50)' : r.color, color: r.color === 'transparent' ? 'var(--ink-2)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
+                  {r.rk <= 3 ? (r.rk === 1 ? <Icon name="crown" size={16} color="white"/> : r.rk) : r.rk}
+                </div>
+                <div className="ps-avatar" style={{ width: 32, height: 32, fontSize: 12 }}>{r.name[0]}</div>
+                <div style={{ flex: 1, fontWeight: 700, fontSize: 14, color: r.mine ? 'var(--green-700)' : 'var(--ink)' }}>{r.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--ink)' }}>{r.days}<span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700, marginLeft: 2 }}>일</span></div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ height: 20 }}/>
+        </div>
+      </div>
+      <TabBar active="home" onChange={onNav}/>
+    </div>
+  );
+}
+
+function MetricCard({ icon, iconBg, iconFg, label, value, unit, trend, sparklineUp }) {
+  return (
+    <div style={homeStyles.metric}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={homeStyles.metricIcon(iconBg, iconFg)}><Icon name={icon} size={16}/></div>
+        <Sparkline up={sparklineUp} color={iconFg}/>
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', marginTop: 6, letterSpacing: 0 }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.025em', display: 'flex', alignItems: 'baseline', gap: 3 }}>
+        {value}<span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>{unit}</span>
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)' }}>{trend}</div>
+    </div>
+  );
+}
+
+function Sparkline({ up = true, color = '#5BC23B' }) {
+  const path = up
+    ? 'M0 12 L8 10 L16 11 L24 6 L32 7 L40 2'
+    : 'M0 4 L8 8 L16 6 L24 9 L32 8 L40 11';
+  return (
+    <svg width="44" height="14" viewBox="0 0 44 14" fill="none">
+      <path d={path} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+    </svg>
+  );
+}
+
+function StreakCard({ days = 27, week = [], todayIdx = 5 }) {
+  const labels = ['월','화','수','목','금','토','일'];
+  return (
+    <div style={{
+      background: 'white',
+      borderRadius: 22,
+      padding: '18px 18px 16px',
+      boxShadow: 'var(--shadow-sm)',
+      border: '1px solid var(--line)',
+    }}>
+      {/* Top row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {/* Number + flame */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            fontSize: 44,
+            fontWeight: 800,
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            background: 'linear-gradient(180deg, #FFB930 0%, #FF7A2E 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}>{days}</span>
+          <Flame3D size={42}/>
+        </div>
+        {/* Title */}
+        <div style={{ flex: 1, textAlign: 'right' }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.02em' }}>연속 금연 스트릭</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 600, marginTop: 2 }}>최고 기록 갱신 중!</div>
+        </div>
+      </div>
+
+      {/* 7-day row */}
+      <div style={{ marginTop: 14, display: 'flex', gap: 6, justifyContent: 'space-between' }}>
+        {labels.map((d, i) => {
+          const completed = week[i];
+          const isToday = i === todayIdx;
+          let bg, fg, ring;
+          if (completed) {
+            bg = isToday ? '#5BC23B' : '#A5E66B';
+            fg = 'white';
+          } else if (isToday) {
+            bg = 'white'; fg = 'var(--green-700)'; ring = '2px solid var(--green-500)';
+          } else {
+            bg = '#E4EFE6'; fg = 'var(--ink-3)';
+          }
+          return (
+            <div key={d} style={{
+              flex: 1, aspectRatio: '1 / 1',
+              maxWidth: 38,
+              borderRadius: '50%',
+              background: bg,
+              color: fg,
+              border: ring || 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 800,
+              boxShadow: completed && isToday ? '0 4px 10px rgba(91,194,59,.35)' : 'none',
+            }}>{d}</div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 3D-styled flame icon — gradient layers
+function Flame3D({ size = 42 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" style={{ filter: 'drop-shadow(0 3px 4px rgba(255,122,46,.35))' }}>
+      <defs>
+        <linearGradient id="flameOuter" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stopColor="#FFB930"/>
+          <stop offset="60%" stopColor="#FF8A3D"/>
+          <stop offset="100%" stopColor="#E65A4A"/>
+        </linearGradient>
+        <linearGradient id="flameInner" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stopColor="#FFF1A3"/>
+          <stop offset="100%" stopColor="#FFB930"/>
+        </linearGradient>
+      </defs>
+      {/* outer flame */}
+      <path d="M24 4
+               C 28 12, 38 16, 38 28
+               C 38 38, 30 44, 24 44
+               C 18 44, 10 38, 10 28
+               C 10 22, 14 18, 16 16
+               C 16 22, 18 24, 20 24
+               C 20 18, 22 12, 24 4 Z"
+            fill="url(#flameOuter)"/>
+      {/* inner flame */}
+      <path d="M24 18
+               C 26 22, 30 24, 30 30
+               C 30 36, 26 40, 24 40
+               C 22 40, 18 36, 18 30
+               C 18 26, 20 24, 22 22
+               C 22 26, 23 28, 24 28
+               C 24 24, 24 21, 24 18 Z"
+            fill="url(#flameInner)"/>
+    </svg>
+  );
+}
+
+Object.assign(window, { ScreenHome, StreakCard, Flame3D });
+
+  </script>
+
+  <script type="text/babel">
+// screen-missions.jsx — Daily/weekly/monthly missions with XP
+// Missions are split: auto-linked (CO measurement, CBT, trigger logs) vs manual (water, walk, breath)
+
+function ScreenMissions({ onNav = () => {} }) {
+  const [tab, setTab] = useState('daily');
+  // CO already auto-completed from this morning's measurement
+  const [doneIds, setDoneIds] = useState(new Set(['co']));
+  // Tap-increment counters for self-tracked missions (water, walk)
+  const [counts, setCounts] = useState({ water: 6, walk: 0 });
+
+  const missions = {
+    daily: [
+      { id: 'co',     icon: 'co',    iconBg: '#EBF4FB', iconFg: '#2A6FAA', title: '아침 호기 CO 측정',  sub: '오전 9시 인증 마감',       xp: 50, auto: true,  link: 'co'      },
+      { id: 'water',  icon: 'water', iconBg: '#EBF4FB', iconFg: '#5AAACE', title: '물 8잔 마시기',      target: 8, unit: '잔',                                  xp: 30                                       },
+      { id: 'breath', icon: 'wind',  iconBg: '#E5F8D0', iconFg: '#3FAA48', title: '4-7-8 심호흡 1회',   sub: '약 2분 소요',              xp: 20                                       },
+      { id: 'soc',    icon: 'note',  iconBg: '#F0E7FB', iconFg: '#6F44E2', title: 'CBT 소크라테스 질문', sub: '트리거 발생 시 자동 진행', xp: 40, auto: true,  link: 'trigger' },
+      { id: 'walk',   icon: 'walk',  iconBg: '#FFEFC8', iconFg: '#A06A00', title: '저녁 산책 (동네 3바퀴)', target: 3, unit: '바퀴',                            xp: 35                                       },
+      { id: 'trig',   icon: 'bolt',  iconBg: '#FFE6E1', iconFg: '#E65A4A', title: '트리거 기록 1회',    sub: '충동 발생 시 자동',         xp: 25, auto: true,  link: 'trigger' },
+    ],
+    weekly: [
+      { id: 'w1', icon: 'trophy', iconBg: '#FFEFC8', iconFg: '#9A6A00', title: 'CO 7일 연속 측정',     sub: '5 / 7 일',  xp: 200, prog: 5/7,  auto: true, link: 'co'      },
+      { id: 'w2', icon: 'leaf',   iconBg: '#E5F8D0', iconFg: '#3FAA48', title: '주 3회 산책',          sub: '2 / 3 회',  xp: 150, prog: 2/3                                  },
+      { id: 'w3', icon: 'note',   iconBg: '#F0E7FB', iconFg: '#6F44E2', title: '주 2회 CBT 세션 완료', sub: '1 / 2 회',  xp: 250, prog: 0.5, auto: true, link: 'trigger' },
+    ],
+    monthly: [
+      { id: 'm1', icon: 'crown',  iconBg: '#FFEFC8', iconFg: '#9A6A00', title: '7일 연속 금연 인증',    sub: '5 / 7 일',   xp: 1000, prog: 5/7, auto: true, link: 'cal'     },
+      { id: 'm2', icon: 'gift',   iconBg: '#FFE6E1', iconFg: '#E65A4A', title: '금연방 친구 3명 응원',  sub: '친구 응원 시 자동 기록',   xp: 400,  prog: 1/3, auto: true, link: 'home'   },
+    ],
+  };
+
+  // Enrich daily list with live counters so sub/prog reflect current taps
+  const enrichList = (rawList) => rawList.map(m => {
+    if (m.target != null && counts[m.id] != null) {
+      const cur = counts[m.id];
+      return { ...m, _current: cur, sub: `${cur} / ${m.target} ${m.unit}`, prog: cur / m.target };
+    }
+    return m;
+  });
+
+  const list = enrichList(missions[tab]);
+  const totalXP = list.filter(m => doneIds.has(m.id)).reduce((s,m) => s + m.xp, 0);
+
+  const complete = (m) => {
+    if (m.auto) {
+      if (m.link) onNav(m.link);
+      return;
+    }
+    // Incrementable tracked mission
+    if (m.target != null && counts[m.id] != null) {
+      const cur = counts[m.id];
+      if (cur >= m.target) return;
+      const next = cur + 1;
+      setCounts(c => ({ ...c, [m.id]: next }));
+      if (next >= m.target) {
+        setDoneIds(prev => { const n = new Set(prev); n.add(m.id); return n; });
+      }
+      return;
+    }
+    // Binary toggle
+    setDoneIds(prev => {
+      const next = new Set(prev);
+      if (next.has(m.id)) next.delete(m.id);
+      else next.add(m.id);
+      return next;
+    });
+  };
+
+  const autoCount   = list.filter(m => m.auto).length;
+  const manualCount = list.length - autoCount;
+
+  return (
+    <div className="ps-screen" data-screen-label="04 미션">
+      <div className="ps-content scroll" style={{ padding: 0 }}>
+        {/* Hero */}
+        <div style={{ background: 'linear-gradient(180deg, #C9F08D 0%, #F2FBE6 100%)', paddingBottom: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
+          <StatusBar />
+          <div style={{ padding: '6px 20px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h1 className="ps-h1" style={{ fontSize: 30 }}>미션</h1>
+              <button style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="filter" size={18}/></button>
+            </div>
+
+            {/* XP summary */}
+            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FFEFC8', color: '#9A6A00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bolt" size={20}/></div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>오늘 획득 XP</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                  <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>{totalXP}</span>
+                  <span style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 700 }}>/ 250 XP</span>
+                </div>
+                <div className="ps-progress" style={{ marginTop: 6, height: 4 }}><div style={{ width: (totalXP/250*100) + '%', background: 'linear-gradient(90deg, #FFB930, #FF7A2E)' }}/></div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>레벨</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green-700)' }}>12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ padding: '18px 20px 0', position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
+          <div style={{ display: 'flex', background: 'var(--green-50)', borderRadius: 14, padding: 4, gap: 4 }}>
+            {[{id:'daily',label:'일일'},{id:'weekly',label:'주간'},{id:'monthly',label:'월간'}].map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, height: 38, border: 'none', borderRadius: 11, background: tab === t.id ? 'white' : 'transparent', color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)', fontWeight: 700, fontSize: 14, boxShadow: tab === t.id ? '0 2px 6px rgba(15,42,30,.06)' : 'none', cursor: 'pointer' }}>{t.label}</button>
+            ))}
+          </div>
+
+          {/* Legend */}
+          <div style={{ marginTop: 10, display: 'flex', gap: 10, fontSize: 11, fontWeight: 700, color: 'var(--ink-3)' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 14, height: 14, borderRadius: 999, background: 'var(--lung-blue-50)', color: '#2A6FAA', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9 }}>⚡</span>
+              자동 연동 {autoCount}
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 14, height: 14, borderRadius: 999, background: 'var(--green-100)', color: 'var(--green-700)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9 }}>✓</span>
+              직접 체크 {manualCount}
+            </span>
+          </div>
+        </div>
+
+        {/* Mission list */}
+        <div style={{ padding: '14px 20px 110px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {list.map(m => <MissionRow key={m.id} m={m} done={doneIds.has(m.id)} onAction={() => complete(m)}/>)}
+        </div>
+      </div>
+      <TabBar active="mission" onChange={onNav}/>
+    </div>
+  );
+}
+
+function MissionRow({ m, done, onAction }) {
+  const auto = !!m.auto;
+  return (
+    <div className="ps-anim-fade-up" style={{
+      background: 'white',
+      borderRadius: 20,
+      padding: 14,
+      boxShadow: 'var(--shadow-sm)',
+      border: done ? '1.5px solid var(--green-300)' : auto ? '1px solid var(--lung-blue-50)' : '1px solid var(--line)',
+      display: 'flex', alignItems: 'center', gap: 12,
+      opacity: done ? .85 : 1,
+      position: 'relative',
+      transition: 'all .25s',
+    }}>
+      <div style={{ width: 48, height: 48, borderRadius: 14, background: m.iconBg, color: m.iconFg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name={m.icon} size={24}/></div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink)', textDecoration: done ? 'line-through' : 'none' }}>{m.title}</span>
+          {auto ? (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 2,
+              background: 'var(--lung-blue-50)', color: '#2A6FAA',
+              fontSize: 10, fontWeight: 800,
+              padding: '2px 6px', borderRadius: 6,
+            }}>⚡ 자동 연동</span>
+          ) : null}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{m.sub}</div>
+        {m.prog != null && !done ? (
+          <div className="ps-progress" style={{ marginTop: 8, height: 4 }}><div style={{ width: (m.prog * 100) + '%' }}/></div>
+        ) : null}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#FFEFC8', color: '#9A6A00', padding: '4px 8px', borderRadius: 999, fontWeight: 800, fontSize: 12 }}>
+          <Icon name="bolt" size={12}/>{m.xp}
+        </div>
+
+        {done ? (
+          // Completed (manual or auto)
+          <div className="ps-anim-pop" style={{ width: 32, height: 32, borderRadius: 999, background: 'var(--green-500)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="check" size={18} stroke={2.6}/>
+          </div>
+        ) : auto ? (
+          // Auto-linked, not yet completed — tap to navigate to source flow
+          <button onClick={onAction} className="ps-tap" title="진행하러 가기" style={{
+            height: 32, padding: '0 12px',
+            borderRadius: 999,
+            background: 'var(--lung-blue-50)', color: '#2A6FAA',
+            border: '1px solid #B4D5EA',
+            fontSize: 11, fontWeight: 800,
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            진행 중<Icon name="chev" size={12}/>
+          </button>
+        ) : m.target != null ? (
+          // Tap-increment manual mission — last tap shows 완료, others show +1
+          (() => {
+            const cur = m._current ?? 0;
+            const isFinal = cur === m.target - 1;
+            return (
+              <button onClick={onAction} className="ps-tap" style={{
+                height: 32, padding: '0 14px', borderRadius: 999,
+                background: isFinal ? 'var(--ink)' : 'var(--green-100)',
+                color: isFinal ? 'white' : 'var(--green-700)',
+                border: 'none', fontSize: 12, fontWeight: 800,
+                display: 'flex', alignItems: 'center', gap: 4,
+                transition: 'all .2s',
+              }}>
+                {isFinal ? '완료' : `+1 ${m.unit}`}
+              </button>
+            );
+          })()
+        ) : (
+          // Manual binary — user can tap 완료
+          <button onClick={onAction} className="ps-tap" style={{ height: 32, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontSize: 12, fontWeight: 800 }}>
+            완료
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenMissions });
+
+  </script>
+
+  <script type="text/babel">
+// screen-co.jsx — Interactive CO flow: idle → measuring (animated) → result; + warnings screen
+
+function ScreenCOFlow({ onNav = () => {} }) {
+  // phase: 'idle' | 'measuring' | 'result'
+  const [phase, setPhase] = useState('idle');
+  const [progress, setProgress] = useState(0); // 0..1
+  const [coVal, setCoVal] = useState(3);
+
+  React.useEffect(() => {
+    if (phase !== 'measuring') return;
+    setProgress(0);
+    setCoVal(0);
+    const start = performance.now();
+    const dur = 5000;
+    let raf;
+    const tick = (t) => {
+      const p = Math.min(1, (t - start) / dur);
+      setProgress(p);
+      const sim = 6 * Math.sin(p * Math.PI) + (p * 1.5);
+      setCoVal(+(sim).toFixed(1));
+      if (p < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setCoVal(3);
+        setTimeout(() => setPhase('result'), 350);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [phase]);
+
+  if (phase === 'result') return <COResult onReset={() => setPhase('idle')} onNav={onNav}/>;
+  if (phase === 'measuring') return <COMeasuring progress={progress} coVal={coVal} onCancel={() => setPhase('idle')}/>;
+  return <COIdle onStart={() => setPhase('measuring')} onNav={onNav}/>;
+}
+
+function COIdle({ onStart, onNav }) {
+  return (
+    <div className="ps-screen" data-screen-label="05 CO 측정 · 시작">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #1B5240 0%, #0E3A2C 50%, #061E18 100%)', zIndex: 0 }}/>
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <StatusBar dark/>
+        <div style={{ padding: '4px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={() => onNav && onNav('home')} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={18} color="white"/></button>
+          <div style={{ color: 'rgba(255,255,255,.7)', fontSize: 13, fontWeight: 700 }}>호기 CO 측정</div>
+          <button className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bell" size={18} color="white"/></button>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', textAlign: 'center', padding: '0 24px' }}>
+          <div className="ps-eyebrow" style={{ color: '#A5E66B' }}>오늘 측정 전</div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginTop: 10, letterSpacing: '-0.02em' }}>측정기를 입에 물고<br/>5초간 천천히 내쉬세요</h1>
+
+          <div style={{ position: 'relative', width: 240, height: 240, marginTop: 28 }}>
+            <div className="ps-anim-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(165,230,107,.45) 0%, rgba(165,230,107,0) 65%)' }}/>
+            <div className="ps-anim-breath" style={{ position: 'absolute', inset: 30, borderRadius: '50%', background: 'radial-gradient(circle, rgba(125,217,87,0.6) 0%, rgba(125,217,87,0) 70%)' }}/>
+            <div style={{ position: 'absolute', inset: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="wind" size={68} color="#A5E66B" stroke={1.4}/>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,.65)', marginTop: 30, lineHeight: 1.5 }}>측정 전 30초간 숨을 참아주세요.<br/>정확한 결과를 위해 카페인 섭취 직후엔 피해주세요.</div>
+        </div>
+
+        <div style={{ padding: '0 20px 30px' }}>
+          <button onClick={onStart} className="ps-cta green ps-tap" style={{ height: 60 }}>
+            <Icon name="wind" size={20}/>측정 시작
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function COMeasuring({ progress, coVal, onCancel }) {
+  const dashTotal = 691;
+  const offset = dashTotal * (1 - progress);
+  const seconds = Math.ceil(5 - progress * 5);
+  return (
+    <div className="ps-screen" data-screen-label="05 CO 측정 · 진행">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #1B5240 0%, #0E3A2C 50%, #061E18 100%)', zIndex: 0 }}/>
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+        {[...Array(20)].map((_, i) => (
+          <div key={i} style={{ position: 'absolute', left: `${(i * 53) % 100}%`, top: `${(i * 37) % 90}%`, width: 4 + (i % 4) * 2, height: 4 + (i % 4) * 2, borderRadius: 999, background: 'rgba(165,230,107,0.4)', filter: 'blur(1px)', animation: `ps-bob ${3 + (i % 3)}s ease-in-out infinite`, animationDelay: (i * 0.2) + 's' }}/>
+        ))}
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <StatusBar dark/>
+        <div style={{ padding: '4px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button onClick={onCancel} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={18} color="white"/></button>
+          <div style={{ color: 'rgba(255,255,255,.7)', fontSize: 13, fontWeight: 700 }}>호기 CO 측정</div>
+          <div style={{ width: 40 }}/>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', textAlign: 'center' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#A5E66B', letterSpacing: '.08em', textTransform: 'uppercase' }}>{seconds}초 남음</div>
+          <div style={{ fontSize: 28, fontWeight: 800, marginTop: 10, letterSpacing: '-0.02em' }}>천천히 길게<br/>내쉬고 있어요</div>
+
+          <div style={{ position: 'relative', width: 260, height: 260, marginTop: 24 }}>
+            <div className="ps-anim-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(165,230,107,0.45) 0%, rgba(165,230,107,0) 65%)' }}/>
+            <div className="ps-anim-breath" style={{ position: 'absolute', inset: 30, borderRadius: '50%', background: 'radial-gradient(circle, rgba(125,217,87,0.6) 0%, rgba(125,217,87,0) 70%)' }}/>
+            <svg width="260" height="260" viewBox="0 0 260 260" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
+              <circle cx="130" cy="130" r="110" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6"/>
+              <circle cx="130" cy="130" r="110" fill="none" stroke="#A5E66B" strokeWidth="6" strokeDasharray={dashTotal} strokeLinecap="round" style={{ animation: 'ps-co-fill 5s linear forwards' }}/>
+            </svg>
+            <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="wind" size={48} color="#A5E66B" stroke={1.5}/>
+              <div style={{ fontSize: 44, fontWeight: 800, marginTop: 6, letterSpacing: '-0.04em' }}>{coVal.toFixed(1)}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>현재 CO ppm</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 18, marginTop: 28 }}>
+            {['숨 들이쉬기','5초 멈춤','천천히 내쉬기'].map((step, i) => {
+              const passed = progress > (i + 1) / 3 - 0.1;
+              const active = !passed && progress > i / 3 - 0.1;
+              return (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 999, background: passed ? '#A5E66B' : active ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,0.12)', color: passed ? '#0E3A2C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11, transition: 'background .3s' }}>{passed ? <Icon name="check" size={14} stroke={3}/> : i + 1}</div>
+                  <div style={{ fontSize: 11, color: active ? 'white' : 'rgba(255,255,255,.45)', fontWeight: 700 }}>{step}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ padding: '0 20px 30px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', borderRadius: 18, padding: 14, color: 'white', fontSize: 12, display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(255,255,255,0.12)' }}>
+            <Icon name="shield" size={18} color="#A5E66B"/>
+            <span style={{ opacity: .8 }}>측정기가 자동으로 결과를 기록해요. 의사에게 공유됩니다.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function COResult({ onReset, onNav }) {
+  return (
+    <div className="ps-screen" data-screen-label="05 CO 측정 · 결과">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #C9F08D 0%, #F2FBE6 50%, #FFFFFF 100%)', zIndex: 0 }}/>
+      <StatusBar />
+      <div className="ps-content scroll" style={{ paddingTop: 6, paddingBottom: 30 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => onNav && onNav('home')} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="chev-l" size={18}/></button>
+          <div style={{ flex: 1, fontWeight: 700, fontSize: 15 }}>측정 결과</div>
+          <button className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="kebab" size={18}/></button>
+        </div>
+
+        <div className="ps-anim-pop" style={{ textAlign: 'center', marginTop: 16 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'white', padding: '6px 14px', borderRadius: 999, boxShadow: 'var(--shadow-sm)' }}>
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--green-500)' }}/>
+            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--green-700)' }}>정상 범위 · 비흡연자</span>
+          </div>
+          <div style={{ marginTop: 18, fontSize: 72, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--ink)', lineHeight: 1 }}>3<span style={{ fontSize: 24, color: 'var(--ink-3)', fontWeight: 700, marginLeft: 4 }}>ppm</span></div>
+          <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 6 }}>어제 대비 <strong style={{ color: 'var(--green-700)' }}>−5 ppm</strong> · 폐가 빠르게 회복 중이에요</div>
+        </div>
+
+        <div className="ps-card" style={{ marginTop: 22 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>최근 7일 추이</div>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>ppm</span>
+          </div>
+          <div style={{ marginTop: 12, height: 100, display: 'flex', alignItems: 'flex-end', gap: 10, position: 'relative' }}>
+            {[12, 9, 11, 7, 6, 8, 3].map((v, i) => {
+              const tone = v <= 4 ? '#5BC23B' : v <= 8 ? '#FFB930' : '#E65A4A';
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--ink)' }}>{v}</div>
+                  <div className="ps-anim-fade-up" style={{ width: '100%', height: v * 6 + 'px', background: tone, borderRadius: '8px 8px 4px 4px', position: 'relative', animationDelay: (i * 50) + 'ms' }}>
+                    {i === 6 ? <div style={{ position: 'absolute', inset: -3, borderRadius: 10, border: '2px dashed var(--green-700)' }}/> : null}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{['월','화','수','목','금','토','오늘'][i]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-md)', border: '1.5px solid var(--green-200)', display: 'flex', gap: 14 }}>
+          <div className="ps-anim-bob-sm"><Soomi size={80} mood="proud"/></div>
+          <div style={{ flex: 1 }}>
+            <div className="ps-eyebrow">CBT 인지 재구성</div>
+            <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4, lineHeight: 1.4 }}>"한 번도 안 피웠다"가 아니라,<br/>"내 폐가 한 번 더 회복할 시간"이에요.</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.5 }}>CO가 4 ppm 아래면 비흡연자 수준. 24시간 만에도 폐포가 활발해져요.</div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
+          <button className="ps-tap" style={{ flex: 1, height: 56, borderRadius: 18, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 700, color: 'var(--ink)' }}>
+            <Icon name="bolt" size={18} color="#9A6A00"/>+50 XP 획득
+          </button>
+          <button className="ps-tap" style={{ width: 56, height: 56, borderRadius: 18, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="arrow-up" size={20}/></button>
+        </div>
+
+        <button onClick={onReset} className="ps-cta green ps-tap" style={{ marginTop: 12 }}>다시 측정</button>
+      </div>
+    </div>
+  );
+}
+
+// Warnings screen (unchanged from before, but exported separately)
+function ScreenCOWarnings({ onNav = () => {} }) {
+  return (
+    <div className="ps-screen" data-screen-label="05 CO · 미인증 경고">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #FFF4DC 0%, #FFFFFF 100%)', zIndex: 0 }}/>
+      <StatusBar />
+      <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => onNav('home')} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="chev-l" size={18}/></button>
+          <div style={{ flex: 1, fontWeight: 700, fontSize: 15 }}>미인증 경고 3단계</div>
+        </div>
+
+        <div style={{ marginTop: 16, fontSize: 12, color: 'var(--ink-3)', fontWeight: 600 }}>오늘 측정을 하지 않으면 시간대에 따라 다음 알림이 표시돼요.</div>
+
+        <div className="ps-anim-fade-up" style={{ marginTop: 14, background: '#FFF4DC', border: '1.5px solid #F2A93B', borderRadius: 20, padding: 16, display: 'flex', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: '#F2A93B', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#A06A00', letterSpacing: '.05em' }}>1단계 · 오후 10시 이전</div>
+            <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: '#5A3F00' }}>아직 오늘 CO 측정 전이에요</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 4, lineHeight: 1.45 }}>지금 2분만 시간 내볼까요? 인증 스트릭이 끊기지 않게요.</div>
+            <button onClick={() => onNav('co')} className="ps-tap" style={{ marginTop: 10, height: 32, padding: '0 12px', borderRadius: 999, background: '#F2A93B', color: 'white', border: 'none', fontWeight: 800, fontSize: 12 }}>지금 측정</button>
+          </div>
+        </div>
+
+        <div className="ps-anim-fade-up" style={{ animationDelay: '60ms', marginTop: 12, background: '#FFE6E1', border: '1.5px solid #E65A4A', borderRadius: 20, padding: 16, display: 'flex', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: '#E65A4A', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#A8331C', letterSpacing: '.05em' }}>2단계 · 오후 10시 이후</div>
+            <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: '#5C1D10' }}>23:59까지 인증하지 않으면 실패로 기록돼요</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 4, lineHeight: 1.45 }}>27일 스트릭 · 끊기면 처음부터 다시 시작이에요.</div>
+            <button onClick={() => onNav('co')} className="ps-tap" style={{ marginTop: 10, height: 32, padding: '0 12px', borderRadius: 999, background: '#E65A4A', color: 'white', border: 'none', fontWeight: 800, fontSize: 12 }}>지금 측정</button>
+          </div>
+        </div>
+
+        <div className="ps-anim-fade-up" style={{ animationDelay: '120ms', marginTop: 12, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-md)', border: '1.5px solid var(--line)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 12, background: '#1A2A22', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={18}/></div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em' }}>3단계 · 자동 실패 처리</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>2월 14일 인증 실패</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 14, display: 'flex', gap: 10 }}>
+            <div className="ps-anim-bob-sm"><Soomi size={56} mood="chill" accent="#7FB8D9"/></div>
+            <div style={{ flex: 1, fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>
+              "오늘은 어려운 하루였어요. <strong>실패는 데이터예요</strong> — 어떤 트리거가 있었는지 한 번만 기록해볼까요?"
+              <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+                <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 32, padding: '0 12px', borderRadius: 999, background: 'var(--green-500)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>트리거 기록</button>
+                <button className="ps-tap" style={{ height: 32, padding: '0 12px', borderRadius: 999, background: 'transparent', color: 'var(--ink-2)', border: '1px solid var(--line)', fontWeight: 700, fontSize: 12 }}>내일 다시</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenCOFlow, ScreenCOWarnings });
+
+  </script>
+
+  <script type="text/babel">
+// screen-character.jsx — Tamagotchi character with per-category outfit selection + categorized dex
+
+// ── Item catalogs ────────────────────────────────────────────────
+// Each item: id, label, locked?, render(size, color?) — renders absolutely-positioned SVG
+// "none" is always an option to leave that slot empty.
+
+const ITEMS = {
+  color: [
+    { id: 'green',  label: '연두',     swatch: '#7DD957', locked: false },
+    { id: 'yellow', label: '병아리',   swatch: '#FFB930', locked: false },
+    { id: 'blue',   label: '하늘',     swatch: '#7FB8D9', locked: false },
+    { id: 'pink',   label: '체리',     swatch: '#FF9DBF', locked: false },
+    { id: 'purple', label: '라벤더',   swatch: '#A89BF5', locked: true },
+    { id: 'orange', label: '감귤',     swatch: '#FF7A2E', locked: true },
+  ],
+  tail: [
+    { id: 'none',   label: '없음',     locked: false, preview: () => null },
+    { id: 'pink',   label: '핑크 꼬리', locked: false, preview: (c, s = 1) => (
+      <svg width={50*s} height={40*s} viewBox="0 0 50 40">
+        <path d="M5 20 Q 20 5 45 10 Q 30 22 5 22 Z" fill="#FF9DBF"/>
+        <path d="M30 12 L 40 8 M 32 16 L 44 14" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    )},
+    { id: 'fox',    label: '여우 꼬리', locked: false, preview: (c, s = 1) => (
+      <svg width={60*s} height={36*s} viewBox="0 0 60 36">
+        <path d="M5 22 Q 25 4 50 12 Q 58 24 50 30 Q 30 30 5 28 Z" fill="#D67A3D"/>
+        <path d="M48 8 Q 56 16 56 26 Q 52 18 48 10 Z" fill="#FFF1E0"/>
+      </svg>
+    )},
+    { id: 'curl',   label: '말린 꼬리', locked: false, preview: (c, s = 1) => (
+      <svg width={40*s} height={44*s} viewBox="0 0 40 44">
+        <path d="M5 22 Q 18 10 30 18 Q 36 26 28 32 Q 20 34 22 26 Q 26 22 30 26"
+              fill="none" stroke="#6F44E2" strokeWidth="8" strokeLinecap="round"/>
+      </svg>
+    )},
+    { id: 'spike',  label: '뾰족 꼬리', locked: true, preview: (c, s = 1) => (
+      <svg width={50*s} height={30*s} viewBox="0 0 50 30">
+        <path d="M5 20 L 30 6 L 35 14 L 45 4 L 42 18 L 28 18 Z" fill="#0F2A1E"/>
+      </svg>
+    )},
+    { id: 'glow',   label: '반딧불 꼬리', locked: true, preview: (c, s = 1) => (
+      <svg width={56*s} height={36*s} viewBox="0 0 56 36">
+        <circle cx="48" cy="14" r="8" fill="#FFE066"/>
+        <circle cx="48" cy="14" r="14" fill="#FFE066" opacity="0.3"/>
+        <path d="M5 20 Q 25 10 40 14" stroke="#FFB930" strokeWidth="4" fill="none" strokeLinecap="round"/>
+      </svg>
+    )},
+  ],
+  horn: [
+    { id: 'none',   label: '없음',     locked: false, preview: () => null },
+    { id: 'gold',   label: '황금 뿔',   locked: false, preview: (c, s = 1) => (
+      <svg width={36*s} height={40*s} viewBox="0 0 36 40">
+        <path d="M10 38 Q 6 10 18 4 Q 22 16 26 38" fill="#FFB930"/>
+        <path d="M14 38 Q 12 20 18 12" stroke="rgba(255,255,255,.5)" strokeWidth="2" fill="none"/>
+      </svg>
+    )},
+    { id: 'spiral', label: '나선 뿔',   locked: false, preview: (c, s = 1) => (
+      <svg width={36*s} height={42*s} viewBox="0 0 36 42">
+        <path d="M18 40 Q 14 28 20 22 Q 14 18 20 12 Q 14 8 18 2" fill="none" stroke="#FF7A2E" strokeWidth="6" strokeLinecap="round"/>
+      </svg>
+    )},
+    { id: 'stubby', label: '짧은 뿔',   locked: false, preview: (c, s = 1) => (
+      <svg width={40*s} height={20*s} viewBox="0 0 40 20">
+        <path d="M10 18 Q 8 6 14 4 Q 18 14 18 18 Z" fill="#A89BF5"/>
+        <path d="M22 18 Q 22 4 28 6 Q 30 14 30 18 Z" fill="#A89BF5"/>
+      </svg>
+    )},
+    { id: 'crystal',label: '크리스탈',  locked: true, preview: (c, s = 1) => (
+      <svg width={32*s} height={42*s} viewBox="0 0 32 42">
+        <path d="M16 0 L 26 14 L 22 40 L 10 40 L 6 14 Z" fill="#7FB8D9"/>
+        <path d="M16 0 L 26 14 L 16 18 Z" fill="#A8D4ED"/>
+        <path d="M16 0 L 6 14 L 16 18 Z" fill="#5A9DC4"/>
+      </svg>
+    )},
+    { id: 'branch', label: '나뭇가지',  locked: true, preview: (c, s = 1) => (
+      <svg width={42*s} height={44*s} viewBox="0 0 42 44">
+        <path d="M21 42 L 21 14 M 21 26 L 10 16 M 21 22 L 32 12 M 21 18 L 14 8 M 21 14 L 28 6"
+              stroke="#6B4423" strokeWidth="4" strokeLinecap="round" fill="none"/>
+      </svg>
+    )},
+  ],
+  pattern: [
+    { id: 'none',   label: '없음',     locked: false, preview: () => null },
+    { id: 'dots',   label: '물방울',    locked: false, preview: (c, s = 1) => (
+      <svg width={120*s} height={80*s} viewBox="0 0 120 80" style={{ pointerEvents: 'none' }}>
+        <circle cx="30" cy="20" r="6" fill="rgba(15,42,30,.18)"/>
+        <circle cx="80" cy="14" r="5" fill="rgba(15,42,30,.18)"/>
+        <circle cx="55" cy="40" r="7" fill="rgba(15,42,30,.18)"/>
+        <circle cx="95" cy="45" r="5" fill="rgba(15,42,30,.18)"/>
+        <circle cx="25" cy="55" r="6" fill="rgba(15,42,30,.18)"/>
+      </svg>
+    )},
+    { id: 'stripes',label: '줄무늬',    locked: false, preview: (c, s = 1) => (
+      <svg width={120*s} height={80*s} viewBox="0 0 120 80" style={{ pointerEvents: 'none' }}>
+        <path d="M0 20 Q 60 12 120 20" stroke="rgba(15,42,30,.18)" strokeWidth="4" fill="none"/>
+        <path d="M0 38 Q 60 30 120 38" stroke="rgba(15,42,30,.18)" strokeWidth="4" fill="none"/>
+        <path d="M0 56 Q 60 48 120 56" stroke="rgba(15,42,30,.18)" strokeWidth="4" fill="none"/>
+      </svg>
+    )},
+    { id: 'stars',  label: '별',       locked: false, preview: (c, s = 1) => (
+      <svg width={120*s} height={80*s} viewBox="0 0 120 80" style={{ pointerEvents: 'none' }}>
+        <path d="M30 20 l3 6 6 1 -4 5 1 6 -6 -3 -6 3 1 -6 -4 -5 6 -1z" fill="white" opacity=".85"/>
+        <path d="M85 30 l2 4 4 0.5 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -0.5z" fill="white" opacity=".85"/>
+        <path d="M55 55 l2 4 4 0.5 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -0.5z" fill="white" opacity=".85"/>
+      </svg>
+    )},
+    { id: 'leaf',   label: '잎무늬',    locked: true, preview: (c, s = 1) => (
+      <svg width={120*s} height={80*s} viewBox="0 0 120 80" style={{ pointerEvents: 'none' }}>
+        <path d="M20 30 q10 -14 22 -4 q-2 14 -22 4z" fill="rgba(47,138,62,.4)"/>
+        <path d="M70 50 q10 -14 22 -4 q-2 14 -22 4z" fill="rgba(47,138,62,.4)"/>
+      </svg>
+    )},
+  ],
+  face: [
+    { id: 'happy',   label: '방긋',   locked: false, mood: 'happy' },
+    { id: 'chill',   label: '심심',   locked: false, mood: 'chill' },
+    { id: 'sleepy',  label: '꾸벅',   locked: false, mood: 'sleepy' },
+    { id: 'proud',   label: '뿌듯',   locked: false, mood: 'proud' },
+    { id: 'worried', label: '걱정',   locked: true,  mood: 'worried' },
+  ],
+  hat: [
+    { id: 'none',   label: '없음',     locked: false, preview: () => null },
+    { id: 'beanie', label: '비니',     locked: false, preview: (c, s = 1) => (
+      <svg width={70*s} height={36*s} viewBox="0 0 70 36">
+        <path d="M5 28 Q 35 -4 65 28 Z" fill="#E65A4A"/>
+        <rect x="3" y="26" width="64" height="8" rx="3" fill="#A8331C"/>
+        <circle cx="35" cy="4" r="6" fill="#FFB930"/>
+      </svg>
+    )},
+    { id: 'cap',    label: '캡 모자',  locked: false, preview: (c, s = 1) => (
+      <svg width={80*s} height={36*s} viewBox="0 0 80 36">
+        <path d="M10 24 Q 40 -2 70 24 Z" fill="#0F2A1E"/>
+        <ellipse cx="40" cy="24" rx="38" ry="6" fill="#0F2A1E"/>
+        <path d="M40 34 L 78 32 L 78 26 L 40 24 Z" fill="#0F2A1E"/>
+      </svg>
+    )},
+    { id: 'crown',  label: '왕관',     locked: true,  preview: (c, s = 1) => (
+      <svg width={70*s} height={32*s} viewBox="0 0 70 32">
+        <path d="M5 28 L 10 6 L 22 18 L 35 4 L 48 18 L 60 6 L 65 28 Z" fill="#FFB930"/>
+        <rect x="5" y="26" width="60" height="4" fill="#D08A00"/>
+        <circle cx="35" cy="14" r="3" fill="#E65A4A"/>
+      </svg>
+    )},
+    { id: 'top',    label: '실크햇',   locked: true,  preview: (c, s = 1) => (
+      <svg width={70*s} height={42*s} viewBox="0 0 70 42">
+        <rect x="20" y="2" width="30" height="28" fill="#0F2A1E"/>
+        <rect x="20" y="22" width="30" height="4" fill="#E65A4A"/>
+        <ellipse cx="35" cy="32" rx="34" ry="6" fill="#0F2A1E"/>
+      </svg>
+    )},
+  ],
+};
+
+const CATEGORIES = [
+  { id: 'color',   label: '색상',    icon: '🎨' },
+  { id: 'tail',    label: '꼬리',    icon: '🦊' },
+  { id: 'horn',    label: '뿔',     icon: '🦄' },
+  { id: 'pattern', label: '무늬',    icon: '✨' },
+  { id: 'face',    label: '이목구비', icon: '👀' },
+  { id: 'hat',     label: '모자',    icon: '🎩' },
+];
+
+const DEFAULT_EQUIP = {
+  color: 'green',
+  tail: 'pink',
+  horn: 'gold',
+  pattern: 'none',
+  face: 'happy',
+  hat: 'none',
+};
+
+// ── Character renderer with equipped items ──────────────────────────
+function DressedSoomi({ size, equip }) {
+  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#7DD957';
+  const mood = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
+  const tail = ITEMS.tail.find(t => t.id === equip.tail);
+  const horn = ITEMS.horn.find(h => h.id === equip.horn);
+  const pat  = ITEMS.pattern.find(p => p.id === equip.pattern);
+  const hat  = ITEMS.hat.find(h => h.id === equip.hat);
+
+  const s = size / 200;
+  return (
+    <div style={{ position: 'relative', width: size, height: size }}>
+      {/* Tail behind body */}
+      {tail && tail.preview ? (
+        <div style={{ position: 'absolute', right: -8 * s, bottom: 28 * s, zIndex: 0 }}>{tail.preview(color, s)}</div>
+      ) : null}
+      <Soomi size={size} mood={mood} accent={color}/>
+      {/* Pattern overlay on body */}
+      {pat && pat.preview ? (
+        <div style={{ position: 'absolute', left: 40*s, top: 80*s, width: 120*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
+      ) : null}
+      {/* Horn on head */}
+      {horn && horn.preview ? (
+        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 8*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
+      ) : null}
+      {/* Hat on top */}
+      {hat && hat.preview ? (
+        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -4*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Main screen ─────────────────────────────────────────────────────
+function ScreenCharacter({ onNav = () => {} }) {
+  const [tab, setTab] = useState('mine');
+  const [equip, setEquip] = useState(DEFAULT_EQUIP);
+  const [pickerCat, setPickerCat] = useState(null); // null | 'color' | 'tail' | ...
+  const setItem = (cat, id) => setEquip(e => ({ ...e, [cat]: id }));
+
+  return (
+    <div className="ps-screen" data-screen-label="06 캐릭터">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #EBF4FB 0%, #F2FBE6 60%, #FFFFFF 100%)', zIndex: 0 }}/>
+      <div className="ps-content scroll" style={{ padding: 0 }}>
+        <StatusBar />
+
+        <div style={{ padding: '4px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h1 className="ps-h1" style={{ fontSize: 26 }}>나의 숨이</h1>
+          <div className="ps-pill" style={{ height: 36, padding: '0 14px 0 10px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#FFB930"/></svg>
+            <span>1,240P</span>
+          </div>
+        </div>
+
+        {/* Hero stage */}
+        <div style={{ position: 'relative', margin: '14px 20px 0', borderRadius: 28, padding: 20, overflow: 'hidden', background: 'linear-gradient(180deg, #FFFFFF 0%, #F2FBE6 100%)', boxShadow: 'var(--shadow-md)', minHeight: 320 }}>
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 90, background: 'linear-gradient(180deg, transparent, rgba(165,230,107,.35))' }}/>
+          <div style={{ position: 'absolute', right: 24, top: 24, width: 36, height: 36, borderRadius: '50%', background: 'radial-gradient(circle, #FFE0A1, #FFC56B)', boxShadow: '0 0 30px rgba(255,201,107,.6)' }}/>
+          <div style={{ position: 'absolute', left: 30, top: 36, color: '#fff', fontSize: 24, opacity: .9 }}><Icon name="cloud" size={28} color="rgba(255,255,255,.95)"/></div>
+
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div className="ps-eyebrow">진화 단계 · 3 / 5</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em' }}>초록이</h2>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-3)' }}>· 27일째 함께</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6, position: 'relative', zIndex: 1 }}>
+            <div className="ps-anim-bob"><DressedSoomi size={200} equip={equip}/></div>
+          </div>
+
+          <div style={{ position: 'relative', zIndex: 1, marginTop: 4, display: 'flex', gap: 8 }}>
+            <Meter icon="heart"  label="기분"   value={86} color="#E65A4A"/>
+            <Meter icon="leaf"   label="건강"   value={72} color="#5BC23B"/>
+            <Meter icon="sparkle" label="친밀도" value={94} color="#FFB930"/>
+          </div>
+        </div>
+
+        {/* Interaction row */}
+        <div style={{ display: 'flex', gap: 10, padding: '14px 20px 0' }}>
+          {[
+            { id: 'feed',   icon: 'water', label: '먹이 주기', cost: 10, fn: () => setItem('face', 'happy') },
+            { id: 'pet',    icon: 'sparkle', label: '쓰다듬기', cost: 0, fn: () => setItem('face', 'chill') },
+            { id: 'dress',  icon: 'gift',  label: '꾸미기',    cost: null, fn: () => setPickerCat('color') },
+            { id: 'name',   icon: 'note',  label: '이름',     cost: null, fn: () => {} },
+          ].map(b => (
+            <button key={b.id} onClick={b.fn} className="ps-tap" style={{ flex: 1, height: 72, background: 'white', border: '1px solid var(--line)', borderRadius: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6, color: 'var(--ink)', cursor: 'pointer' }}>
+              <Icon name={b.icon} size={20}/>
+              <div style={{ fontSize: 10, fontWeight: 700 }}>{b.label}</div>
+              {b.cost != null ? (b.cost > 0 ? <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>{b.cost}P</div> : <div style={{ fontSize: 9, color: 'var(--green-700)', fontWeight: 700 }}>무료</div>) : null}
+            </button>
+          ))}
+        </div>
+
+        {/* Tabs */}
+        <div style={{ padding: '16px 20px 0' }}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[{id:'mine',label:'꾸미기'},{id:'dex',label:'도감'},{id:'family',label:'가족'}].map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} className="ps-tap" style={{ height: 34, padding: '0 14px', borderRadius: 999, background: tab === t.id ? 'var(--ink)' : 'white', color: tab === t.id ? 'white' : 'var(--ink-2)', border: '1px solid ' + (tab === t.id ? 'var(--ink)' : 'var(--line)'), fontWeight: 700, fontSize: 13 }}>{t.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ padding: '12px 20px 110px' }}>
+          {tab === 'mine'   && <DressUpGrid equip={equip} onOpenCat={setPickerCat}/>}
+          {tab === 'dex'    && <CategorizedDex equip={equip}/>}
+          {tab === 'family' && <FamilyView/>}
+        </div>
+      </div>
+      <TabBar active="char" onChange={onNav}/>
+
+      {pickerCat ? <CategoryPicker cat={pickerCat} equip={equip} onPick={(id) => setItem(pickerCat, id)} onSwitchCat={setPickerCat} onClose={() => setPickerCat(null)}/> : null}
+    </div>
+  );
+}
+
+function Meter({ icon, label, value, color }) {
+  return (
+    <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', borderRadius: 14, padding: '8px 10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <Icon name={icon} size={13} color={color}/>
+          <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--ink-2)' }}>{label}</span>
+        </div>
+        <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink)' }}>{value}</span>
+      </div>
+      <div style={{ marginTop: 5, height: 4, borderRadius: 999, background: 'rgba(15,42,30,.08)' }}>
+        <div style={{ height: '100%', width: value + '%', background: color, borderRadius: 999 }}/>
+      </div>
+    </div>
+  );
+}
+
+// ── Dress-up grid (category overview, opens picker) ────────────────
+function DressUpGrid({ equip, onOpenCat }) {
+  return (
+    <div>
+      <h3 className="ps-h3" style={{ marginTop: 4 }}>꾸미기</h3>
+      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>각 부위마다 하나씩 선택할 수 있어요</div>
+
+      <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        {CATEGORIES.map(c => {
+          const items = ITEMS[c.id];
+          const equippedId = equip[c.id];
+          const equipped = items.find(i => i.id === equippedId);
+          const unlocked = items.filter(i => !i.locked).length;
+          const total = items.length;
+          return (
+            <button key={c.id} onClick={() => onOpenCat(c.id)} className="ps-tap" style={{ background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)', border: 'none', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 18 }}>{c.icon}</span>
+                  <span style={{ fontSize: 13, fontWeight: 800 }}>{c.label}</span>
+                </div>
+                <Icon name="chev" size={14} color="var(--ink-3)"/>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ width: 52, height: 36, background: 'var(--green-50)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {c.id === 'color' ? <div style={{ width: 22, height: 22, borderRadius: 8, background: equipped?.swatch }}/> :
+                   c.id === 'face'  ? <span style={{ fontSize: 18 }}>{equipped?.id === 'happy' ? '😊' : equipped?.id === 'chill' ? '😌' : equipped?.id === 'sleepy' ? '😴' : equipped?.id === 'proud' ? '🥰' : '😟'}</span> :
+                   equipped?.preview ? <div style={{ transform: 'scale(0.6)' }}>{equipped.preview('', 0.6)}</div> :
+                   <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{equipped?.label}</div>
+                  <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>{unlocked} / {total} 보유</div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Category picker bottom sheet ───────────────────────────────────
+function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
+  const items = ITEMS[cat];
+  const equippedId = equip[cat];
+  const catLabel = CATEGORIES.find(c => c.id === cat)?.label;
+
+  return (
+    <React.Fragment>
+      <div className="ps-sheet-backdrop" onClick={onClose}/>
+      <div className="ps-sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '85%', overflowY: 'auto', paddingBottom: 40 }}>
+        <div className="ps-sheet-handle"/>
+        {/* Live preview */}
+        <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 18, padding: 14 }}>
+          <div className="ps-anim-bob-sm"><DressedSoomi size={120} equip={equip}/></div>
+        </div>
+
+        {/* Category tabs */}
+        <div style={{ marginTop: 12, display: 'flex', gap: 6, overflowX: 'auto', padding: '2px 0' }}>
+          {CATEGORIES.map(c => (
+            <button key={c.id} onClick={() => onSwitchCat(c.id)} className="ps-tap" style={{ height: 32, padding: '0 12px', borderRadius: 999, background: cat === c.id ? 'var(--ink)' : 'var(--green-50)', color: cat === c.id ? 'white' : 'var(--ink-2)', border: 'none', fontWeight: 700, fontSize: 12, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span>{c.icon}</span>{c.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <h3 className="ps-h3">{catLabel}</h3>
+          <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>{items.filter(i => !i.locked).length} / {items.length} 보유</div>
+        </div>
+
+        {/* Item grid */}
+        <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          {items.map(it => {
+            const isPicked = it.id === equippedId;
+            return (
+              <button key={it.id} onClick={() => !it.locked && onPick(it.id)} className="ps-tap" style={{ background: 'white', borderRadius: 14, padding: 10, border: isPicked ? '2px solid var(--green-500)' : '2px solid var(--line)', boxShadow: isPicked ? '0 6px 16px rgba(91,194,59,.22)' : 'none', cursor: it.locked ? 'not-allowed' : 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: '100%', height: 56, borderRadius: 10, background: cat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                  {cat === 'color' ? null
+                   : cat === 'face' ? <span style={{ fontSize: 28 }}>{it.id === 'happy' ? '😊' : it.id === 'chill' ? '😌' : it.id === 'sleepy' ? '😴' : it.id === 'proud' ? '🥰' : '😟'}</span>
+                   : it.id === 'none' ? <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>
+                   : it.preview ? <div style={{ transform: 'scale(0.85)' }}>{it.preview('', 0.85)}</div>
+                   : null}
+                  {it.locked ? <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔒</div> : null}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: it.locked ? 'var(--ink-3)' : 'var(--ink)' }}>{it.label}</div>
+                {it.locked ? <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>500P</div> : isPicked ? <div style={{ fontSize: 9, color: 'var(--green-700)', fontWeight: 800 }}>착용 중</div> : null}
+              </button>
+            );
+          })}
+        </div>
+
+        <button onClick={onClose} className="ps-cta green ps-tap" style={{ marginTop: 16, height: 50 }}>완료</button>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ── Categorized dex ─────────────────────────────────────────────────
+function CategorizedDex({ equip }) {
+  const [dexCat, setDexCat] = useState('color');
+  const items = ITEMS[dexCat];
+  const total = items.length;
+  const unlocked = items.filter(i => !i.locked).length;
+  const catLabel = CATEGORIES.find(c => c.id === dexCat)?.label;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+        <h3 className="ps-h3">아이템 도감</h3>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-700)' }}>{unlocked} / {total} 수집</div>
+      </div>
+      <div className="ps-progress" style={{ marginTop: 8, height: 6 }}><div style={{ width: (unlocked / total * 100) + '%' }}/></div>
+
+      {/* Category tabs */}
+      <div style={{ marginTop: 14, display: 'flex', gap: 6, overflowX: 'auto' }}>
+        {CATEGORIES.map(c => {
+          const u = ITEMS[c.id].filter(i => !i.locked).length;
+          const t = ITEMS[c.id].length;
+          return (
+            <button key={c.id} onClick={() => setDexCat(c.id)} className="ps-tap" style={{ height: 56, padding: '0 14px', borderRadius: 16, background: dexCat === c.id ? 'var(--ink)' : 'white', color: dexCat === c.id ? 'white' : 'var(--ink-2)', border: '1px solid ' + (dexCat === c.id ? 'var(--ink)' : 'var(--line)'), fontWeight: 700, fontSize: 12, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+              <span style={{ fontSize: 16 }}>{c.icon}</span>
+              <span style={{ fontSize: 10, fontWeight: 800 }}>{c.label}</span>
+              <span style={{ fontSize: 9, fontWeight: 700, opacity: .7 }}>{u}/{t}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Items in this category */}
+      <div style={{ marginTop: 14, fontSize: 14, fontWeight: 800 }}>{catLabel} · {unlocked}종</div>
+      <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+        {items.map(it => {
+          const isEq = it.id === equip[dexCat];
+          return (
+            <div key={it.id} style={{ position: 'relative', background: 'white', borderRadius: 16, padding: 10, boxShadow: 'var(--shadow-sm)', border: isEq ? '1.5px solid var(--green-500)' : it.locked ? '1.5px dashed var(--line)' : '1.5px solid var(--green-200)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              {isEq ? <div style={{ position: 'absolute', top: 6, right: 6, fontSize: 9, fontWeight: 800, color: 'white', background: 'var(--green-500)', padding: '2px 6px', borderRadius: 999 }}>착용</div> : null}
+              <div style={{ width: '100%', height: 60, borderRadius: 10, background: dexCat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', filter: it.locked ? 'grayscale(1) brightness(.8)' : 'none' }}>
+                {dexCat === 'color' ? null
+                 : dexCat === 'face' ? <span style={{ fontSize: 26 }}>{it.id === 'happy' ? '😊' : it.id === 'chill' ? '😌' : it.id === 'sleepy' ? '😴' : it.id === 'proud' ? '🥰' : '😟'}</span>
+                 : it.id === 'none' ? <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>
+                 : it.preview ? <div style={{ transform: 'scale(0.85)' }}>{it.preview('', 0.85)}</div>
+                 : null}
+                {it.locked ? <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔒</div> : null}
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: it.locked ? 'var(--ink-3)' : 'var(--ink)', textAlign: 'center' }}>{it.locked ? '???' : it.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Family view ─────────────────────────────────────────────────────
+function FamilyView() {
+  return (
+    <div>
+      <h3 className="ps-h3" style={{ marginTop: 4 }}>가족</h3>
+      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>다른 사용자와 결혼해 2세를 만들어요</div>
+
+      <div style={{ marginTop: 14, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 28 }}>
+          <div style={{ textAlign: 'center' }}>
+            <Soomi size={72} mood="happy" accent="#7DD957"/>
+            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>초록이</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>나의 캐릭터</div>
+          </div>
+          <div style={{ paddingBottom: 24 }}>
+            <svg width="32" height="32" viewBox="0 0 24 24"><path d="M12 20s-7-4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6-7 10-7 10Z" fill="#E65A4A"/></svg>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <Soomi size={72} mood="happy" accent="#FF9DBF"/>
+            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>체리</div>
+            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>배우자 캐릭터 · 41일째</div>
+          </div>
+        </div>
+
+        <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: 8 }}>
+          <path d="M50 0 L 50 20 L 150 20 L 150 0 M100 20 L 100 40" stroke="var(--line)" strokeWidth="2" fill="none"/>
+        </svg>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: -8 }}>
+          <div style={{ textAlign: 'center' }}>
+            <Soomi size={64} mood="chill" accent="#C9F08D"/>
+            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 2 }}>봄이 🌱</div>
+            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>레벨 4 · 첫째</div>
+          </div>
+          <div style={{ textAlign: 'center', opacity: .6 }}>
+            <div style={{ width: 64, height: 64, borderRadius: 999, border: '2px dashed var(--ink-4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)' }}><Icon name="plus" size={24}/></div>
+            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 4, color: 'var(--ink-3)' }}>둘째 입양</div>
+            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>3,000P 필요</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 12, background: 'var(--green-50)', borderRadius: 16, padding: 14, display: 'flex', gap: 10 }}>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'white', color: 'var(--green-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="sparkle" size={18}/></div>
+        <div style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.5 }}>
+          <strong>봄이</strong>는 부모를 닮은 외형으로 랜덤 생성됐어요. 동일하게 성장·육성할 수 있고, 본체 캐릭터를 다 키운 뒤에도 함께해요.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenCharacter });
+
+  </script>
+
+  <script type="text/babel">
+// screen-calendar.jsx — Monthly view with verified (green) / failed (red) cells + streak
+
+const DAY_NOTES = {
+  3:  { type: 'smoke',   why: '회의 직후 충동 폭증, 옥상행', tag: '스트레스', co: '—', urge: 8, action: '흡연' },
+  7:  { type: 'missing', why: '회식 후 새벽 귀가 — 측정 시간 놓침', tag: '미측정', co: '—', urge: 7, action: '미측정' },
+  9:  { type: 'smoke',   why: '시험 스트레스 폭증', tag: '스트레스', co: '—', urge: 9, action: '흡연' },
+};
+
+function ScreenCalendar({ onNav = () => {} }) {
+  const days = Array.from({ length: 28 }, (_, i) => i + 1);
+  const smokeDays   = [3, 9];
+  const missingDays = [7];
+  const today = 14;
+  const firstDayOffset = 6;
+  const [sheetDay, setSheetDay] = useState(null);
+
+  const stats = [
+    { label: '현재 스트릭', value: 5,  color: '#5BC23B', icon: 'check' },
+    { label: '흡연',       value: 2,  color: '#E65A4A', icon: 'cig' },
+    { label: '미측정',     value: 1,  color: '#F2A93B', icon: 'bell' },
+    { label: '최장 스트릭', value: 27, color: '#FF7A2E', icon: 'flame' },
+  ];
+
+  return (
+    <div className="ps-screen" data-screen-label="07 캘린더">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #F2FBE6 0%, #FFFFFF 100%)', zIndex: 0 }}/>
+      <div className="ps-content scroll" style={{ padding: 0 }}>
+        <StatusBar />
+
+        {/* Header */}
+        <div style={{ padding: '4px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h1 className="ps-h1" style={{ fontSize: 26 }}>금연 캘린더</h1>
+          <button style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="filter" size={18}/></button>
+        </div>
+
+        {/* Streak banner */}
+        <div style={{ margin: '14px 20px 0' }}>
+          <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
+        </div>
+
+        {/* Month selector */}
+        <div style={{ padding: '18px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button style={{ width: 36, height: 36, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="chev-l" size={16}/></button>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>2026</div>
+            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>2월</div>
+          </div>
+          <button style={{ width: 36, height: 36, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="chev" size={16}/></button>
+        </div>
+
+        {/* Calendar grid */}
+        <div style={{ margin: '14px 20px 0', background: 'white', borderRadius: 22, padding: 16, boxShadow: 'var(--shadow-sm)' }}>
+          {/* Weekday header */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
+            {['일','월','화','수','목','금','토'].map((d, i) => (
+              <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: i === 0 ? '#E65A4A' : i === 6 ? '#2A6FAA' : 'var(--ink-3)' }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Days */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+            {Array.from({ length: firstDayOffset }).map((_, i) => <div key={'b' + i}/>)}
+            {days.map(d => {
+              const isFuture = d > today;
+              const isToday = d === today;
+              const isSmoke = smokeDays.includes(d);
+              const isMissing = missingDays.includes(d);
+              const isFailed = isSmoke || isMissing;
+              const isVerified = !isFuture && !isFailed && !isToday;
+              return (
+                <div key={d} onClick={() => !isFuture && setSheetDay(d)} className={!isFuture ? 'ps-tap' : ''} style={{
+                  position: 'relative', aspectRatio: '1 / 1',
+                  borderRadius: 11,
+                  background: isVerified ? '#5BC23B' :
+                              isSmoke    ? '#E65A4A' :
+                              isMissing  ? 'white' :
+                              isToday    ? 'white' :
+                              'transparent',
+                  border: isMissing ? '2px dashed #F2A93B' : isToday ? '2px solid var(--green-500)' : 'none',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                  cursor: isFuture ? 'default' : 'pointer',
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 800,
+                    color: isVerified ? 'white' : isSmoke ? 'white' : isMissing ? '#A06A00' : isToday ? 'var(--green-700)' : 'var(--ink-2)',
+                    opacity: isFuture ? .35 : 1 }}>{d}</div>
+                  {isVerified ? <Icon name="check" size={10} color="white" stroke={3}/> : null}
+                  {isSmoke    ? <Icon name="cig"   size={10} color="white" stroke={2.5}/> : null}
+                  {isMissing  ? <span style={{ fontSize: 8, fontWeight: 800, color: '#F2A93B' }}>?</span> : null}
+                  {isToday && !isFailed ? <div style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--green-500)' }}/> : null}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legend */}
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)', display: 'flex', gap: 12, fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', flexWrap: 'wrap' }}>
+            <Legend color="#5BC23B" label="인증"/>
+            <Legend color="#E65A4A" label="흡연"/>
+            <Legend color="white" label="미측정" dashed/>
+            <Legend color="white" label="오늘" border/>
+            <Legend color="transparent" label="예정"/>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{ padding: '18px 20px 0', display: 'flex', gap: 8 }}>
+          {stats.map((s, i) => (
+            <div key={i} style={{ flex: 1, background: 'white', borderRadius: 16, padding: '10px 8px 12px', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ width: 24, height: 24, borderRadius: 7, background: s.color + '22', color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name={s.icon} size={14}/></div>
+              <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, marginTop: 6 }}>{s.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)' }}>{s.value}<span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, marginLeft: 2 }}>일</span></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent failures + reflection */}
+        <div style={{ margin: '14px 20px 0', background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>이번 달 미달성일 회고</div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-700)' }}>전체 →</span>
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[
+              { d: '2월 9일',  why: '시험 스트레스 폭증 → 흡연 1개비',  tag: '스트레스', kind: 'smoke' },
+              { d: '2월 7일', why: '회식 후 새벽 귀가 — 측정 시간 놓침', tag: '미측정', kind: 'missing' },
+              { d: '2월 3일',  why: '회의 직후 충동 폭증, 옥상행',     tag: '스트레스', kind: 'smoke' },
+            ].map((r, i) => {
+              const smoke = r.kind === 'smoke';
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: i ? '1px solid var(--line)' : 'none' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 11, background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#E65A4A' : '#A06A00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {smoke ? <Icon name="cig" size={18} stroke={2.2}/> : <span style={{ fontSize: 16, fontWeight: 800 }}>?</span>}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{r.d} <span style={{ fontSize: 10, fontWeight: 800, marginLeft: 4, padding: '2px 6px', borderRadius: 6, background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#A8331C' : '#A06A00' }}>{smoke ? '흡연' : '미측정'}</span></div>
+                    <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 1 }}>{r.why}</div>
+                  </div>
+                  <span className="ps-chip" style={{ background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#A8331C' : '#A06A00' }}>#{r.tag}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ height: 30 }}/>
+      </div>
+      <TabBar active="cal" onChange={onNav}/>
+
+      {/* Day detail bottom sheet */}
+      {sheetDay != null ? <DayDetailSheet day={sheetDay} note={DAY_NOTES[sheetDay]} isToday={sheetDay === 14} onClose={() => setSheetDay(null)}/> : null}
+    </div>
+  );
+}
+
+function DayDetailSheet({ day, note, isToday, onClose }) {
+  const smoke   = note?.type === 'smoke';
+  const missing = note?.type === 'missing';
+  const failed  = smoke || missing;
+  const titleColor = smoke ? 'var(--danger)' : missing ? '#A06A00' : 'var(--green-700)';
+  const titleText  = smoke ? '흡연 기록' : missing ? '미측정' : '인증 완료';
+  return (
+    <React.Fragment>
+      <div className="ps-sheet-backdrop" onClick={onClose}/>
+      <div className="ps-sheet" onClick={e => e.stopPropagation()}>
+        <div className="ps-sheet-handle"/>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', textTransform: 'uppercase' }}>2026 · 2월 {day}일 {isToday ? '(오늘)' : ''}</div>
+            <h2 className="ps-h2" style={{ marginTop: 4, color: titleColor }}>
+              {titleText}
+            </h2>
+          </div>
+          <button onClick={onClose} className="ps-tap" style={{ width: 36, height: 36, borderRadius: 999, background: 'var(--green-50)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="close" size={16}/></button>
+        </div>
+
+        {missing ? (
+          <div style={{ marginTop: 10, padding: '10px 14px', background: 'var(--warn-bg)', borderRadius: 12, fontSize: 12, color: '#5A3F00', fontWeight: 600, lineHeight: 1.45 }}>
+            ⚠️ <strong>측정 안 함 ≠ 흡연</strong>. 측정 기록만 누락된 거예요.<br/>스트릭은 자동 실패 처리되지만, 회고를 남기면 다시 회복할 수 있어요.
+          </div>
+        ) : null}
+
+        {/* metrics row */}
+        <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
+          <SheetStat label="호기 CO" value={failed ? note.co : '3.2'} unit={failed ? '' : 'ppm'} tone={failed ? 'gray' : 'green'}/>
+          <SheetStat label="충동 강도" value={failed ? note.urge : '4'} unit="/10" tone={smoke ? 'red' : missing ? 'yellow' : 'green'}/>
+          <SheetStat label="획득 XP" value={failed ? '0' : '90'} unit="" tone="yellow"/>
+        </div>
+
+        {failed ? (
+          <React.Fragment>
+            <div style={{ marginTop: 14, padding: 14, background: smoke ? 'var(--danger-bg)' : 'var(--warn-bg)', borderRadius: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: smoke ? '#A8331C' : '#A06A00', letterSpacing: '.05em' }}>회고 메모</div>
+              <div style={{ fontSize: 14, marginTop: 4, color: 'var(--ink)' }}>{note.why}</div>
+              <div style={{ marginTop: 8 }}><span className="ps-chip" style={{ background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#A8331C' : '#A06A00' }}>#{note.tag}</span></div>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
+              <button className="ps-tap" style={{ flex: 1, height: 48, borderRadius: 14, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 14 }}>{smoke ? 'CBT 코칭 받기' : '내일 잊지 않게 알림'}</button>
+              <button onClick={onClose} className="ps-tap" style={{ width: 48, height: 48, borderRadius: 14, background: 'white', border: '1px solid var(--line)' }}><Icon name="kebab" size={18}/></button>
+            </div>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--green-700)', letterSpacing: '.05em' }}>완료한 미션 4개</div>
+              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { icon: 'co',    label: '아침 CO 측정', xp: 50 },
+                  { icon: 'walk',  label: '저녁 산책 1,580걸음', xp: 35 },
+                  { icon: 'wind',  label: '4-7-8 심호흡', xp: 20 },
+                  { icon: 'note',  label: '소크라테스 Q 3개', xp: 40 },
+                ].map((m, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 9, background: 'white', color: 'var(--green-700)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name={m.icon} size={14}/></div>
+                    <div style={{ flex: 1, fontSize: 13, fontWeight: 700 }}>{m.label}</div>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 800, color: '#9A6A00' }}><Icon name="bolt" size={11}/>+{m.xp}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button onClick={onClose} className="ps-cta green ps-tap" style={{ marginTop: 14, height: 48 }}>닫기</button>
+          </React.Fragment>
+        )}
+      </div>
+    </React.Fragment>
+  );
+}
+
+function SheetStat({ label, value, unit, tone }) {
+  const tones = {
+    green:  { bg: 'var(--green-50)',  fg: 'var(--green-700)' },
+    red:    { bg: 'var(--danger-bg)', fg: 'var(--danger)' },
+    yellow: { bg: '#FFEFC8',          fg: '#9A6A00' },
+    gray:   { bg: '#F0F4F1',          fg: 'var(--ink-3)' },
+  }[tone];
+  return (
+    <div style={{ flex: 1, background: tones.bg, borderRadius: 14, padding: '10px 12px' }}>
+      <div style={{ fontSize: 10, fontWeight: 800, color: tones.fg, letterSpacing: '.02em' }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginTop: 4 }}>
+        <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.02em' }}>{value}</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)' }}>{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+function Legend({ color, label, border, dashed }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ width: 12, height: 12, borderRadius: 4, background: color,
+        border: border ? '2px solid var(--green-500)'
+              : dashed ? '2px dashed #F2A93B'
+              : color === 'transparent' ? '1.5px dashed var(--ink-4)' : 'none' }}/>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenCalendar });
+
+  </script>
+
+  <script type="text/babel">
+// app-mobile.jsx — Mobile app router
+// Routes screens via setState. Tab bar + CTAs drive nav.
+// Flow: splash → login → (first visit) onboarding → home  /  (returning) home
+// Doctor login → redirects to share-doctor.html
+
+const PS_VISITED_KEY = 'ps_visited_v1';
+
+function MobileApp({ initialRoute = 'splash' }) {
+  const [route, setRoute] = useState(initialRoute);
+
+  const nav = (r) => {
+    setRoute(r);
+    setTimeout(() => {
+      const el = document.querySelector('[data-screen-label] .ps-content.scroll');
+      if (el) el.scrollTop = 0;
+    }, 50);
+  };
+
+  const handleSplashDone = () => nav('login');
+
+  const handlePatientLogin = () => {
+    let visited = false;
+    try { visited = localStorage.getItem(PS_VISITED_KEY) === '1'; } catch(_) {}
+    if (visited) {
+      nav('home');
+    } else {
+      nav('onboarding');
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    try { localStorage.setItem(PS_VISITED_KEY, '1'); } catch(_) {}
+    nav('home');
+  };
+
+  const handleDoctorLogin = () => {
+    // doctor flow lives on desktop — hop over to the dashboard view
+    try { window.location.href = 'netlify-deploy/share-doctor.html'; } catch(_) {}
+  };
+
+  return (
+    <div key={route} className="ps-anim-fade-up" style={{ width: '100%', height: '100%' }}>
+      {route === 'splash'     && <ScreenSplash onComplete={handleSplashDone}/>}
+      {route === 'login'      && <ScreenLogin onPatientLogin={handlePatientLogin} onDoctorLogin={handleDoctorLogin}/>}
+      {route === 'onboarding' && <ScreenOnboarding onComplete={handleOnboardingComplete}/>}
+      {route === 'home'       && <ScreenHome onNav={nav}/>}
+      {route === 'mission'    && <ScreenMissions onNav={nav}/>}
+      {route === 'co'         && <ScreenCOFlow onNav={nav}/>}
+      {route === 'char'       && <ScreenCharacter onNav={nav}/>}
+      {route === 'cal'        && <ScreenCalendar onNav={nav}/>}
+      {route === 'trigger'    && <ScreenTriggerFlow onComplete={() => nav('home')}/>}
+      {route === 'warnings'   && <ScreenCOWarnings onNav={nav}/>}
+    </div>
+  );
+}
+
+Object.assign(window, { MobileApp });
+
+  </script>
+
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const hashRoute = (typeof location !== 'undefined' && location.hash || '').replace('#','');
+      const [route, setRoute] = useState(hashRoute || 'splash');
+
+      useEffect(() => {
+        const onClick = (e) => {
+          const btn = e.target.closest('[data-route]');
+          if (!btn) return;
+          const r = btn.getAttribute('data-route');
+          setRoute(r);
+          document.querySelectorAll('#quick button').forEach(b => b.classList.toggle('is-active', b === btn));
+          try { history.replaceState(null, '', '#' + r); } catch(_) {}
+        };
+        document.getElementById('quick').addEventListener('click', onClick);
+        return () => document.getElementById('quick').removeEventListener('click', onClick);
+      }, []);
+
+      useEffect(() => {
+        document.querySelectorAll('#quick button').forEach(b => {
+          b.classList.toggle('is-active', b.getAttribute('data-route') === route);
+        });
+      }, [route]);
+
+      return <MobileApp key={route} initialRoute={route}/>;
+    }
+
+    ReactDOM.createRoot(document.getElementById('screen')).render(<App/>);
+  </script>
+</body>
+</html>

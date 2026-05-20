@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Purely:SOOM · 프로토타입 공유</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body {
+      font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      color: #0F2A1E;
+      background:
+        radial-gradient(60% 50% at 15% 0%, #E5F8D0 0%, transparent 60%),
+        radial-gradient(60% 50% at 85% 100%, #DCEEF8 0%, transparent 55%),
+        #F4F2EC;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .wrap { width: 100%; max-width: 1080px; }
+    header.head {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+    }
+    header.head img { height: 44px; }
+    header.head h1 {
+      font-size: 13px; margin: 0; font-weight: 800; letter-spacing: -0.01em;
+    }
+    header.head p { font-size: 11px; margin: 2px 0 0; color: #4A5B55; font-weight: 700; }
+
+    .hero {
+      font-size: clamp(36px, 5vw, 56px); font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.05;
+      text-wrap: balance; margin: 0 0 14px;
+    }
+    .hero em {
+      font-style: normal;
+      background: linear-gradient(180deg, transparent 55%, #C8F0A0 55%);
+      padding: 0 4px;
+    }
+    .sub {
+      font-size: 16px; color: #3A4A44; line-height: 1.55; font-weight: 500;
+      max-width: 620px; margin: 0 0 36px;
+    }
+
+    .team {
+      display: inline-flex; align-items: center; gap: 14px;
+      padding: 10px 18px 10px 14px;
+      background: white;
+      border: 1px solid rgba(15,42,30,0.08);
+      border-radius: 999px;
+      box-shadow: 0 4px 14px -4px rgba(15,42,30,0.08);
+      margin: 0 0 36px;
+      max-width: 100%;
+    }
+    .team .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px;
+      background: linear-gradient(135deg, #7DD957, #5BC23B);
+      color: white; font-weight: 800; font-size: 11px; letter-spacing: .08em;
+      border-radius: 999px; text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(91,194,59,.3);
+      flex-shrink: 0;
+    }
+    .team .name {
+      font-size: 14px; font-weight: 800; color: #0F2A1E; letter-spacing: -0.01em;
+      display: flex; align-items: baseline; gap: 6px; flex-shrink: 0;
+    }
+    .team .name em { font-style: normal; color: #4A5B55; font-weight: 700; font-size: 12px; }
+    .team .divider {
+      width: 1px; height: 18px; background: rgba(15,42,30,0.12); flex-shrink: 0;
+    }
+    .team .members {
+      font-size: 13px; color: #3A4A44; font-weight: 600;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .team .members span {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .team .members span::before {
+      content: ''; width: 5px; height: 5px; border-radius: 999px; background: #A5E66B;
+    }
+    @media (max-width: 720px) {
+      .team { flex-wrap: wrap; border-radius: 22px; padding: 14px 18px; }
+      .team .divider { display: none; }
+    }
+
+    .cards {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    }
+    @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+
+    .card {
+      position: relative; display: block; text-decoration: none; color: inherit;
+      background: white; border-radius: 24px; padding: 26px 24px 22px;
+      border: 1px solid rgba(15,42,30,0.06);
+      box-shadow: 0 8px 30px -10px rgba(15,42,30,0.1);
+      transition: all .2s ease;
+      overflow: hidden;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 18px 50px -15px rgba(15,42,30,0.18); }
+    .card .tag {
+      font-size: 10px; font-weight: 800; letter-spacing: .12em;
+      color: #2F8A3E; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .card .tag::before {
+      content: ''; width: 6px; height: 6px; border-radius: 999px; background: #5BC23B;
+    }
+    .card h2 {
+      font-size: 24px; margin: 8px 0 6px; font-weight: 800; letter-spacing: -0.02em;
+    }
+    .card .desc { font-size: 13px; color: #4A5B55; line-height: 1.55; font-weight: 500; }
+
+    .preview {
+      margin-top: 18px;
+      aspect-ratio: 16 / 10;
+      border-radius: 14px; overflow: hidden;
+      position: relative;
+      background: #F4F7F5;
+      border: 1px solid rgba(15,42,30,0.05);
+    }
+    .preview.phone {
+      background:
+        radial-gradient(50% 60% at 50% 50%, rgba(125,217,87,0.2) 0%, transparent 70%),
+        #F1F4EE;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .phone-mini {
+      width: 140px; height: 280px;
+      background: #000; border-radius: 22px; padding: 5px;
+      box-shadow: 0 20px 40px -10px rgba(15,42,30,0.3);
+    }
+    .phone-mini-screen {
+      width: 100%; height: 100%; border-radius: 17px;
+      background: linear-gradient(180deg, #E5F8D0 0%, #FFF 50%);
+      display: flex; flex-direction: column; gap: 4px;
+      padding: 12px 8px; align-items: center;
+      position: relative;
+    }
+    .phone-mini-screen::before {
+      content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 10px; background: #000; border-radius: 999px;
+    }
+    .pm-emoji { font-size: 36px; margin-top: 24px; }
+    .pm-bar { width: 70%; height: 6px; border-radius: 999px; background: #5BC23B; opacity: 0.8; }
+    .pm-bar.thin { width: 50%; opacity: 0.45; }
+    .pm-pill { font-size: 8px; font-weight: 800; color: #0F2A1E; background: white; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(15,42,30,0.08); margin-top: 4px; }
+
+    .preview.dash {
+      background: linear-gradient(135deg, #F4F7F5 0%, #E9F4DD 100%);
+      padding: 14px;
+      display: flex; gap: 8px;
+    }
+    .dash-side {
+      width: 36px; background: white; border-radius: 8px; padding: 8px 4px;
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+      box-shadow: 0 2px 6px rgba(15,42,30,0.04);
+    }
+    .dash-side .di { width: 18px; height: 18px; border-radius: 5px; background: #E9F4DD; }
+    .dash-side .di.active { background: #5BC23B; }
+    .dash-main { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .dash-card { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 6px rgba(15,42,30,0.04); flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .dash-card .h { font-size: 9px; font-weight: 800; color: #0F2A1E; }
+    .dash-card svg { width: 100%; flex: 1; }
+    .dash-row { display: flex; gap: 8px; }
+    .dash-row > div { flex: 1; }
+
+    .arrow {
+      margin-top: 16px; display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 800; color: #2F8A3E;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 11px; color: #6B7B75; font-weight: 600;
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    footer a { color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(15,42,30,0.2); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="head">
+      <img src="assets/logo.png" alt="Purely:SOOM"/>
+      <div>
+        <h1>Purely:SOOM</h1>
+        <p>DTX 퓨어리숨 · 프로토타입</p>
+      </div>
+    </header>
+
+    <h1 class="hero">흡연 욕구의 <em>그 순간</em>을<br/>케어하는 디지털 치료제.</h1>
+
+    <div class="team">
+      <span class="badge">Team</span>
+      <span class="name">Soomers <em>[수머즈]</em></span>
+      <span class="divider"></span>
+      <div class="members">
+        <span>박정호</span>
+        <span>문해진</span>
+        <span>송은주</span>
+        <span>선한별</span>
+      </div>
+    </div>
+
+    <div class="cards">
+      <a class="card" href="share-patient.html">
+        <span class="tag">환자 앱 · 모바일</span>
+        <h2>연결된 풀 플로우</h2>
+        <p class="desc">온보딩부터 홈 · 미션 · CO 측정 · 캐릭터 · 캘린더까지 — 8개 화면이 실제로 연결되어 있어요.</p>
+        <div class="preview phone">
+          <div class="phone-mini">
+            <div class="phone-mini-screen">
+              <div class="pm-emoji">🌱</div>
+              <div class="pm-bar"></div>
+              <div class="pm-bar thin"></div>
+              <div class="pm-pill">대응하기</div>
+            </div>
+          </div>
+        </div>
+        <div class="arrow">앱 열기 →</div>
+      </a>
+
+      <a class="card" href="share-doctor.html">
+        <span class="tag">의사 대시보드 · 데스크탑</span>
+        <h2>임상 모니터링</h2>
+        <p class="desc">환자별 CO 추이, 트리거 로그, CBT 진척까지 — 6명 환자 전환과 1주/4주/12주 기간 토글이 라이브로 동작합니다.</p>
+        <div class="preview dash">
+          <div class="dash-side">
+            <div class="di active"></div>
+            <div class="di"></div>
+            <div class="di"></div>
+            <div class="di"></div>
+          </div>
+          <div class="dash-main">
+            <div class="dash-card">
+              <div class="h">CO 추이 (4주)</div>
+              <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+                <path d="M 0 30 L 15 24 L 30 26 L 45 18 L 60 14 L 75 16 L 90 10 L 100 8" fill="none" stroke="#5BC23B" stroke-width="2" stroke-linecap="round"/>
+                <path d="M 0 30 L 15 24 L 30 26 L 45 18 L 60 14 L 75 16 L 90 10 L 100 8 L 100 40 L 0 40 Z" fill="#5BC23B" opacity="0.12"/>
+              </svg>
+            </div>
+            <div class="dash-row">
+              <div class="dash-card"><div class="h">트리거</div><svg viewBox="0 0 30 20"><rect x="2" y="4" width="4" height="14" fill="#FFB930" rx="1"/><rect x="9" y="8" width="4" height="10" fill="#7FB8D9" rx="1"/><rect x="16" y="2" width="4" height="16" fill="#E65A4A" rx="1"/><rect x="23" y="10" width="4" height="8" fill="#A89BF5" rx="1"/></svg></div>
+              <div class="dash-card"><div class="h">CBT</div><svg viewBox="0 0 30 20"><circle cx="15" cy="11" r="7" fill="none" stroke="#E9F4DD" stroke-width="2.5"/><path d="M 15 4 A 7 7 0 0 1 21.5 13" fill="none" stroke="#5BC23B" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="arrow">대시보드 열기 →</div>
+      </a>
+    </div>
+
+    <footer>
+      <span>Prototype · 실 데이터 아님</span>
+      <a href="index.html">← 디자인 캔버스 (모든 변형 보기)</a>
+    </footer>
+  </div>
+</body>
+</html>
