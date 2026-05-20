@@ -2190,6 +2190,7 @@ Object.assign(window, { ScreenCOFlow, ScreenCOWarnings });
 
 const ITEMS = {
   color: [
+    { id: 'brown',  label: '카피바라', swatch: '#C8956A', locked: false },
     { id: 'green',  label: '연두',     swatch: '#7DD957', locked: false },
     { id: 'yellow', label: '병아리',   swatch: '#FFB930', locked: false },
     { id: 'blue',   label: '하늘',     swatch: '#7FB8D9', locked: false },
@@ -2345,42 +2346,91 @@ const CATEGORIES = [
 ];
 
 const DEFAULT_EQUIP = {
-  color: 'green',
-  tail: 'pink',
+  color: 'brown',
+  tail: 'fox',
   horn: 'gold',
   pattern: 'none',
   face: 'happy',
   hat: 'none',
 };
 
-// ── Character renderer with equipped items ──────────────────────────
-function DressedSoomi({ size, equip }) {
-  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#7DD957';
-  const mood = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
-  const tail = ITEMS.tail.find(t => t.id === equip.tail);
-  const horn = ITEMS.horn.find(h => h.id === equip.horn);
-  const pat  = ITEMS.pattern.find(p => p.id === equip.pattern);
-  const hat  = ITEMS.hat.find(h => h.id === equip.hat);
+// ── Capybara base SVG ───────────────────────────────────────────────
+function Capybara({ size = 180, mood = 'happy', accent = '#C8956A' }) {
+  const dk = '#3A1C00';
+  const eyes = {
+    happy:   <g><circle cx="116" cy="84" r="10" fill={dk}/><circle cx="119" cy="81" r="3" fill="white"/></g>,
+    chill:   <g><ellipse cx="116" cy="86" rx="10" ry="7" fill={dk}/><circle cx="119" cy="83" r="2.5" fill="white"/></g>,
+    sleepy:  <g><ellipse cx="116" cy="88" rx="10" ry="5" fill={dk}/><path d="M106 85 Q116 80 126 85" stroke={dk} strokeWidth="2.5" fill="none" strokeLinecap="round"/></g>,
+    worried: <g><circle cx="116" cy="84" r="9" fill={dk}/><circle cx="119" cy="81" r="2.5" fill="white"/><path d="M108 78 Q113 74 120 78" stroke={dk} strokeWidth="2" fill="none"/></g>,
+    proud:   <g><path d="M106 82 Q111 76 126 84" stroke={dk} strokeWidth="11" strokeLinecap="round" fill="none"/><path d="M106 82 Q111 76 126 84" stroke={dk} strokeWidth="7" strokeLinecap="round" fill="none"/><circle cx="119" cy="81" r="3" fill="white"/></g>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 210" style={{ filter: 'drop-shadow(0 6px 14px rgba(60,30,0,0.18))' }}>
+      <defs>
+        <radialGradient id={`cb-${accent.replace('#','')}`} cx="38%" cy="32%" r="70%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.3)"/>
+          <stop offset="55%" stopColor={accent} stopOpacity="0.95"/>
+          <stop offset="100%" stopColor={accent}/>
+        </radialGradient>
+      </defs>
+      {/* Body */}
+      <ellipse cx="100" cy="152" rx="62" ry="52" fill={`url(#cb-${accent.replace('#','')})`} stroke={dk} strokeWidth="2.5"/>
+      {/* Belly */}
+      <ellipse cx="100" cy="165" rx="40" ry="34" fill="rgba(255,230,190,0.55)"/>
+      {/* Head */}
+      <circle cx="100" cy="80" r="52" fill={`url(#cb-${accent.replace('#','')})`} stroke={dk} strokeWidth="2.5"/>
+      {/* Ears */}
+      <circle cx="70" cy="36" r="15" fill={accent} stroke={dk} strokeWidth="2.5"/>
+      <circle cx="130" cy="36" r="15" fill={accent} stroke={dk} strokeWidth="2.5"/>
+      <circle cx="70" cy="36" r="9" fill="rgba(255,175,155,0.65)"/>
+      <circle cx="130" cy="36" r="9" fill="rgba(255,175,155,0.65)"/>
+      {/* Snout */}
+      <ellipse cx="106" cy="103" rx="25" ry="19" fill="rgba(220,180,135,0.72)" stroke={dk} strokeWidth="1.5"/>
+      {/* Nostrils */}
+      <ellipse cx="97" cy="105" rx="4" ry="3.5" fill={dk}/>
+      <ellipse cx="115" cy="105" rx="4" ry="3.5" fill={dk}/>
+      {/* Eye */}
+      {eyes[mood] || eyes.happy}
+      {/* Cheeks */}
+      <rect x="72" y="90" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      <rect x="71" y="95.5" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      <rect x="72" y="101" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      {/* Smile */}
+      <path d="M92 117 q14 9 26 0" stroke={dk} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* Legs */}
+      <ellipse cx="64" cy="196" rx="20" ry="11" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="89" cy="200" rx="17" ry="9" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="113" cy="200" rx="17" ry="9" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="138" cy="196" rx="20" ry="11" fill={accent} stroke={dk} strokeWidth="2"/>
+      {/* Highlight */}
+      <ellipse cx="82" cy="72" rx="16" ry="10" fill="rgba(255,255,255,0.42)"/>
+    </svg>
+  );
+}
 
+// ── Character renderer with equipped items ──────────────────────────
+function DressedCapybara({ size, equip }) {
+  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#C8956A';
+  const mood  = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
+  const tail  = ITEMS.tail.find(t => t.id === equip.tail);
+  const horn  = ITEMS.horn.find(h => h.id === equip.horn);
+  const pat   = ITEMS.pattern.find(p => p.id === equip.pattern);
+  const hat   = ITEMS.hat.find(h => h.id === equip.hat);
   const s = size / 200;
   return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      {/* Tail behind body */}
+    <div style={{ position: 'relative', width: size, height: size * 1.05 }}>
       {tail && tail.preview ? (
-        <div style={{ position: 'absolute', right: -8 * s, bottom: 28 * s, zIndex: 0 }}>{tail.preview(color, s)}</div>
+        <div style={{ position: 'absolute', right: -10*s, bottom: 30*s, zIndex: 0 }}>{tail.preview(color, s)}</div>
       ) : null}
-      <Soomi size={size} mood={mood} accent={color}/>
-      {/* Pattern overlay on body */}
+      <Capybara size={size} mood={mood} accent={color}/>
       {pat && pat.preview ? (
-        <div style={{ position: 'absolute', left: 40*s, top: 80*s, width: 120*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 38*s, top: 82*s, width: 124*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
       ) : null}
-      {/* Horn on head */}
       {horn && horn.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 8*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 2*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
       ) : null}
-      {/* Hat on top */}
       {hat && hat.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -4*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -8*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
       ) : null}
     </div>
   );
@@ -2419,10 +2469,23 @@ function ScreenCharacter({ onNav = () => {} }) {
               <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em' }}>초록이</h2>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-3)' }}>· 27일째 함께</span>
             </div>
+            {/* XP Bar */}
+            <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.6)', borderRadius: 14, padding: '8px 12px', backdropFilter: 'blur(8px)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 7, background: '#FFEFC8', color: '#9A6A00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bolt" size={13}/></div>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>Lv.12</span>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-3)' }}>680 / 1000 XP</span>
+              </div>
+              <div style={{ height: 7, borderRadius: 999, background: 'rgba(15,42,30,0.1)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: '68%', background: 'linear-gradient(90deg, #FFB930, #FF7A2E)', borderRadius: 999, transition: 'width .6s ease' }}/>
+              </div>
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6, position: 'relative', zIndex: 1 }}>
-            <div className="ps-anim-bob"><DressedSoomi size={200} equip={equip}/></div>
+            <div className="ps-anim-bob"><DressedCapybara size={200} equip={equip}/></div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1, marginTop: 4, display: 'flex', gap: 8 }}>
@@ -2451,16 +2514,15 @@ function ScreenCharacter({ onNav = () => {} }) {
         {/* Tabs */}
         <div style={{ padding: '16px 20px 0' }}>
           <div style={{ display: 'flex', gap: 4 }}>
-            {[{id:'mine',label:'꾸미기'},{id:'dex',label:'도감'},{id:'family',label:'가족'}].map(t => (
+            {[{id:'mine',label:'꾸미기'},{id:'dex',label:'도감'}].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} className="ps-tap" style={{ height: 34, padding: '0 14px', borderRadius: 999, background: tab === t.id ? 'var(--ink)' : 'white', color: tab === t.id ? 'white' : 'var(--ink-2)', border: '1px solid ' + (tab === t.id ? 'var(--ink)' : 'var(--line)'), fontWeight: 700, fontSize: 13 }}>{t.label}</button>
             ))}
           </div>
         </div>
 
         <div style={{ padding: '12px 20px 110px' }}>
-          {tab === 'mine'   && <DressUpGrid equip={equip} onOpenCat={setPickerCat}/>}
-          {tab === 'dex'    && <CategorizedDex equip={equip}/>}
-          {tab === 'family' && <FamilyView/>}
+          {tab === 'mine' && <DressUpGrid equip={equip} onOpenCat={setPickerCat}/>}
+          {tab === 'dex'  && <CategorizedDex equip={equip}/>}
         </div>
       </div>
       <TabBar active="char" onChange={onNav}/>
@@ -2543,7 +2605,7 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
         <div className="ps-sheet-handle"/>
         {/* Live preview */}
         <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 18, padding: 14 }}>
-          <div className="ps-anim-bob-sm"><DressedSoomi size={120} equip={equip}/></div>
+          <div className="ps-anim-bob-sm"><DressedCapybara size={120} equip={equip}/></div>
         </div>
 
         {/* Category tabs */}
@@ -2638,58 +2700,6 @@ function CategorizedDex({ equip }) {
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-// ── Family view ─────────────────────────────────────────────────────
-function FamilyView() {
-  return (
-    <div>
-      <h3 className="ps-h3" style={{ marginTop: 4 }}>가족</h3>
-      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>다른 사용자와 결혼해 2세를 만들어요</div>
-
-      <div style={{ marginTop: 14, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 28 }}>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={72} mood="happy" accent="#7DD957"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>초록이</div>
-            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>나의 캐릭터</div>
-          </div>
-          <div style={{ paddingBottom: 24 }}>
-            <svg width="32" height="32" viewBox="0 0 24 24"><path d="M12 20s-7-4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6-7 10-7 10Z" fill="#E65A4A"/></svg>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={72} mood="happy" accent="#FF9DBF"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>체리</div>
-            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>배우자 캐릭터 · 41일째</div>
-          </div>
-        </div>
-
-        <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: 8 }}>
-          <path d="M50 0 L 50 20 L 150 20 L 150 0 M100 20 L 100 40" stroke="var(--line)" strokeWidth="2" fill="none"/>
-        </svg>
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: -8 }}>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={64} mood="chill" accent="#C9F08D"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 2 }}>봄이 🌱</div>
-            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>레벨 4 · 첫째</div>
-          </div>
-          <div style={{ textAlign: 'center', opacity: .6 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 999, border: '2px dashed var(--ink-4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)' }}><Icon name="plus" size={24}/></div>
-            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 4, color: 'var(--ink-3)' }}>둘째 입양</div>
-            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>3,000P 필요</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 12, background: 'var(--green-50)', borderRadius: 16, padding: 14, display: 'flex', gap: 10 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'white', color: 'var(--green-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="sparkle" size={18}/></div>
-        <div style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.5 }}>
-          <strong>봄이</strong>는 부모를 닮은 외형으로 랜덤 생성됐어요. 동일하게 성장·육성할 수 있고, 본체 캐릭터를 다 키운 뒤에도 함께해요.
-        </div>
       </div>
     </div>
   );
