@@ -1015,7 +1015,7 @@ function OnboardingResult({ answers, onReset, onComplete }) {
       <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
         {/* Hero */}
         <div style={{ textAlign: 'center', paddingTop: 4 }}>
-          <div className="ps-anim-bob"><Soomi size={150} mood="proud" accent={top?.color}/></div>
+          <div className="ps-anim-bob"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 150, height: 150, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
           <div style={{ marginTop: -6, fontSize: 12, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 흡연 패턴</div>
           <h1 className="ps-h1" style={{ marginTop: 8 }}>{top?.short} 중심형</h1>
           <div className="ps-muted" style={{ marginTop: 6, fontSize: 14, padding: '0 8px', lineHeight: 1.45 }}>{top?.insight}.</div>
@@ -1271,7 +1271,7 @@ function StepSocratic({ answer, setAnswer, onNext }) {
   return (
     <div className="ps-anim-fade-up">
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 18 }}>
-        <div className="ps-anim-bob-sm"><Soomi size={84} mood="chill" accent="#7FB8D9"/></div>
+        <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 84, height: 84, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
         <div style={{ flex: 1, background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--lung-blue)', letterSpacing: '.05em', textTransform: 'uppercase' }}>SOCRATIC · 3 / 3</div>
           <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35, letterSpacing: '-0.02em' }}>지금 흡연하면, 5분 뒤 당신은 어떤 모습일까요?</div>
@@ -1312,7 +1312,7 @@ function StepSocratic({ answer, setAnswer, onNext }) {
 function StepDone({ onReset, onComplete }) {
   return (
     <div className="ps-anim-fade-up" style={{ textAlign: 'center', padding: '40px 0 0' }}>
-      <div className="ps-anim-pop"><Soomi size={180} mood="proud"/></div>
+      <div className="ps-anim-pop"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 180, height: 180, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
       <div className="ps-eyebrow" style={{ marginTop: 8 }}>충동 넘기기 성공</div>
       <h1 className="ps-h1" style={{ marginTop: 8 }}>잘 버텼어요!</h1>
       <div className="ps-muted" style={{ fontSize: 14, marginTop: 8 }}>충동은 보통 3–5분이면 사라져요.<br/>한 번 더 폐가 회복할 시간을 벌었어요.</div>
@@ -2098,7 +2098,7 @@ function COResult({ onReset, onNav }) {
         </div>
 
         <div style={{ marginTop: 16, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-md)', border: '1.5px solid var(--green-200)', display: 'flex', gap: 14 }}>
-          <div className="ps-anim-bob-sm"><Soomi size={80} mood="proud"/></div>
+          <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 80, height: 80, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
           <div style={{ flex: 1 }}>
             <div className="ps-eyebrow">CBT 인지 재구성</div>
             <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4, lineHeight: 1.4 }}>"한 번도 안 피웠다"가 아니라,<br/>"내 폐가 한 번 더 회복할 시간"이에요.</div>
@@ -2162,7 +2162,7 @@ function ScreenCOWarnings({ onNav = () => {} }) {
             </div>
           </div>
           <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 14, display: 'flex', gap: 10 }}>
-            <div className="ps-anim-bob-sm"><Soomi size={56} mood="chill" accent="#7FB8D9"/></div>
+            <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 56, height: 56, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
             <div style={{ flex: 1, fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>
               "오늘은 어려운 하루였어요. <strong>실패는 데이터예요</strong> — 어떤 트리거가 있었는지 한 번만 기록해볼까요?"
               <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
