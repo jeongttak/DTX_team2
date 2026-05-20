@@ -2485,7 +2485,7 @@ function ScreenCharacter({ onNav = () => {} }) {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6, position: 'relative', zIndex: 1 }}>
-            <div className="ps-anim-bob"><DressedCapybara size={200} equip={equip}/></div>
+            <div className="ps-anim-bob"><img src="netlify-deploy/assets/capybara.png" alt="초록이" style={{ width: 200, height: 200, objectFit: "contain", filter: "drop-shadow(0 6px 14px rgba(60,30,0,0.18))" }}/></div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1, marginTop: 4, display: 'flex', gap: 8 }}>
@@ -2605,7 +2605,7 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
         <div className="ps-sheet-handle"/>
         {/* Live preview */}
         <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 18, padding: 14 }}>
-          <div className="ps-anim-bob-sm"><DressedCapybara size={120} equip={equip}/></div>
+          <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="초록이" style={{ width: 110, height: 110, objectFit: "contain" }}/></div>
         </div>
 
         {/* Category tabs */}
