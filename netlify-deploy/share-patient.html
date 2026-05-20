@@ -1711,9 +1711,9 @@ function ScreenMissions({ onNav = () => {} }) {
       { id: 'co',     icon: 'co',    iconBg: '#EBF4FB', iconFg: '#2A6FAA', title: '아침 호기 CO 측정',  sub: '오전 9시 인증 마감',       xp: 50, auto: true,  link: 'co'      },
       { id: 'water',  icon: 'water', iconBg: '#EBF4FB', iconFg: '#5AAACE', title: '물 8잔 마시기',      target: 8, unit: '잔',                                  xp: 30                                       },
       { id: 'breath', icon: 'wind',  iconBg: '#E5F8D0', iconFg: '#3FAA48', title: '4-7-8 심호흡 1회',   sub: '약 2분 소요',              xp: 20                                       },
-      { id: 'soc',    icon: 'note',  iconBg: '#F0E7FB', iconFg: '#6F44E2', title: 'CBT 소크라테스 질문', sub: '트리거 발생 시 자동 진행', xp: 40, auto: true,  link: 'trigger' },
+      { id: 'soc', icon: 'note', iconBg: '#F0E7FB', iconFg: '#6F44E2', title: '트리거 기록 + CBT 질문', sub: '충동 발생 시 자동 · 3단계 플로우', xp: 65, auto: true, link: 'trigger' },
       { id: 'walk',   icon: 'walk',  iconBg: '#FFEFC8', iconFg: '#A06A00', title: '저녁 산책 (동네 3바퀴)', target: 3, unit: '바퀴',                            xp: 35                                       },
-      { id: 'trig',   icon: 'bolt',  iconBg: '#FFE6E1', iconFg: '#E65A4A', title: '트리거 기록 1회',    sub: '충동 발생 시 자동',         xp: 25, auto: true,  link: 'trigger' },
+      
     ],
     weekly: [
       { id: 'w1', icon: 'trophy', iconBg: '#FFEFC8', iconFg: '#9A6A00', title: 'CO 7일 연속 측정',     sub: '5 / 7 일',  xp: 200, prog: 5/7,  auto: true, link: 'co'      },
