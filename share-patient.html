@@ -369,6 +369,7 @@
           <button data-route="warnings"><span class="dot"></span>CO 경고 3단계</button>
         </div>
       </div>
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#0F2A1E;color:white;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:14px;transition:opacity .15s;" onmouseover="this.style.opacity=.8" onmouseout="this.style.opacity=1">← 메인으로</a>
       <div class="footnote">
         프로토타입 · 실 데이터 아님<br/>
         의사용 화면은 <a href="netlify-deploy/share-doctor.html">의사 대시보드 →</a>
@@ -1015,7 +1016,7 @@ function OnboardingResult({ answers, onReset, onComplete }) {
       <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
         {/* Hero */}
         <div style={{ textAlign: 'center', paddingTop: 4 }}>
-          <div className="ps-anim-bob"><Soomi size={150} mood="proud" accent={top?.color}/></div>
+          <div className="ps-anim-bob"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 150, height: 150, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
           <div style={{ marginTop: -6, fontSize: 12, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 흡연 패턴</div>
           <h1 className="ps-h1" style={{ marginTop: 8 }}>{top?.short} 중심형</h1>
           <div className="ps-muted" style={{ marginTop: 6, fontSize: 14, padding: '0 8px', lineHeight: 1.45 }}>{top?.insight}.</div>
@@ -1271,7 +1272,7 @@ function StepSocratic({ answer, setAnswer, onNext }) {
   return (
     <div className="ps-anim-fade-up">
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 18 }}>
-        <div className="ps-anim-bob-sm"><Soomi size={84} mood="chill" accent="#7FB8D9"/></div>
+        <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 84, height: 84, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
         <div style={{ flex: 1, background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--lung-blue)', letterSpacing: '.05em', textTransform: 'uppercase' }}>SOCRATIC · 3 / 3</div>
           <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35, letterSpacing: '-0.02em' }}>지금 흡연하면, 5분 뒤 당신은 어떤 모습일까요?</div>
@@ -1312,7 +1313,7 @@ function StepSocratic({ answer, setAnswer, onNext }) {
 function StepDone({ onReset, onComplete }) {
   return (
     <div className="ps-anim-fade-up" style={{ textAlign: 'center', padding: '40px 0 0' }}>
-      <div className="ps-anim-pop"><Soomi size={180} mood="proud"/></div>
+      <div className="ps-anim-pop"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 180, height: 180, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
       <div className="ps-eyebrow" style={{ marginTop: 8 }}>충동 넘기기 성공</div>
       <h1 className="ps-h1" style={{ marginTop: 8 }}>잘 버텼어요!</h1>
       <div className="ps-muted" style={{ fontSize: 14, marginTop: 8 }}>충동은 보통 3–5분이면 사라져요.<br/>한 번 더 폐가 회복할 시간을 벌었어요.</div>
@@ -1461,7 +1462,7 @@ function ScreenHome({ onNav = () => {} }) {
           {/* Character + streak */}
           <div style={{ position: 'relative', textAlign: 'center', marginTop: 8, paddingBottom: 6 }}>
             <div style={{ position: 'relative', display: 'inline-block' }} className="ps-anim-bob">
-              <Soomi size={170} mood="happy" />
+              <img src="assets/capybara.png" alt="카피바라몬" style={{ width: 170, height: 170, objectFit: "contain", filter: "drop-shadow(0 8px 16px rgba(60,30,0,0.15))" }}/>
             </div>
             <div style={{ marginTop: 4, position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.06em', textTransform: 'uppercase' }}>5일째 깨끗한 숨</div>
@@ -1486,20 +1487,25 @@ function ScreenHome({ onNav = () => {} }) {
             <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 36, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>대응</button>
           </div>
 
-          {/* Savings */}
-          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: 20, color: 'white', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(125,217,87,.18)' }}/>
-            <div style={{ position: 'absolute', right: 14, bottom: 14, opacity: .25 }}><Icon name="leaf" size={48} color="#A5E66B"/></div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#A5E66B', letterSpacing: '.05em', textTransform: 'uppercase' }}>지금까지 절약한 금액</div>
-            <div style={{ fontSize: 38, fontWeight: 800, marginTop: 6, letterSpacing: '-0.025em' }}>₩ 121,500</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.7)', marginTop: 2 }}>
-              하루 ₩4,500 × 27일 · <span style={{ color: '#A5E66B', fontWeight: 700 }}>+₩4,500 오늘</span>
+{/* Savings */}
+          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: '18px 20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', right: -20, top: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(125,217,87,.15)' }}/>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="wallet" size={14} color="#A5E66B"/>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#A5E66B', letterSpacing: '.05em', textTransform: 'uppercase' }}>절약한 금액</div>
             </div>
-            {/* small monthly bars */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 14, height: 28 }}>
-              {[8, 14, 18, 22, 26, 30, 27].map((h, i) => (
-                <div key={i} style={{ flex: 1, height: h + 'px', background: i === 6 ? '#A5E66B' : 'rgba(255,255,255,.25)', borderRadius: 4 }}/>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+              <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.03em' }}>121,500<span style={{ fontSize: 20, fontWeight: 700, marginLeft: 3 }}>원</span></div>
+              <div style={{ fontSize: 40, lineHeight: 1 }}>💰</div>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', marginTop: 2 }}>27일 × 4,500원 (한 갑 기준)</div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700 }}>
+                <span>☕</span> 아메리카노 40잔
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 999, padding: '6px 14px', fontSize: 12, fontWeight: 700 }}>
+                <span>🍗</span> 치킨 6마리
+              </div>
             </div>
           </div>
 
@@ -1711,9 +1717,9 @@ function ScreenMissions({ onNav = () => {} }) {
       { id: 'co',     icon: 'co',    iconBg: '#EBF4FB', iconFg: '#2A6FAA', title: '아침 호기 CO 측정',  sub: '오전 9시 인증 마감',       xp: 50, auto: true,  link: 'co'      },
       { id: 'water',  icon: 'water', iconBg: '#EBF4FB', iconFg: '#5AAACE', title: '물 8잔 마시기',      target: 8, unit: '잔',                                  xp: 30                                       },
       { id: 'breath', icon: 'wind',  iconBg: '#E5F8D0', iconFg: '#3FAA48', title: '4-7-8 심호흡 1회',   sub: '약 2분 소요',              xp: 20                                       },
-      { id: 'soc',    icon: 'note',  iconBg: '#F0E7FB', iconFg: '#6F44E2', title: 'CBT 소크라테스 질문', sub: '트리거 발생 시 자동 진행', xp: 40, auto: true,  link: 'trigger' },
+      { id: 'soc', icon: 'note', iconBg: '#F0E7FB', iconFg: '#6F44E2', title: '트리거 기록 + CBT 질문', sub: '충동 발생 시 자동 · 3단계 플로우', xp: 65, auto: true, link: 'trigger' },
       { id: 'walk',   icon: 'walk',  iconBg: '#FFEFC8', iconFg: '#A06A00', title: '저녁 산책 (동네 3바퀴)', target: 3, unit: '바퀴',                            xp: 35                                       },
-      { id: 'trig',   icon: 'bolt',  iconBg: '#FFE6E1', iconFg: '#E65A4A', title: '트리거 기록 1회',    sub: '충동 발생 시 자동',         xp: 25, auto: true,  link: 'trigger' },
+      
     ],
     weekly: [
       { id: 'w1', icon: 'trophy', iconBg: '#FFEFC8', iconFg: '#9A6A00', title: 'CO 7일 연속 측정',     sub: '5 / 7 일',  xp: 200, prog: 5/7,  auto: true, link: 'co'      },
@@ -2098,7 +2104,7 @@ function COResult({ onReset, onNav }) {
         </div>
 
         <div style={{ marginTop: 16, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-md)', border: '1.5px solid var(--green-200)', display: 'flex', gap: 14 }}>
-          <div className="ps-anim-bob-sm"><Soomi size={80} mood="proud"/></div>
+          <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 80, height: 80, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
           <div style={{ flex: 1 }}>
             <div className="ps-eyebrow">CBT 인지 재구성</div>
             <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4, lineHeight: 1.4 }}>"한 번도 안 피웠다"가 아니라,<br/>"내 폐가 한 번 더 회복할 시간"이에요.</div>
@@ -2162,7 +2168,7 @@ function ScreenCOWarnings({ onNav = () => {} }) {
             </div>
           </div>
           <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 14, display: 'flex', gap: 10 }}>
-            <div className="ps-anim-bob-sm"><Soomi size={56} mood="chill" accent="#7FB8D9"/></div>
+            <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 56, height: 56, objectFit: "contain", filter: "drop-shadow(0 4px 10px rgba(60,30,0,0.15))" }}/></div>
             <div style={{ flex: 1, fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>
               "오늘은 어려운 하루였어요. <strong>실패는 데이터예요</strong> — 어떤 트리거가 있었는지 한 번만 기록해볼까요?"
               <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
@@ -2190,6 +2196,7 @@ Object.assign(window, { ScreenCOFlow, ScreenCOWarnings });
 
 const ITEMS = {
   color: [
+    { id: 'brown',  label: '카피바라', swatch: '#C8956A', locked: false },
     { id: 'green',  label: '연두',     swatch: '#7DD957', locked: false },
     { id: 'yellow', label: '병아리',   swatch: '#FFB930', locked: false },
     { id: 'blue',   label: '하늘',     swatch: '#7FB8D9', locked: false },
@@ -2345,42 +2352,91 @@ const CATEGORIES = [
 ];
 
 const DEFAULT_EQUIP = {
-  color: 'green',
-  tail: 'pink',
+  color: 'brown',
+  tail: 'fox',
   horn: 'gold',
   pattern: 'none',
   face: 'happy',
   hat: 'none',
 };
 
-// ── Character renderer with equipped items ──────────────────────────
-function DressedSoomi({ size, equip }) {
-  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#7DD957';
-  const mood = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
-  const tail = ITEMS.tail.find(t => t.id === equip.tail);
-  const horn = ITEMS.horn.find(h => h.id === equip.horn);
-  const pat  = ITEMS.pattern.find(p => p.id === equip.pattern);
-  const hat  = ITEMS.hat.find(h => h.id === equip.hat);
+// ── Capybara base SVG ───────────────────────────────────────────────
+function Capybara({ size = 180, mood = 'happy', accent = '#C8956A' }) {
+  const dk = '#3A1C00';
+  const eyes = {
+    happy:   <g><circle cx="116" cy="84" r="10" fill={dk}/><circle cx="119" cy="81" r="3" fill="white"/></g>,
+    chill:   <g><ellipse cx="116" cy="86" rx="10" ry="7" fill={dk}/><circle cx="119" cy="83" r="2.5" fill="white"/></g>,
+    sleepy:  <g><ellipse cx="116" cy="88" rx="10" ry="5" fill={dk}/><path d="M106 85 Q116 80 126 85" stroke={dk} strokeWidth="2.5" fill="none" strokeLinecap="round"/></g>,
+    worried: <g><circle cx="116" cy="84" r="9" fill={dk}/><circle cx="119" cy="81" r="2.5" fill="white"/><path d="M108 78 Q113 74 120 78" stroke={dk} strokeWidth="2" fill="none"/></g>,
+    proud:   <g><path d="M106 82 Q111 76 126 84" stroke={dk} strokeWidth="11" strokeLinecap="round" fill="none"/><path d="M106 82 Q111 76 126 84" stroke={dk} strokeWidth="7" strokeLinecap="round" fill="none"/><circle cx="119" cy="81" r="3" fill="white"/></g>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 210" style={{ filter: 'drop-shadow(0 6px 14px rgba(60,30,0,0.18))' }}>
+      <defs>
+        <radialGradient id={`cb-${accent.replace('#','')}`} cx="38%" cy="32%" r="70%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.3)"/>
+          <stop offset="55%" stopColor={accent} stopOpacity="0.95"/>
+          <stop offset="100%" stopColor={accent}/>
+        </radialGradient>
+      </defs>
+      {/* Body */}
+      <ellipse cx="100" cy="152" rx="62" ry="52" fill={`url(#cb-${accent.replace('#','')})`} stroke={dk} strokeWidth="2.5"/>
+      {/* Belly */}
+      <ellipse cx="100" cy="165" rx="40" ry="34" fill="rgba(255,230,190,0.55)"/>
+      {/* Head */}
+      <circle cx="100" cy="80" r="52" fill={`url(#cb-${accent.replace('#','')})`} stroke={dk} strokeWidth="2.5"/>
+      {/* Ears */}
+      <circle cx="70" cy="36" r="15" fill={accent} stroke={dk} strokeWidth="2.5"/>
+      <circle cx="130" cy="36" r="15" fill={accent} stroke={dk} strokeWidth="2.5"/>
+      <circle cx="70" cy="36" r="9" fill="rgba(255,175,155,0.65)"/>
+      <circle cx="130" cy="36" r="9" fill="rgba(255,175,155,0.65)"/>
+      {/* Snout */}
+      <ellipse cx="106" cy="103" rx="25" ry="19" fill="rgba(220,180,135,0.72)" stroke={dk} strokeWidth="1.5"/>
+      {/* Nostrils */}
+      <ellipse cx="97" cy="105" rx="4" ry="3.5" fill={dk}/>
+      <ellipse cx="115" cy="105" rx="4" ry="3.5" fill={dk}/>
+      {/* Eye */}
+      {eyes[mood] || eyes.happy}
+      {/* Cheeks */}
+      <rect x="72" y="90" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      <rect x="71" y="95.5" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      <rect x="72" y="101" width="11" height="3" rx="1.5" fill="#FF9DBF" opacity="0.8"/>
+      {/* Smile */}
+      <path d="M92 117 q14 9 26 0" stroke={dk} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* Legs */}
+      <ellipse cx="64" cy="196" rx="20" ry="11" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="89" cy="200" rx="17" ry="9" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="113" cy="200" rx="17" ry="9" fill={accent} stroke={dk} strokeWidth="2"/>
+      <ellipse cx="138" cy="196" rx="20" ry="11" fill={accent} stroke={dk} strokeWidth="2"/>
+      {/* Highlight */}
+      <ellipse cx="82" cy="72" rx="16" ry="10" fill="rgba(255,255,255,0.42)"/>
+    </svg>
+  );
+}
 
+// ── Character renderer with equipped items ──────────────────────────
+function DressedCapybara({ size, equip }) {
+  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#C8956A';
+  const mood  = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
+  const tail  = ITEMS.tail.find(t => t.id === equip.tail);
+  const horn  = ITEMS.horn.find(h => h.id === equip.horn);
+  const pat   = ITEMS.pattern.find(p => p.id === equip.pattern);
+  const hat   = ITEMS.hat.find(h => h.id === equip.hat);
   const s = size / 200;
   return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      {/* Tail behind body */}
+    <div style={{ position: 'relative', width: size, height: size * 1.05 }}>
       {tail && tail.preview ? (
-        <div style={{ position: 'absolute', right: -8 * s, bottom: 28 * s, zIndex: 0 }}>{tail.preview(color, s)}</div>
+        <div style={{ position: 'absolute', right: -10*s, bottom: 30*s, zIndex: 0 }}>{tail.preview(color, s)}</div>
       ) : null}
-      <Soomi size={size} mood={mood} accent={color}/>
-      {/* Pattern overlay on body */}
+      <Capybara size={size} mood={mood} accent={color}/>
       {pat && pat.preview ? (
-        <div style={{ position: 'absolute', left: 40*s, top: 80*s, width: 120*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 38*s, top: 82*s, width: 124*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
       ) : null}
-      {/* Horn on head */}
       {horn && horn.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 8*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 2*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
       ) : null}
-      {/* Hat on top */}
       {hat && hat.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -4*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -8*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
       ) : null}
     </div>
   );
@@ -2416,13 +2472,26 @@ function ScreenCharacter({ onNav = () => {} }) {
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="ps-eyebrow">진화 단계 · 3 / 5</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em' }}>초록이</h2>
+              <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em' }}>카피바라몬</h2>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-3)' }}>· 27일째 함께</span>
+            </div>
+            {/* XP Bar */}
+            <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.6)', borderRadius: 14, padding: '8px 12px', backdropFilter: 'blur(8px)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 7, background: '#FFEFC8', color: '#9A6A00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bolt" size={13}/></div>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-2)' }}>Lv.12</span>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-3)' }}>680 / 1000 XP</span>
+              </div>
+              <div style={{ height: 7, borderRadius: 999, background: 'rgba(15,42,30,0.1)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: '68%', background: 'linear-gradient(90deg, #FFB930, #FF7A2E)', borderRadius: 999, transition: 'width .6s ease' }}/>
+              </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6, position: 'relative', zIndex: 1 }}>
-            <div className="ps-anim-bob"><DressedSoomi size={200} equip={equip}/></div>
+            <div className="ps-anim-bob"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 200, height: 200, objectFit: "contain", filter: "drop-shadow(0 6px 14px rgba(60,30,0,0.18))" }}/></div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1, marginTop: 4, display: 'flex', gap: 8 }}>
@@ -2451,16 +2520,15 @@ function ScreenCharacter({ onNav = () => {} }) {
         {/* Tabs */}
         <div style={{ padding: '16px 20px 0' }}>
           <div style={{ display: 'flex', gap: 4 }}>
-            {[{id:'mine',label:'꾸미기'},{id:'dex',label:'도감'},{id:'family',label:'가족'}].map(t => (
+            {[{id:'mine',label:'꾸미기'},{id:'dex',label:'도감'}].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} className="ps-tap" style={{ height: 34, padding: '0 14px', borderRadius: 999, background: tab === t.id ? 'var(--ink)' : 'white', color: tab === t.id ? 'white' : 'var(--ink-2)', border: '1px solid ' + (tab === t.id ? 'var(--ink)' : 'var(--line)'), fontWeight: 700, fontSize: 13 }}>{t.label}</button>
             ))}
           </div>
         </div>
 
         <div style={{ padding: '12px 20px 110px' }}>
-          {tab === 'mine'   && <DressUpGrid equip={equip} onOpenCat={setPickerCat}/>}
-          {tab === 'dex'    && <CategorizedDex equip={equip}/>}
-          {tab === 'family' && <FamilyView/>}
+          {tab === 'mine' && <DressUpGrid equip={equip} onOpenCat={setPickerCat}/>}
+          {tab === 'dex'  && <CategorizedDex equip={equip}/>}
         </div>
       </div>
       <TabBar active="char" onChange={onNav}/>
@@ -2543,7 +2611,7 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
         <div className="ps-sheet-handle"/>
         {/* Live preview */}
         <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 18, padding: 14 }}>
-          <div className="ps-anim-bob-sm"><DressedSoomi size={120} equip={equip}/></div>
+          <div className="ps-anim-bob-sm"><img src="netlify-deploy/assets/capybara.png" alt="카피바라몬" style={{ width: 110, height: 110, objectFit: "contain" }}/></div>
         </div>
 
         {/* Category tabs */}
@@ -2638,58 +2706,6 @@ function CategorizedDex({ equip }) {
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-// ── Family view ─────────────────────────────────────────────────────
-function FamilyView() {
-  return (
-    <div>
-      <h3 className="ps-h3" style={{ marginTop: 4 }}>가족</h3>
-      <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4 }}>다른 사용자와 결혼해 2세를 만들어요</div>
-
-      <div style={{ marginTop: 14, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 28 }}>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={72} mood="happy" accent="#7DD957"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>초록이</div>
-            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>나의 캐릭터</div>
-          </div>
-          <div style={{ paddingBottom: 24 }}>
-            <svg width="32" height="32" viewBox="0 0 24 24"><path d="M12 20s-7-4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6-7 10-7 10Z" fill="#E65A4A"/></svg>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={72} mood="happy" accent="#FF9DBF"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 4 }}>체리</div>
-            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>배우자 캐릭터 · 41일째</div>
-          </div>
-        </div>
-
-        <svg width="100%" height="40" viewBox="0 0 200 40" style={{ marginTop: 8 }}>
-          <path d="M50 0 L 50 20 L 150 20 L 150 0 M100 20 L 100 40" stroke="var(--line)" strokeWidth="2" fill="none"/>
-        </svg>
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: -8 }}>
-          <div style={{ textAlign: 'center' }}>
-            <Soomi size={64} mood="chill" accent="#C9F08D"/>
-            <div style={{ fontSize: 11, fontWeight: 800, marginTop: 2 }}>봄이 🌱</div>
-            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>레벨 4 · 첫째</div>
-          </div>
-          <div style={{ textAlign: 'center', opacity: .6 }}>
-            <div style={{ width: 64, height: 64, borderRadius: 999, border: '2px dashed var(--ink-4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)' }}><Icon name="plus" size={24}/></div>
-            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 4, color: 'var(--ink-3)' }}>둘째 입양</div>
-            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>3,000P 필요</div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 12, background: 'var(--green-50)', borderRadius: 16, padding: 14, display: 'flex', gap: 10 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'white', color: 'var(--green-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="sparkle" size={18}/></div>
-        <div style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.5 }}>
-          <strong>봄이</strong>는 부모를 닮은 외형으로 랜덤 생성됐어요. 동일하게 성장·육성할 수 있고, 본체 캐릭터를 다 키운 뒤에도 함께해요.
-        </div>
       </div>
     </div>
   );
