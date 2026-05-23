@@ -1370,6 +1370,7 @@ const homeStyles = {
 
 function ScreenHome({ onNav = () => {} }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [gpsAlert, setGpsAlert] = React.useState(true);
   return (
     <div className="ps-screen" data-screen-label="03 홈">
       <div className="ps-content scroll" style={{ padding: 0 }}>
@@ -1474,6 +1475,24 @@ function ScreenHome({ onNav = () => {} }) {
 
         {/* Content below hero */}
         <div style={{ padding: '18px 20px 0' }}>
+
+          {/* GPS 위치 기반 트리거 감지 배너 */}
+          {gpsAlert && (
+            <div className="ps-anim-fade-up" style={{ marginBottom: 14, background: 'linear-gradient(135deg, #1A1A2E 0%, #16213E 100%)', borderRadius: 20, padding: 14, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(125,217,87,.3)', position: 'relative' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(125,217,87,.15)', border: '1px solid rgba(125,217,87,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 22 }}>📍</span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#A5E66B', letterSpacing: '.06em', textTransform: 'uppercase' }}>GPS 위치 감지됨</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginTop: 2 }}>회사 건물 인근 흡연 구역 50m</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.55)', marginTop: 2 }}>이 시간대 충동 위험도 높음 · 오후 2:22</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                <button onClick={() => { setGpsAlert(false); onNav('trigger'); }} className="ps-tap" style={{ height: 32, padding: '0 12px', borderRadius: 999, background: '#A5E66B', color: '#0F2A1E', border: 'none', fontWeight: 800, fontSize: 12 }}>대응</button>
+                <button onClick={() => setGpsAlert(false)} className="ps-tap" style={{ height: 24, padding: '0 10px', borderRadius: 999, background: 'rgba(255,255,255,.1)', color: 'rgba(255,255,255,.6)', border: 'none', fontWeight: 700, fontSize: 10 }}>닫기</button>
+              </div>
+            </div>
+          )}
 
           {/* Streak card — new */}
           <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
