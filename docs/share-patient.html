@@ -368,6 +368,7 @@
           <button data-route="trigger"><span class="dot"></span>트리거 플로우</button>
           <button data-route="warnings"><span class="dot"></span>CO 경고 3단계</button>
           <button data-route="smartalert"><span class="dot"></span>스마트 알림 (시뮬)</button>
+          <button data-route="mi"><span class="dot"></span>MI 동기강화 상담</button>
         </div>
       </div>
       <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#0F2A1E;color:white;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:14px;transition:opacity .15s;" onmouseover="this.style.opacity=.8" onmouseout="this.style.opacity=1">← 메인으로</a>
@@ -3409,6 +3410,250 @@ function ScreenSmartAlert({ onNav = () => {} }) {
 
 Object.assign(window, { ScreenSmartAlert });
 
+// ── MI 동기강화상담 ────────────────────────────────────────────────
+function ScreenMI({ onNav = () => {} }) {
+  const [step, setStep] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+
+  const flow = [
+    {
+      type: 'intro',
+      soomi: '안녕하세요. 요즘 금연이 힘드신가요? 판단 없이 솔직하게 이야기해요.',
+      label: '동기강화 상담 · MI',
+    },
+    {
+      type: 'scale',
+      question: '지금 이 순간, 금연을 계속하고 싶은 마음이 얼마나 되나요?',
+      key: 'motivation',
+      low: '전혀 없음',
+      high: '매우 강함',
+    },
+    {
+      type: 'openq',
+      question: '금연을 계속하고 싶은 이유가 있다면, 가장 중요한 것 하나만 말해볼 수 있어요?',
+      key: 'reason',
+      placeholder: '예) 건강이 걱정돼서요 / 가족 때문에…',
+      soomi: '어떤 이유도 괜찮아요. 작은 것도 충분해요 😊',
+    },
+    {
+      type: 'ambivalence',
+      question: '금연이 어렵게 느껴지는 이유도 있을 거예요. 솔직히 말해줄 수 있어요?',
+      key: 'barrier',
+      placeholder: '예) 스트레스 받으면 너무 피우고 싶어요…',
+      soomi: '그 마음도 완전히 자연스러운 거예요.',
+    },
+    {
+      type: 'reflect',
+    },
+    {
+      type: 'commitment',
+      question: '오늘 딱 한 가지만 시도해본다면, 어떤 걸 해볼 수 있을까요?',
+      key: 'action',
+      options: ['충동 오면 3분만 참기', '물 한 컵 마시기', '산책 5분', '소크라테스 질문 해보기', '직접 입력…'],
+    },
+    {
+      type: 'done',
+    },
+  ];
+
+  const cur = flow[step];
+  const motivScore = answers.motivation || 5;
+
+  const next = (val) => {
+    if (val !== undefined) setAnswers(a => ({ ...a, [cur.key]: val }));
+    setStep(s => Math.min(s + 1, flow.length - 1));
+  };
+
+  return (
+    <div className="ps-screen" data-screen-label="MI 동기강화상담" style={{ background: 'linear-gradient(180deg, #EBF4FB 0%, #F2FBE6 50%, #FFFFFF 100%)' }}>
+      <StatusBar />
+      <div className="ps-content scroll" style={{ paddingBottom: 30 }}>
+
+        {/* 헤더 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <button onClick={() => onNav('home')} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="chev-l" size={18}/>
+          </button>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--lung-blue)', fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase' }}>동기강화상담 · MI</div>
+            <div style={{ fontSize: 16, fontWeight: 800, marginTop: 2 }}>다시 마음 잡기</div>
+          </div>
+          {step < flow.length - 1 && step > 0 && (
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+              {flow.map((_, i) => i > 0 && i < flow.length - 1 && (
+                <div key={i} style={{ width: i === step ? 20 : 6, height: 6, borderRadius: 999, background: i <= step ? 'var(--lung-blue)' : 'var(--line)', transition: 'all .3s' }}/>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Soomi 말풍선 */}
+        {(cur.soomi || cur.type === 'intro') && (
+          <div style={{ display: 'flex', gap: 12, marginBottom: 18 }} className="ps-anim-fade-up">
+            <div className="ps-anim-bob-sm" style={{ flexShrink: 0 }}>
+              <img src="assets/capybara.png" alt="카피바라몬" style={{ width: 64, height: 64, objectFit: 'contain' }}/>
+            </div>
+            <div style={{ background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)', flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--lung-blue)', letterSpacing: '.04em', marginBottom: 4 }}>카피바라몬</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.5 }}>
+                {cur.type === 'intro' ? cur.soomi : cur.soomi}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* intro */}
+        {cur.type === 'intro' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+                MI(동기강화상담)는 판단하지 않아요. 금연을 강요하지도 않아요.<br/>
+                지금 마음 상태 그대로 대화하면서 <strong>스스로 이유를 찾아가는 과정</strong>이에요.
+              </div>
+            </div>
+            <button onClick={() => next()} className="ps-cta green ps-tap" style={{ height: 52 }}>
+              시작할게요 <Icon name="arrow-r" size={18} color="white"/>
+            </button>
+          </div>
+        )}
+
+        {/* scale */}
+        {cur.type === 'scale' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ background: 'white', borderRadius: 22, padding: 20, boxShadow: 'var(--shadow-md)', marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.4, marginBottom: 20 }}>{cur.question}</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  <button key={n} onClick={() => next(n)} className="ps-tap" style={{ flex: 1, height: 48, borderRadius: 12, border: '1.5px solid var(--line)', background: 'white', fontWeight: 800, fontSize: 14, color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{n}</button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-3)', marginTop: 8, fontWeight: 600 }}>
+                <span>{cur.low}</span><span>{cur.high}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* openq */}
+        {cur.type === 'openq' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ background: 'white', borderRadius: 22, padding: 20, boxShadow: 'var(--shadow-md)', marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.4, marginBottom: 14 }}>{cur.question}</div>
+              <textarea defaultValue={answers[cur.key] || ''} onChange={e => setAnswers(a => ({ ...a, [cur.key]: e.target.value }))}
+                rows={3} placeholder={cur.placeholder}
+                style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 14, padding: '12px 14px', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'none', color: 'var(--ink)' }}/>
+            </div>
+            <button onClick={() => next(answers[cur.key])} className="ps-cta green ps-tap" style={{ height: 52 }}>다음 <Icon name="arrow-r" size={18} color="white"/></button>
+            <button onClick={() => next('(건너뜀)')} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 8, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+          </div>
+        )}
+
+        {/* ambivalence */}
+        {cur.type === 'ambivalence' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ background: 'white', borderRadius: 22, padding: 20, boxShadow: 'var(--shadow-md)', marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.4, marginBottom: 14 }}>{cur.question}</div>
+              <textarea defaultValue={answers[cur.key] || ''} onChange={e => setAnswers(a => ({ ...a, [cur.key]: e.target.value }))}
+                rows={3} placeholder={cur.placeholder}
+                style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 14, padding: '12px 14px', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'none', color: 'var(--ink)' }}/>
+            </div>
+            <button onClick={() => next(answers[cur.key])} className="ps-cta green ps-tap" style={{ height: 52 }}>다음 <Icon name="arrow-r" size={18} color="white"/></button>
+            <button onClick={() => next('(건너뜀)')} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 8, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+          </div>
+        )}
+
+        {/* reflect — MI 핵심: 양가감정 반영 */}
+        {cur.type === 'reflect' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <div className="ps-anim-bob-sm" style={{ flexShrink: 0 }}>
+                <img src="assets/capybara.png" alt="카피바라몬" style={{ width: 64, height: 64, objectFit: 'contain' }}/>
+              </div>
+              <div style={{ background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)', flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--lung-blue)', marginBottom: 6 }}>들어보니까요…</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.6 }}>
+                  금연을 원하는 이유도 있고, 힘든 이유도 있군요.<br/>
+                  <strong>그 두 마음이 동시에 존재하는 건 완전히 자연스러운 거예요.</strong>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+              <div style={{ background: '#E5F8D0', borderRadius: 18, padding: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--green-700)', marginBottom: 6 }}>💚 하고 싶은 이유</div>
+                <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 600, lineHeight: 1.5 }}>{answers.reason && answers.reason !== '(건너뜀)' ? answers.reason : '건강·가족·미래를 위해서'}</div>
+              </div>
+              <div style={{ background: '#EBF4FB', borderRadius: 18, padding: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#2A6FAA', marginBottom: 6 }}>💙 힘든 이유</div>
+                <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 600, lineHeight: 1.5 }}>{answers.barrier && answers.barrier !== '(건너뜀)' ? answers.barrier : '스트레스 받을 때 너무 힘들어서'}</div>
+              </div>
+            </div>
+            <div style={{ background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)', marginBottom: 16, borderLeft: '4px solid var(--lung-blue)' }}>
+              <div style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.6 }}>
+                동기 점수 <strong style={{ color: motivScore >= 7 ? 'var(--green-700)' : motivScore >= 4 ? '#F2A93B' : '#E65A4A' }}>{motivScore}/10</strong>이라고 하셨는데, 그것만으로도 충분한 출발점이에요. 지금 딱 하나만 해볼까요?
+              </div>
+            </div>
+            <button onClick={() => next()} className="ps-cta green ps-tap" style={{ height: 52 }}>
+              네, 한 가지만요 <Icon name="arrow-r" size={18} color="white"/>
+            </button>
+          </div>
+        )}
+
+        {/* commitment */}
+        {cur.type === 'commitment' && (
+          <div className="ps-anim-fade-up">
+            <div style={{ background: 'white', borderRadius: 22, padding: 20, boxShadow: 'var(--shadow-md)', marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.4, marginBottom: 16 }}>{cur.question}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {cur.options.map((opt, i) => (
+                  <button key={i} onClick={() => next(opt)} className="ps-tap" style={{ height: 48, borderRadius: 14, background: 'var(--green-50)', border: '1.5px solid var(--green-200)', color: 'var(--ink)', fontWeight: 700, fontSize: 13, textAlign: 'left', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ width: 22, height: 22, borderRadius: 7, background: 'var(--green-500)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* done */}
+        {cur.type === 'done' && (
+          <div className="ps-anim-fade-up" style={{ textAlign: 'center', paddingTop: 20 }}>
+            <div className="ps-anim-pop">
+              <img src="assets/capybara.png" alt="카피바라몬" style={{ width: 160, height: 160, objectFit: 'contain' }}/>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--lung-blue)', letterSpacing: '.05em', marginTop: 8 }}>상담 완료</div>
+            <h1 className="ps-h1" style={{ marginTop: 6 }}>잘하셨어요!</h1>
+            <div style={{ fontSize: 14, color: 'var(--ink-2)', marginTop: 8, lineHeight: 1.6 }}>
+              오늘 스스로 이유를 찾고,<br/>한 가지를 선택했어요.<br/>그게 금연의 시작이에요.
+            </div>
+            <div style={{ marginTop: 20, background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)', textAlign: 'left' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', marginBottom: 10 }}>오늘의 다짐</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', padding: '10px 14px', background: 'var(--green-50)', borderRadius: 12 }}>
+                "{answers.action || '충동 오면 3분만 참기'}"
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <div style={{ flex: 1, textAlign: 'center', background: '#FFEFC8', borderRadius: 12, padding: '10px 8px' }}>
+                  <div style={{ fontSize: 10, color: '#9A6A00', fontWeight: 700 }}>획득 XP</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#9A6A00' }}>+80</div>
+                </div>
+                <div style={{ flex: 1, textAlign: 'center', background: '#FFF8E7', borderRadius: 12, padding: '10px 8px' }}>
+                  <div style={{ fontSize: 10, color: '#B8860B', fontWeight: 700 }}>코인</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#B8860B' }}>+40</div>
+                </div>
+              </div>
+            </div>
+            <button onClick={() => onNav('home')} className="ps-cta green ps-tap" style={{ marginTop: 20 }}>홈으로</button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenMI });
+
+
 // app-mobile.jsx — Mobile app router
 // Routes screens via setState. Tab bar + CTAs drive nav.
 // Flow: splash → login → (first visit) onboarding → home  /  (returning) home
@@ -3462,6 +3707,7 @@ function MobileApp({ initialRoute = 'splash' }) {
       {route === 'trigger'    && <ScreenTriggerFlow onComplete={() => nav('home')}/>}
       {route === 'warnings'   && <ScreenCOWarnings onNav={nav}/>}
       {route === 'smartalert' && <ScreenSmartAlert onNav={nav}/>}
+      {route === 'mi' && <ScreenMI onNav={nav}/>}
     </div>
   );
 }
