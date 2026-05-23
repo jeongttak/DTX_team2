@@ -1,5 +1,5 @@
 [build]
-  publish = "netlify-deploy"
+  publish = "docs"
 
 [[headers]]
   for = "/*"
