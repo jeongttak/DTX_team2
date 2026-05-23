@@ -2759,12 +2759,13 @@ function ScreenCalendar({ onNav = () => {} }) {
 
         {/* 월간/주간 탭 */}
         <div style={{ margin: '14px 20px 0', display: 'flex', background: 'var(--green-50)', borderRadius: 14, padding: 4, gap: 4 }}>
-          {[{id:'monthly',label:'📅 월간'},{id:'weekly',label:'📊 주간 리포트'}].map(t=>(
-            <button key={t.id} onClick={()=>setCalTab(t.id)} className="ps-tap" style={{ flex:1, height:38, border:'none', borderRadius:11, background:calTab===t.id?'white':'transparent', color:calTab===t.id?'var(--ink)':'var(--ink-3)', fontWeight:700, fontSize:13, boxShadow:calTab===t.id?'0 2px 6px rgba(15,42,30,.06)':'none' }}>{t.label}</button>
+          {[{id:'monthly',label:'📅 월간'},{id:'weekly',label:'📊 주간'},{id:'trigger',label:'⚡ 트리거 분석'}].map(t=>(
+            <button key={t.id} onClick={()=>setCalTab(t.id)} className="ps-tap" style={{ flex:1, height:38, border:'none', borderRadius:11, background:calTab===t.id?'white':'transparent', color:calTab===t.id?'var(--ink)':'var(--ink-3)', fontWeight:700, fontSize:11, boxShadow:calTab===t.id?'0 2px 6px rgba(15,42,30,.06)':'none' }}>{t.label}</button>
           ))}
         </div>
 
         {calTab === 'weekly' && <WeeklyReport/>}
+        {calTab === 'trigger' && <TriggerAnalysis/>}
 
         {calTab === 'monthly' && <>
 
@@ -3124,6 +3125,125 @@ function Legend({ color, label, border, dashed }) {
               : dashed ? '2px dashed #F2A93B'
               : color === 'transparent' ? '1.5px dashed var(--ink-4)' : 'none' }}/>
       <span>{label}</span>
+    </div>
+  );
+}
+
+
+/* ── 트리거 누적 분석 ────────────────────────────────────────────── */
+function TriggerAnalysis() {
+  const [period, setPeriod] = React.useState('4주');
+  const situations = [
+    { label: '회의 직후',    count: 18, color: '#E65A4A' },
+    { label: '점심 식후',    count: 14, color: '#F2A93B' },
+    { label: '퇴근 후',      count: 11, color: '#7FB8D9' },
+    { label: '술자리',       count: 8,  color: '#A89BF5' },
+    { label: '커피 마실 때', count: 6,  color: '#5BC23B' },
+  ];
+  const maxSit = Math.max(...situations.map(s => s.count));
+  const weekTrend = [
+    { week: '4주 전', count: 42, success: 31 },
+    { week: '3주 전', count: 38, success: 29 },
+    { week: '2주 전', count: 33, success: 27 },
+    { week: '이번 주', count: 29, success: 26 },
+  ];
+  const maxWeek = Math.max(...weekTrend.map(w => w.count));
+  const intensityDist = [2, 3, 6, 8, 12, 15, 14, 10, 6, 3];
+  const maxInten = Math.max(...intensityDist);
+
+  return (
+    <div className="ps-anim-fade-up" style={{ padding: '14px 20px 110px' }}>
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, alignItems: 'center' }}>
+        {['1주','4주','전체'].map(p => (
+          <button key={p} onClick={() => setPeriod(p)} className="ps-tap" style={{ height: 32, padding: '0 14px', borderRadius: 999, background: period === p ? 'var(--ink)' : 'white', color: period === p ? 'white' : 'var(--ink-2)', border: '1px solid ' + (period === p ? 'var(--ink)' : 'var(--line)'), fontWeight: 700, fontSize: 12 }}>{p}</button>
+        ))}
+        <div style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>누적 112회 기록</div>
+      </div>
+
+      {/* 주별 추이 */}
+      <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>주별 충동 추이</div>
+        <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 14 }}>📉 4주 연속 감소 중 — 잘하고 있어요!</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 100 }}>
+          {weekTrend.map((w, i) => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{w.count}</div>
+              <div style={{ width: '100%', position: 'relative', height: (w.count / maxWeek * 80) + 'px' }}>
+                <div style={{ position: 'absolute', bottom: 0, width: '100%', height: '100%', background: '#FFE6E1', borderRadius: '6px 6px 3px 3px' }}/>
+                <div style={{ position: 'absolute', bottom: 0, width: '100%', height: (w.success / w.count * 100) + '%', background: '#5BC23B', borderRadius: '6px 6px 3px 3px' }}/>
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: i === 3 ? 'var(--green-700)' : 'var(--ink-3)', textAlign: 'center' }}>{w.week}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, fontWeight: 700 }}>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, background: '#FFE6E1', marginRight: 4, verticalAlign: 'middle' }}/>총 충동</span>
+          <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, background: '#5BC23B', marginRight: 4, verticalAlign: 'middle' }}/>버텨낸 횟수</span>
+        </div>
+      </div>
+
+      {/* 상황별 TOP 5 */}
+      <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>충동 유발 상황 TOP 5</div>
+        <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 14 }}>⚠️ 회의 직후가 가장 취약한 상황이에요</div>
+        {situations.map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+            <div style={{ width: 22, height: 22, borderRadius: 7, background: s.color + '22', color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{i + 1}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{s.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: s.color }}>{s.count}회</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 999, background: 'var(--green-50)', overflow: 'hidden' }}>
+                <div style={{ width: (s.count / maxSit * 100) + '%', height: '100%', background: s.color, borderRadius: 999 }}/>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 충동 강도 분포 */}
+      <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>충동 강도 분포</div>
+        <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 14 }}>강도 5~7 구간이 가장 많아요 · 평균 5.8/10</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 70 }}>
+          {intensityDist.map((v, i) => {
+            const color = i >= 7 ? '#E65A4A' : i >= 4 ? '#F2A93B' : '#5BC23B';
+            return (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)' }}>{v}</div>
+                <div style={{ width: '100%', height: (v / maxInten * 55) + 'px', background: color, borderRadius: '4px 4px 2px 2px', opacity: 0.85 }}/>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)' }}>{i + 1}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--ink-3)', fontWeight: 600, padding: '4px 2px 0' }}>
+          <span>약함</span><span>보통</span><span>강함</span>
+        </div>
+      </div>
+
+      {/* CBT 개입 효과 */}
+      <div style={{ background: 'linear-gradient(135deg, #1B5240, #0E3A2C)', borderRadius: 22, padding: 18, color: 'white' }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: '#A5E66B', marginBottom: 14 }}>🎯 CBT 개입 효과</div>
+        {[
+          { label: '트리거 후 CBT 완료', pct: 78, color: '#A5E66B' },
+          { label: '충동 참기 성공',     pct: 89, color: '#7DD957' },
+          { label: '흡연으로 이어짐',    pct: 11, color: '#E65A4A' },
+        ].map((r, i) => (
+          <div key={i} style={{ marginBottom: i < 2 ? 12 : 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.85)' }}>{r.label}</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: r.color }}>{r.pct}%</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 999, background: 'rgba(255,255,255,.15)', overflow: 'hidden' }}>
+              <div style={{ width: r.pct + '%', height: '100%', background: r.color, borderRadius: 999 }}/>
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }
