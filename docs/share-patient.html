@@ -545,6 +545,9 @@ function Icon({ name, size = 22, color = 'currentColor', stroke = 2 }) {
     case 'sun':      return <svg {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M4.5 19.5l2-2M17.5 6.5l2-2"/></svg>;
     case 'cloud':    return <svg {...p}><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 20 11a4 4 0 0 1-1 7Z"/></svg>;
     case 'co':       return <svg {...p}><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/></svg>;
+    case 'chart':    return <svg {...p}><path d="M3 3v18h18"/><path d="M7 16V9M12 16V6M17 16v-4"/></svg>;
+    case 'target':   return <svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+    case 'pulse':    return <svg {...p}><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>;
     default: return null;
   }
 }
@@ -1666,10 +1669,30 @@ function StepStateCheck({ urge, setUrge, emo, setEmo, onNext }) {
     setUrge(Math.max(1, Math.min(10, Math.round(x * 10))));
   };
 
+  // Mock GPS 데이터
+  const gpsDetected = { location: '회의실 B동 3층', confidence: 95, riskLevel: 'high' };
+
   return (
     <div className="ps-anim-fade-up">
       <div style={{ marginTop: 18 }}>
-        <div style={trigStyles.step}><span style={{ color: '#D08A3D' }}>● 트리거 감지 14:22</span></div>
+        {/* GPS 자동 감지 배너 */}
+        <div style={{ background: 'linear-gradient(135deg, #E65A4A, #F2A93B)', borderRadius: 16, padding: '12px 14px', marginBottom: 12, color: 'white', boxShadow: '0 4px 14px rgba(230,90,74,.25)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 999, background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>📍</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.05em', opacity: 0.9 }}>GPS 자동 감지 · 위험 장소 진입</div>
+              <div style={{ fontSize: 14, fontWeight: 800, marginTop: 2 }}>{gpsDetected.location}</div>
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 800, padding: '4px 8px', borderRadius: 999, background: 'rgba(255,255,255,.25)' }}>
+              {gpsDetected.confidence}%
+            </div>
+          </div>
+          <div style={{ fontSize: 11, marginTop: 8, opacity: 0.9, lineHeight: 1.4 }}>
+            🤖 이 장소에서 평균 <strong>충동 강도 8.2</strong> · 이번 주 <strong>5회</strong> 트리거 발생
+          </div>
+        </div>
+
+        <div style={trigStyles.step}><span style={{ color: '#D08A3D' }}>● 자동 알림 · 14:22</span></div>
         <h1 className="ps-h2" style={{ marginTop: 10 }}>지금 어떤 상태예요?</h1>
         <div className="ps-muted" style={{ fontSize: 13, marginTop: 6 }}>한 호흡 쉬고, 솔직하게 골라봐요.</div>
       </div>
@@ -1777,43 +1800,148 @@ function StepTriggerLog({ where, setWhere, who, setWho, didSmoke, setDidSmoke, o
 }
 
 function StepSocratic({ answer, setAnswer, onNext }) {
+  const [miStep, setMiStep] = React.useState(1);  // 1~6: MI 대화 단계
+
+  // MI 대화 구조
+  const miDialogue = [
+    // 1. 개방형 질문 (Open-ended Questions)
+    {
+      step: 1,
+      category: '개방형 질문',
+      color: '#7FB8D9',
+      question: '지금 이 충동에 대해 어떤 생각이 드시나요?',
+      placeholder: '예: "회의 끝나고 옥상 가서 한 대 피우면 머리가 비워질 것 같아요..."',
+      reflection: '회의 후에 담배가 머리를 비워주는 느낌이 드는군요. 그 느낌이 정말 중요하시겠어요.',
+    },
+    // 2. 반영적 경청 (Reflective Listening)
+    {
+      step: 2,
+      category: '반영적 경청',
+      color: '#5BC23B',
+      question: '그렇다면, 담배 없이 머리를 비우는 방법을 시도해본 적은 있나요?',
+      placeholder: '예: "5분 정도 밖에 나가면 비슷한 효과가 있는 것 같기도 해요..."',
+      reflection: '아, 실제로 짧은 산책도 비슷한 효과가 있다는 걸 경험하셨군요. 흥미롭네요.',
+    },
+    // 3. 양가감정 탐색 (Exploring Ambivalence)
+    {
+      step: 3,
+      category: '양가감정 탐색',
+      color: '#F2A93B',
+      question: '흡연이 주는 것과 빼앗아가는 것, 각각 무엇이 있을까요?',
+      placeholder: '예: "순간의 진정은 주지만, 건강과 돈을 빼앗아가고 있어요..."',
+      reflection: '한편으론 진정 효과를, 다른 한편으론 건강과 경제적 손실을... 두 가지 모두 진실이네요.',
+    },
+    // 4. 변화 동기 강화 (Elicit Change Talk)
+    {
+      step: 4,
+      category: '변화 동기',
+      color: '#6F44E2',
+      question: '금연이 성공한다면, 당신의 삶에서 가장 달라질 것은 무엇일까요?',
+      placeholder: '예: "아이들한테 미안하지 않을 수 있고, 운동할 때 숨이 덜 찰 것 같아요..."',
+      reflection: '가족에 대한 미안함이 해소되고, 신체 능력도 회복되는 모습을 상상하시는군요.',
+    },
+    // 5. 자기효능감 강화 (Support Self-Efficacy)
+    {
+      step: 5,
+      category: '자기효능감',
+      color: '#FFB930',
+      question: '이전에 어려운 충동을 이겨낸 경험이 있다면, 그때 어떻게 하셨나요?',
+      placeholder: '예: "심호흡하고 물 한 잔 마시면서 5분만 버티니까 사라졌어요..."',
+      reflection: '이미 효과적인 대처법을 알고 계시고, 실제로 성공한 경험이 있으시네요. 대단해요!',
+    },
+    // 6. 요약 및 계획 (Summary & Plan)
+    {
+      step: 6,
+      category: '요약·계획',
+      color: '#3FAA48',
+      question: '지금 이 순간, 담배 대신 할 수 있는 행동 3가지를 정해볼까요?',
+      placeholder: '예: "1) 물 마시기, 2) 5분 산책, 3) 심호흡 10회"',
+      reflection: '구체적인 대체 행동 계획을 세우셨네요. 바로 실행 가능한 것들이에요. 멋져요!',
+    },
+  ];
+
+  const current = miDialogue[miStep - 1];
+  const isLast = miStep === 6;
+
   return (
     <div className="ps-anim-fade-up">
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginTop: 18 }}>
+      {/* MI 진행 단계 */}
+      <div style={{ marginTop: 18, marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 3 }}>
+          {miDialogue.map((d, i) => (
+            <div key={i} style={{ flex: 1, height: 6, borderRadius: 999, background: i < miStep ? d.color : 'rgba(15,42,30,.08)', transition: 'background .3s' }}/>
+          ))}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textAlign: 'center' }}>
+          MI 대화 {miStep}/6 · {current.category}
+        </div>
+      </div>
+
+      {/* 초록이 질문 */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
         <div className="ps-anim-bob-sm"><Soomi size={84} mood="happy" accent="#7DD957"/></div>
-        <div style={{ flex: 1, background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--lung-blue)', letterSpacing: '.05em', textTransform: 'uppercase' }}>SOCRATIC · 3 / 3</div>
-          <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, lineHeight: 1.35, letterSpacing: '-0.02em' }}>지금 흡연하면, 5분 뒤 당신은 어떤 모습일까요?</div>
+        <div style={{ flex: 1, background: 'white', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', boxShadow: 'var(--shadow-sm)', border: `2px solid ${current.color}` }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: current.color, letterSpacing: '.05em', textTransform: 'uppercase' }}>동기강화상담 · {current.category}</div>
+          <div style={{ marginTop: 6, fontSize: 16, fontWeight: 700, lineHeight: 1.4, letterSpacing: '-0.01em' }}>{current.question}</div>
         </div>
       </div>
 
-      <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 16, padding: '10px 14px', border: '1px solid var(--line)' }}>
-          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q1 · 어떤 생각이 떠올랐나요?</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"한 대만 피우면 진정될 거야"</div>
+      {/* 이전 답변 요약 (2단계 이상) */}
+      {miStep > 1 && (
+        <div style={{ marginTop: 12, background: 'rgba(111,68,226,.08)', borderRadius: 14, padding: '10px 14px', border: '1px dashed rgba(111,68,226,.3)' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#6F44E2', marginBottom: 4 }}>💬 이전 대화 반영</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-2)', fontStyle: 'italic', lineHeight: 1.4 }}>
+            {miDialogue[miStep - 2].reflection}
+          </div>
         </div>
-        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 16, padding: '10px 14px', border: '1px solid var(--line)' }}>
-          <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q2 · 그 생각이 사실이라는 근거는?</div>
-          <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"지금까지 진정됐던 기억이 많아서"</div>
-        </div>
-      </div>
+      )}
 
-      <div style={{ marginTop: 14, background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-sm)', border: '2px solid var(--green-400)' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 답변</div>
+      {/* 답변 입력 */}
+      <div style={{ marginTop: 14, background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-sm)', border: `2px solid ${current.color}` }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: current.color, letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 솔직한 답변</div>
         <textarea
           value={answer}
           onChange={e => setAnswer(e.target.value)}
-          rows={5}
+          rows={4}
+          placeholder={current.placeholder}
           style={{ width: '100%', marginTop: 8, fontSize: 14, lineHeight: 1.5, color: 'var(--ink)', border: 'none', outline: 'none', resize: 'none', fontFamily: 'inherit', background: 'transparent' }}
         />
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: 'var(--green-50)', border: 'none', color: 'var(--green-700)', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="mic" size={14}/>음성 입력</button>
-          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: 'var(--green-50)', border: 'none', color: 'var(--green-700)', fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="sparkle" size={14}/>예시 보기</button>
+          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: current.color + '22', border: 'none', color: current.color, fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="mic" size={14}/>음성 입력</button>
+          <button className="ps-tap" style={{ flex: 1, height: 38, borderRadius: 12, background: current.color + '22', border: 'none', color: current.color, fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icon name="sparkle" size={14}/>예시 보기</button>
         </div>
       </div>
 
-      <button onClick={onNext} className="ps-cta green ps-tap" style={{ marginTop: 18 }}>완료 · +30 XP<Icon name="check" size={18}/></button>
-      <button onClick={onNext} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 4, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>건너뛰기</button>
+      {/* MI 가이드 팁 */}
+      <div style={{ marginTop: 12, padding: '10px 14px', background: 'var(--green-50)', borderRadius: 12, fontSize: 12, color: 'var(--green-700)', lineHeight: 1.4 }}>
+        💡 <strong>MI 팁:</strong> 정답은 없어요. 지금 느끼는 솔직한 감정과 생각을 자유롭게 표현해주세요.
+      </div>
+
+      {/* 버튼 */}
+      <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
+        {miStep > 1 && (
+          <button onClick={() => setMiStep(s => s - 1)} className="ps-tap" style={{ width: 44, height: 48, borderRadius: 16, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="chev-l" size={18}/>
+          </button>
+        )}
+        <button
+          onClick={() => {
+            if (isLast) {
+              onNext();
+            } else {
+              setMiStep(s => s + 1);
+              setAnswer('');
+            }
+          }}
+          className="ps-cta green ps-tap"
+          style={{ flex: 1, background: isLast ? 'var(--green-500)' : 'var(--ink)' }}
+        >
+          {isLast ? '완료 · +60 XP' : '다음 질문'}
+          <Icon name={isLast ? 'check' : 'arrow-r'} size={18}/>
+        </button>
+      </div>
+
+      <button onClick={onNext} className="ps-tap" style={{ width: '100%', height: 44, marginTop: 4, background: 'transparent', border: 'none', color: 'var(--ink-3)', fontWeight: 600, fontSize: 13 }}>전체 건너뛰기</button>
     </div>
   );
 }
@@ -1929,6 +2057,7 @@ function ScreenHome({ onNav = () => {} }) {
 
                   {/* Items */}
                   {[
+                    { icon: 'chart',  label: '📊 충동 패턴 분석',          onClick: () => { setMenuOpen(false); onNav('stats'); } },
                     { icon: 'pulse',  label: '흡연 패턴 진단 다시하기', onClick: () => { setMenuOpen(false); onNav('onboarding'); } },
                     { icon: 'shield', label: '나의 정보 변경',            onClick: () => { setMenuOpen(false); } },
                     { icon: 'close',  label: '로그아웃', danger: true,        onClick: () => { setMenuOpen(false); onNav('login'); } },
@@ -1994,6 +2123,66 @@ function ScreenHome({ onNav = () => {} }) {
             </div>
             <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 36, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>대응</button>
           </div>
+
+          {/* 자동 추시 알림 시스템 */}
+          <div style={{ marginTop: 14, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800 }}>🤖 AI 자동 알림</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>패턴 학습 기반 · 7일 분석</div>
+              </div>
+              <button className="ps-tap" style={{ padding: '6px 12px', borderRadius: 999, background: 'var(--green-50)', border: 'none', fontSize: 11, fontWeight: 800, color: 'var(--green-700)' }}>설정</button>
+            </div>
+
+            {/* 예정된 알림 목록 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { time: '12:30', title: '점심 직후 위험 시간', trigger: '장소: 사무실 흡연실 앞', type: 'location', riskLevel: 'high' },
+                { time: '15:00', title: '오후 피로감 예상', trigger: '감정: 스트레스 + 피곤', type: 'emotion', riskLevel: 'medium' },
+                { time: '18:40', title: '퇴근 시간 루틴', trigger: '시간: 주중 저녁 패턴', type: 'time', riskLevel: 'high' },
+              ].map((alarm, i) => {
+                const colors = {
+                  high: { bg: '#FFE6E1', fg: '#E65A4A', dot: '#E65A4A' },
+                  medium: { bg: '#FFF4DC', fg: '#F2A93B', dot: '#F2A93B' },
+                  low: { bg: '#E5F8D0', fg: '#3FAA48', dot: '#5BC23B' },
+                };
+                const c = colors[alarm.riskLevel];
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, background: c.bg, borderRadius: 14 }}>
+                    <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: c.fg, letterSpacing: '-0.02em' }}>{alarm.time}</div>
+                      <div style={{ width: 6, height: 6, borderRadius: 999, background: c.dot, margin: '4px auto 0', animation: 'pulse 2s infinite' }}/>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{alarm.title}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink-2)', marginTop: 2 }}>{alarm.trigger}</div>
+                    </div>
+                    <Icon name="bell" size={16} color={c.fg}/>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 통계 요약 */}
+            <div style={{ marginTop: 14, padding: '12px 14px', background: 'linear-gradient(135deg, #6F44E2, #A89BF5)', borderRadius: 14, color: 'white' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, opacity: 0.9 }}>이번 주 알림 효과</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>18회</div>
+                  <div style={{ fontSize: 10, opacity: 0.8 }}>사전 알림</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>83%</div>
+                  <div style={{ fontSize: 10, opacity: 0.8 }}>대응 성공률</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>12분</div>
+                  <div style={{ fontSize: 10, opacity: 0.8 }}>평균 대응시간</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
 {/* Savings */}
           <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #1B5240 0%, #0E3A2C 100%)', borderRadius: 24, padding: '18px 20px', color: 'white', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', right: -20, top: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(125,217,87,.15)' }}/>
@@ -3600,6 +3789,152 @@ function WeeklyReport() {
   );
 }
 
+/* ── 트리거 통계 분석 (흡동 범위 분류 + 밴드 차트) ──────────────────── */
+function ScreenTriggerStats({ onNav = () => {} }) {
+  // Mock data: 최근 30일간 트리거 기록
+  const triggersByPlace = [
+    { place: '회의실',    count: 18, color: '#E65A4A', avgUrge: 8.2 },
+    { place: '사무실 흡연실 앞', count: 12, color: '#F2A93B', avgUrge: 6.5 },
+    { place: '집 베란다',  count: 9,  color: '#FFB930', avgUrge: 5.3 },
+    { place: '카페',      count: 7,  color: '#7FB8D9', avgUrge: 4.8 },
+    { place: '술자리',    count: 5,  color: '#A89BF5', avgUrge: 7.1 },
+  ];
+  const totalTriggers = triggersByPlace.reduce((s,t)=>s+t.count,0);
+
+  // 충동 강도 밴드 분포
+  const urgeBands = [
+    { range: '1-3', label: '약함', count: 8, color: '#5BC23B', emoji: '😌' },
+    { range: '4-6', label: '중간', count: 19, color: '#FFB930', emoji: '😐' },
+    { range: '7-8', label: '강함', count: 15, color: '#F2A93B', emoji: '😣' },
+    { range: '9-10', label: '매우강함', count: 9, color: '#E65A4A', emoji: '🔥' },
+  ];
+  const maxBand = Math.max(...urgeBands.map(b=>b.count));
+
+  // 시간대별 충동 분포 (24시간)
+  const hourlyData = [0,0,1,0,0,2,4,5,3,6,4,8,9,7,5,6,4,8,9,6,3,2,1,0];
+
+  return (
+    <div className="ps-screen" data-screen-label="트리거 통계">
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #E5F8D0 0%, #FFFFFF 100%)', zIndex: 0 }}/>
+      <div className="ps-content scroll" style={{ padding: 0 }}>
+        <StatusBar />
+
+        {/* Header */}
+        <div style={{ padding: '4px 20px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => onNav('home')} className="ps-tap" style={{ width: 40, height: 40, borderRadius: 999, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="chev-l" size={18}/>
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 className="ps-h1" style={{ fontSize: 24 }}>충동 패턴 분석</h1>
+            <div style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 600, marginTop: 2 }}>최근 30일 · 총 {totalTriggers}회 기록</div>
+          </div>
+        </div>
+
+        <div style={{ padding: '0 20px 110px' }}>
+
+          {/* 장소별 트리거 분포 */}
+          <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800 }}>🗺️ 장소별 트리거 빈도</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>어디서 가장 위험할까요?</div>
+              </div>
+              <button className="ps-tap" style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--green-50)', border: 'none', fontSize: 11, fontWeight: 800, color: 'var(--green-700)' }}>+ GPS 연동</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {triggersByPlace.map((t, i) => {
+                const pct = (t.count / totalTriggers * 100).toFixed(0);
+                return (
+                  <div key={i}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700 }}>{t.place}</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: t.color }}>{t.count}회 · {pct}%</div>
+                    </div>
+                    <div style={{ height: 10, borderRadius: 999, background: 'var(--green-50)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: pct+'%', background: t.color, borderRadius: 999, transition: 'width .5s' }}/>
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-3)', marginTop: 4, fontWeight: 700 }}>평균 충동 강도: {t.avgUrge}/10</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 충동 강도 밴드 차트 */}
+          <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>📊 충동 강도 밴드 분포</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 16 }}>강도별로 얼마나 자주 발생할까요?</div>
+
+            {/* 스택 바 */}
+            <div style={{ height: 16, borderRadius: 999, overflow: 'hidden', display: 'flex', marginBottom: 14 }}>
+              {urgeBands.map(b=>(
+                <div key={b.range} style={{ width: (b.count/totalTriggers*100)+'%', background: b.color }}/>
+              ))}
+            </div>
+
+            {/* 밴드 상세 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {urgeBands.map(b=>{
+                const pct = (b.count/totalTriggers*100).toFixed(0);
+                return (
+                  <div key={b.range} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ fontSize: 20 }}>{b.emoji}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{b.label} <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>({b.range})</span></div>
+                      <div style={{ height: 24, borderRadius: 12, background: 'var(--green-50)', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '100%', width: (b.count/maxBand*100)+'%', background: b.color, borderRadius: 12, transition: 'width .5s' }}/>
+                        <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 800, color: b.count/maxBand > 0.5 ? 'white' : b.color }}>{b.count}회 · {pct}%</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 24시간 히트맵 */}
+          <div style={{ background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>⏰ 24시간 충동 히트맵</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 16 }}>💡 점심 직후(12-14시)와 저녁(18-20시)가 위험 시간대</div>
+            <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 100 }}>
+              {hourlyData.map((v, i) => {
+                const max = Math.max(...hourlyData);
+                const h = (v / max * 100);
+                const color = h >= 80 ? '#E65A4A' : h >= 50 ? '#F2A93B' : h >= 20 ? '#FFB930' : '#C9F08D';
+                return (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <div style={{ fontSize: 9, fontWeight: 800, color: h >= 50 ? color : 'var(--ink-3)' }}>{v || ''}</div>
+                    <div style={{ width: '100%', height: h+'%', background: color, borderRadius: '4px 4px 2px 2px', minHeight: v > 0 ? 6 : 0 }}/>
+                    <div style={{ fontSize: 8, fontWeight: 700, color: i === 12 || i === 19 ? '#E65A4A' : 'var(--ink-3)' }}>{i}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* AI 인사이트 */}
+          <div style={{ background: 'linear-gradient(135deg, #6F44E2, #A89BF5)', borderRadius: 22, padding: 18, color: 'white' }}>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 12 }}>🤖 AI 패턴 인사이트</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, lineHeight: 1.5 }}>
+              <div style={{ background: 'rgba(255,255,255,.15)', borderRadius: 12, padding: 12 }}>
+                <strong>💼 회의실 트리거</strong>가 가장 많아요. 회의 전후 10분간 <strong>자동 알림</strong>을 설정하는 건 어떨까요?
+              </div>
+              <div style={{ background: 'rgba(255,255,255,.15)', borderRadius: 12, padding: 12 }}>
+                <strong>🕐 점심 직후</strong> 충동이 최고조에요. 식후 바로 <strong>심호흡 미션</strong>을 예약해보세요.
+              </div>
+              <div style={{ background: 'rgba(255,255,255,.15)', borderRadius: 12, padding: 12 }}>
+                강도 <strong>7 이상</strong> 충동을 버텨낸 비율: <strong>72%</strong>. 잘하고 있어요! 🎉
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <TabBar active="home" onChange={onNav}/>
+    </div>
+  );
+}
+
 function DayDetailSheet({ day, note, isToday, onClose }) {
   const smoke   = note?.type === 'smoke';
   const missing = note?.type === 'missing';
@@ -3773,6 +4108,7 @@ function MobileApp({ initialRoute = 'splash' }) {
       {route === 'cal'        && <ScreenCalendar onNav={nav}/>}
       {route === 'trigger'    && <ScreenTriggerFlow onComplete={() => nav('home')}/>}
       {route === 'warnings'   && <ScreenCOWarnings onNav={nav}/>}
+      {route === 'stats'      && <ScreenTriggerStats onNav={nav}/>}
     </div>
   );
 }
