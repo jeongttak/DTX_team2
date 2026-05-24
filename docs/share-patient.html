@@ -2467,6 +2467,11 @@ function ScreenCOFlow({ onNav = () => {} }) {
   const [phase, setPhase] = useState('idle');
   const [progress, setProgress] = useState(0); // 0..1
   const [coVal, setCoVal] = useState(3);
+  const [vision, setVision] = useState('petals'); // 시안 (나무는 8초, 나머지 5초)
+
+  // 시안별 측정 시간 (나무 영상이 길어서 8초)
+  const durMs = vision === 'tree' ? 8000 : 5000;
+  const totalSec = durMs / 1000;
 
   React.useEffect(() => {
     if (phase !== 'measuring') return;
@@ -2478,10 +2483,9 @@ function ScreenCOFlow({ onNav = () => {} }) {
       setProgress(0);
       setCoVal(0);
       const start = performance.now();
-      const dur = 5000;
       const tick = (t) => {
         if (cancelled) return;
-        const p = Math.min(1, (t - start) / dur);
+        const p = Math.min(1, (t - start) / durMs);
         setProgress(p);
         const sim = 6 * Math.sin(p * Math.PI) + (p * 1.5);
         setCoVal(+(sim).toFixed(1));
@@ -2500,10 +2504,10 @@ function ScreenCOFlow({ onNav = () => {} }) {
       if (raf) cancelAnimationFrame(raf);
       if (timer) clearTimeout(timer);
     };
-  }, [phase]);
+  }, [phase, durMs]);
 
   if (phase === 'result') return <COResult onReset={() => setPhase('idle')} onNav={onNav}/>;
-  if (phase === 'measuring') return <COMeasuring progress={progress} coVal={coVal} onCancel={() => setPhase('idle')} onFinish={() => setPhase('result')}/>;
+  if (phase === 'measuring') return <COMeasuring progress={progress} coVal={coVal} vision={vision} setVision={setVision} totalSec={totalSec} onCancel={() => setPhase('idle')} onFinish={() => setPhase('result')}/>;
   return <COIdle onStart={() => setPhase('measuring')} onNav={onNav}/>;
 }
 
@@ -2575,7 +2579,7 @@ function COIdle({ onStart, onNav }) {
 }
 
 // ── 시안 1: 꽃잎 날리기 (삼성헬스 레퍼런스) ──
-function VisionPetals({ progress }) {
+function VisionPetals({ progress, totalSec = 5 }) {
   const petalCount = Math.floor(progress * 24) + 4;
   return (
     <div style={{ position: 'relative', width: 280, height: 280 }}>
@@ -2604,7 +2608,7 @@ function VisionPetals({ progress }) {
       {/* 중앙 카운터 */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
         <Icon name="wind" size={36} color="#FFB6D5" stroke={1.5}/>
-        <div style={{ fontSize: 40, fontWeight: 800, marginTop: 4, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 40, fontWeight: 800, marginTop: 4, letterSpacing: '-0.04em' }}>{Math.ceil(totalSec - progress * totalSec)}</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
       </div>
     </div>
@@ -2612,7 +2616,7 @@ function VisionPetals({ progress }) {
 }
 
 // ── 시안 2: 나무 자라기 (영상) ──
-function VisionTree({ progress }) {
+function VisionTree({ progress, totalSec = 8 }) {
   const videoRef = React.useRef(null);
 
   // progress(0~1)에 따라 영상 currentTime 동기화
@@ -2642,7 +2646,7 @@ function VisionTree({ progress }) {
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none' }}/>
       {/* 중앙 카운터 (상단) */}
       <div style={{ position: 'absolute', top: 16, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
-        <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.04em', textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.04em', textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{Math.ceil(totalSec - progress * totalSec)}</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,.85)', fontWeight: 700, letterSpacing: '.1em' }}>SECONDS</div>
       </div>
       {/* 하단 안내 */}
@@ -2656,7 +2660,7 @@ function VisionTree({ progress }) {
 }
 
 // ── 시안 3: 민들레 씨 날리기 ──
-function VisionDandelion({ progress }) {
+function VisionDandelion({ progress, totalSec = 5 }) {
   const seedCount = Math.floor(progress * 16) + 3;
   return (
     <div style={{ position: 'relative', width: 280, height: 280 }}>
@@ -2712,7 +2716,7 @@ function VisionDandelion({ progress }) {
       })}
       {/* 중앙 카운터 */}
       <div style={{ position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
-        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(totalSec - progress * totalSec)}</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
       </div>
     </div>
@@ -2720,7 +2724,7 @@ function VisionDandelion({ progress }) {
 }
 
 // ── 시안 4: 초록이가 날아가기 ──
-function VisionSoomi({ progress }) {
+function VisionSoomi({ progress, totalSec = 5 }) {
   const leafCount = Math.floor(progress * 10) + 2;
   return (
     <div style={{ position: 'relative', width: 280, height: 280 }}>
@@ -2754,17 +2758,16 @@ function VisionSoomi({ progress }) {
       </div>
       {/* 중앙 카운터 */}
       <div style={{ position: 'absolute', top: 14, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
-        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(totalSec - progress * totalSec)}</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
       </div>
     </div>
   );
 }
 
-function COMeasuring({ progress, coVal, onCancel, onFinish }) {
-  const [vision, setVision] = React.useState('petals'); // 'petals' | 'tree' | 'dandelion' | 'soomi'
+function COMeasuring({ progress, coVal, vision, setVision, totalSec = 5, onCancel, onFinish }) {
   const dashTotal = 691;
-  const seconds = Math.ceil(5 - progress * 5);
+  const seconds = Math.ceil(totalSec - progress * totalSec);
   const visions = [
     { id: 'petals',    label: '꽃잎',   icon: '🌸' },
     { id: 'tree',      label: '나무',   icon: '🌳' },
@@ -2812,7 +2815,7 @@ function COMeasuring({ progress, coVal, onCancel, onFinish }) {
 
           {/* 선택된 시안 비주얼 */}
           <div style={{ marginTop: 16 }}>
-            <VisionComp progress={progress}/>
+            <VisionComp progress={progress} totalSec={totalSec}/>
           </div>
 
           {/* CO 값 표시 */}
