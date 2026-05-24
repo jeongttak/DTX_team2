@@ -285,6 +285,36 @@
 /* Tap feedback */
 .ps-tap { transition: transform .15s ease, box-shadow .15s ease; cursor: pointer; }
 .ps-tap:active { transform: scale(0.97); }
+
+/* === CO Measure: 4 vision options === */
+@keyframes ps-float-up {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate(var(--dx, 0), -380px) rotate(var(--rot, 180deg)); opacity: 0; }
+}
+@keyframes ps-sway {
+  0%,100% { transform: translateX(-8px); }
+  50%     { transform: translateX(8px); }
+}
+@keyframes ps-tree-grow {
+  from { transform: scaleY(0.1); opacity: 0; }
+  to   { transform: scaleY(1);   opacity: 1; }
+}
+@keyframes ps-seed-fly {
+  0%   { transform: translate(0,0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate(var(--dx, 40px), -360px) scale(.5); opacity: 0; }
+}
+@keyframes ps-soomi-fly {
+  0%   { transform: translateY(0) rotate(-4deg); }
+  50%  { transform: translateY(-30px) rotate(4deg); }
+  100% { transform: translateY(-260px) rotate(-2deg) scale(.5); opacity: .3; }
+}
+@keyframes ps-leaf-scatter {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 0; }
+  10%  { opacity: .9; }
+  100% { transform: translate(var(--dx, 120px), var(--dy, -180px)) rotate(var(--rot, 360deg)); opacity: 0; }
+}
     :root { color-scheme: light; }
     html, body { margin: 0; padding: 0; height: 100%; }
     body {
@@ -2533,10 +2563,211 @@ function COIdle({ onStart, onNav }) {
   );
 }
 
+// ── 시안 1: 꽃잎 날리기 (삼성헬스 레퍼런스) ──
+function VisionPetals({ progress }) {
+  const petalCount = Math.floor(progress * 24) + 4;
+  return (
+    <div style={{ position: 'relative', width: 280, height: 280 }}>
+      {/* 중앙 부드러운 빛 */}
+      <div style={{ position: 'absolute', inset: 60, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,180,210,0.35) 0%, rgba(255,180,210,0) 70%)', filter: 'blur(8px)' }}/>
+      {/* 꽃잎들 */}
+      {[...Array(petalCount)].map((_, i) => {
+        const dx = (Math.sin(i * 1.7) * 80) + 'px';
+        const dur = 3.5 + (i % 4) * 0.6;
+        const delay = (i * 0.18) % 4;
+        const petalColors = ['#FFB6D5', '#FFCCE5', '#FFE0EC', '#FFFFFF'];
+        const color = petalColors[i % petalColors.length];
+        return (
+          <svg key={i} width="20" height="22" viewBox="0 0 20 22" style={{
+            position: 'absolute', left: '50%', bottom: '20%',
+            marginLeft: -10,
+            '--dx': dx, '--rot': (i % 2 ? 200 : -200) + 'deg',
+            animation: `ps-float-up ${dur}s ease-out infinite`,
+            animationDelay: delay + 's',
+          }}>
+            <path d="M10 0 C 4 4 0 10 4 18 Q 10 22 16 18 C 20 10 16 4 10 0 Z" fill={color} opacity="0.9"/>
+            <circle cx="10" cy="11" r="1.5" fill="rgba(255,180,210,0.6)"/>
+          </svg>
+        );
+      })}
+      {/* 중앙 카운터 */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <Icon name="wind" size={36} color="#FFB6D5" stroke={1.5}/>
+        <div style={{ fontSize: 40, fontWeight: 800, marginTop: 4, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
+      </div>
+    </div>
+  );
+}
+
+// ── 시안 2: 나무 자라기 ──
+function VisionTree({ progress }) {
+  // progress에 따라 나무 단계: 0~0.3 새싹, 0.3~0.6 줄기, 0.6~1 가지+잎
+  const trunkH = 30 + progress * 100;
+  const leafScale = Math.max(0, progress - 0.3) / 0.7;
+  return (
+    <div style={{ position: 'relative', width: 280, height: 280, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      {/* 땅 */}
+      <div style={{ position: 'absolute', bottom: 30, left: '50%', marginLeft: -80, width: 160, height: 16, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(165,230,107,.35), transparent)' }}/>
+      <svg width="200" height="240" viewBox="0 0 200 240" style={{ marginBottom: 16 }}>
+        {/* 줄기 */}
+        <rect x="96" y={220 - trunkH} width="8" height={trunkH} rx="4" fill="#5B3A1A" style={{ transformOrigin: '100px 220px', transform: 'scaleY(1)', transition: 'all .3s linear' }}/>
+        {/* 가지 (progress > 0.5) */}
+        {progress > 0.5 && (
+          <>
+            <path d="M100 140 Q 70 130 60 110" stroke="#5B3A1A" strokeWidth="5" fill="none" strokeLinecap="round" opacity={(progress - 0.5) * 2}/>
+            <path d="M100 130 Q 130 120 140 100" stroke="#5B3A1A" strokeWidth="5" fill="none" strokeLinecap="round" opacity={(progress - 0.5) * 2}/>
+          </>
+        )}
+        {/* 잎 (progress > 0.3) */}
+        {leafScale > 0 && (
+          <g style={{ transform: `scale(${leafScale})`, transformOrigin: '100px 100px', transition: 'transform .3s' }}>
+            <ellipse cx="60" cy="105" rx="22" ry="14" fill="#7DD957" transform="rotate(-30 60 105)"/>
+            <ellipse cx="140" cy="95" rx="22" ry="14" fill="#5BC23B" transform="rotate(30 140 95)"/>
+            <ellipse cx="100" cy="70" rx="28" ry="18" fill="#A5E66B"/>
+            <ellipse cx="80" cy="50" rx="18" ry="12" fill="#7DD957" transform="rotate(-20 80 50)"/>
+            <ellipse cx="120" cy="55" rx="18" ry="12" fill="#5BC23B" transform="rotate(20 120 55)"/>
+            {/* 작은 열매 */}
+            {progress > 0.8 && (
+              <>
+                <circle cx="92" cy="72" r="4" fill="#FF7A2E"/>
+                <circle cx="108" cy="80" r="3" fill="#FFB930"/>
+              </>
+            )}
+          </g>
+        )}
+        {/* 새싹 잎 (초기) */}
+        {progress < 0.4 && (
+          <path d={`M100 ${220-trunkH} q-10 -6 -8 -16 q 10 -2 8 16 z`} fill="#A5E66B"/>
+        )}
+      </svg>
+      {/* 중앙 카운터 */}
+      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
+        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
+      </div>
+    </div>
+  );
+}
+
+// ── 시안 3: 민들레 씨 날리기 ──
+function VisionDandelion({ progress }) {
+  const seedCount = Math.floor(progress * 16) + 3;
+  return (
+    <div style={{ position: 'relative', width: 280, height: 280 }}>
+      {/* 민들레 (하단 중앙) */}
+      <div style={{ position: 'absolute', bottom: 20, left: '50%', marginLeft: -40 }}>
+        <svg width="80" height="120" viewBox="0 0 80 120">
+          {/* 줄기 */}
+          <path d="M40 120 Q 38 80 40 40" stroke="#5B7A3A" strokeWidth="3" fill="none" strokeLinecap="round"/>
+          {/* 잎 */}
+          <path d="M40 80 q -16 -6 -20 -22 q 16 -2 20 12 z" fill="#5BC23B"/>
+          {/* 민들레 꽃 (남은 솜털) */}
+          <circle cx="40" cy="38" r="14" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="2 3"/>
+          {[...Array(10)].map((_, i) => {
+            const angle = (i / 10) * Math.PI * 2;
+            const x1 = 40 + Math.cos(angle) * 6;
+            const y1 = 38 + Math.sin(angle) * 6;
+            const x2 = 40 + Math.cos(angle) * 14;
+            const y2 = 38 + Math.sin(angle) * 14;
+            const visible = i >= progress * 10;
+            return visible ? <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.7)" strokeWidth="1"/> : null;
+          })}
+          <circle cx="40" cy="38" r="3" fill="#FFB930"/>
+        </svg>
+      </div>
+      {/* 날아가는 씨앗들 */}
+      {[...Array(seedCount)].map((_, i) => {
+        const dx = ((Math.sin(i * 2.3) * 100) + (i % 2 ? 60 : -60)) + 'px';
+        const dur = 4 + (i % 4) * 0.7;
+        const delay = (i * 0.22) % 3.5;
+        return (
+          <div key={i} style={{
+            position: 'absolute', left: '50%', bottom: 140,
+            marginLeft: -8,
+            '--dx': dx,
+            animation: `ps-seed-fly ${dur}s ease-out infinite`,
+            animationDelay: delay + 's',
+          }}>
+            <svg width="16" height="20" viewBox="0 0 16 20">
+              {/* 솜털 */}
+              {[...Array(6)].map((_, j) => {
+                const a = (j / 6) * Math.PI * 2;
+                const x = 8 + Math.cos(a) * 6;
+                const y = 6 + Math.sin(a) * 6;
+                return <line key={j} x1="8" y1="6" x2={x} y2={y} stroke="rgba(255,255,255,0.85)" strokeWidth="0.8"/>;
+              })}
+              <circle cx="8" cy="6" r="1.5" fill="white"/>
+              {/* 씨앗 줄 */}
+              <line x1="8" y1="7" x2="8" y2="16" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+              <ellipse cx="8" cy="17" rx="1.5" ry="2.5" fill="#D4C3A0"/>
+            </svg>
+          </div>
+        );
+      })}
+      {/* 중앙 카운터 */}
+      <div style={{ position: 'absolute', top: 30, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
+        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
+      </div>
+    </div>
+  );
+}
+
+// ── 시안 4: 초록이가 날아가기 ──
+function VisionSoomi({ progress }) {
+  const leafCount = Math.floor(progress * 10) + 2;
+  return (
+    <div style={{ position: 'relative', width: 280, height: 280 }}>
+      {/* 빛 후광 */}
+      <div className="ps-anim-pulse" style={{ position: 'absolute', inset: 40, borderRadius: '50%', background: 'radial-gradient(circle, rgba(165,230,107,.35) 0%, rgba(165,230,107,0) 65%)' }}/>
+      {/* 흩어지는 잎들 */}
+      {[...Array(leafCount)].map((_, i) => {
+        const dx = ((Math.sin(i * 1.9) * 120) + (i % 2 ? 80 : -80)) + 'px';
+        const dy = -(140 + (i % 4) * 40) + 'px';
+        const dur = 3 + (i % 3) * 0.8;
+        const delay = (i * 0.3) % 3;
+        return (
+          <svg key={i} width="22" height="14" viewBox="0 0 22 14" style={{
+            position: 'absolute', left: '50%', top: '50%',
+            marginLeft: -11, marginTop: -7,
+            '--dx': dx, '--dy': dy, '--rot': (i % 2 ? 360 : -360) + 'deg',
+            animation: `ps-leaf-scatter ${dur}s ease-out infinite`,
+            animationDelay: delay + 's',
+          }}>
+            <path d="M2 7 q 6 -8 18 -4 q -6 12 -18 4 z" fill={i % 2 ? '#7DD957' : '#A5E66B'}/>
+          </svg>
+        );
+      })}
+      {/* 초록이 캐릭터 (날아오름) */}
+      <div style={{
+        position: 'absolute', left: '50%', bottom: 40,
+        marginLeft: -55,
+        animation: 'ps-soomi-fly 5s ease-in-out infinite',
+      }}>
+        <Soomi size={110} mood="proud" accent="#7DD957"/>
+      </div>
+      {/* 중앙 카운터 */}
+      <div style={{ position: 'absolute', top: 14, left: 0, right: 0, textAlign: 'center', color: 'white' }}>
+        <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.04em' }}>{Math.ceil(5 - progress * 5)}</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>SECONDS</div>
+      </div>
+    </div>
+  );
+}
+
 function COMeasuring({ progress, coVal, onCancel }) {
+  const [vision, setVision] = React.useState('petals'); // 'petals' | 'tree' | 'dandelion' | 'soomi'
   const dashTotal = 691;
-  const offset = dashTotal * (1 - progress);
   const seconds = Math.ceil(5 - progress * 5);
+  const visions = [
+    { id: 'petals',    label: '꽃잎',   icon: '🌸' },
+    { id: 'tree',      label: '나무',   icon: '🌳' },
+    { id: 'dandelion', label: '민들레', icon: '🌼' },
+    { id: 'soomi',     label: '초록이', icon: '🌱' },
+  ];
+  const VisionComp = { petals: VisionPetals, tree: VisionTree, dandelion: VisionDandelion, soomi: VisionSoomi }[vision];
+
   return (
     <div className="ps-screen" data-screen-label="05 CO 측정 · 진행">
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #1B5240 0%, #0E3A2C 50%, #061E18 100%)', zIndex: 0 }}/>
@@ -2554,22 +2785,35 @@ function COMeasuring({ progress, coVal, onCancel }) {
           <div style={{ width: 40 }}/>
         </div>
 
+        {/* 시안 토글 */}
+        <div style={{ padding: '4px 16px 0', display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {visions.map(v => (
+            <button key={v.id} onClick={() => setVision(v.id)} className="ps-tap" style={{
+              height: 32, padding: '0 10px', borderRadius: 999,
+              background: vision === v.id ? 'rgba(165,230,107,0.25)' : 'rgba(255,255,255,0.08)',
+              border: '1px solid ' + (vision === v.id ? 'rgba(165,230,107,0.6)' : 'rgba(255,255,255,0.12)'),
+              color: vision === v.id ? '#A5E66B' : 'rgba(255,255,255,0.6)',
+              fontWeight: 700, fontSize: 11,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <span style={{ fontSize: 13 }}>{v.icon}</span>{v.label}
+            </button>
+          ))}
+        </div>
+
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', textAlign: 'center' }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: '#A5E66B', letterSpacing: '.08em', textTransform: 'uppercase' }}>{seconds}초 남음</div>
-          <div style={{ fontSize: 28, fontWeight: 800, marginTop: 10, letterSpacing: '-0.02em' }}>천천히 길게<br/>내쉬고 있어요</div>
+          <div style={{ fontSize: 24, fontWeight: 800, marginTop: 8, letterSpacing: '-0.02em' }}>천천히 길게<br/>내쉬고 있어요</div>
 
-          <div style={{ position: 'relative', width: 260, height: 260, marginTop: 24 }}>
-            <div className="ps-anim-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(165,230,107,0.45) 0%, rgba(165,230,107,0) 65%)' }}/>
-            <div className="ps-anim-breath" style={{ position: 'absolute', inset: 30, borderRadius: '50%', background: 'radial-gradient(circle, rgba(125,217,87,0.6) 0%, rgba(125,217,87,0) 70%)' }}/>
-            <svg width="260" height="260" viewBox="0 0 260 260" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
-              <circle cx="130" cy="130" r="110" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6"/>
-              <circle cx="130" cy="130" r="110" fill="none" stroke="#A5E66B" strokeWidth="6" strokeDasharray={dashTotal} strokeLinecap="round" style={{ animation: 'ps-co-fill 5s linear forwards' }}/>
-            </svg>
-            <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="wind" size={48} color="#A5E66B" stroke={1.5}/>
-              <div style={{ fontSize: 44, fontWeight: 800, marginTop: 6, letterSpacing: '-0.04em' }}>{coVal.toFixed(1)}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>현재 CO ppm</div>
-            </div>
+          {/* 선택된 시안 비주얼 */}
+          <div style={{ marginTop: 16 }}>
+            <VisionComp progress={progress}/>
+          </div>
+
+          {/* CO 값 표시 */}
+          <div style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', background: 'rgba(255,255,255,0.08)', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)' }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>현재 CO</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#A5E66B' }}>{coVal.toFixed(1)}<span style={{ fontSize: 11, marginLeft: 2, fontWeight: 700 }}>ppm</span></span>
           </div>
 
           <div style={{ display: 'flex', gap: 18, marginTop: 28 }}>
