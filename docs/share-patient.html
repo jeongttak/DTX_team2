@@ -3147,7 +3147,7 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
         <div className="ps-sheet-handle"/>
         {/* Live preview */}
         <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 16, padding: 14 }}>
-          <div className="ps-anim-bob-sm"><Soomi size={110} mood="happy" accent="#7DD957"/></div>
+          <div className="ps-anim-bob-sm"><DressedSoomi size={110} equip={equip}/></div>
         </div>
 
         {/* Category tabs */}
