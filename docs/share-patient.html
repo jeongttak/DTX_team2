@@ -2113,7 +2113,7 @@ function ScreenHome({ onNav = () => {} }) {
         <div style={{ padding: '18px 20px 0' }}>
 
           {/* Streak card — new */}
-          <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
+          <StreakCard days={14} week={[true, true, true, true, true, true, false]} todayIdx={5}/>
           {/* Trigger alert banner */}
           <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #FFF4DC 0%, #FFE6E1 100%)', borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(242,169,59,.3)' }}>
             <div style={{ width: 44, height: 44, borderRadius: 16, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D08A3D', flexShrink: 0 }}><Icon name="bolt" size={22}/></div>
@@ -2124,11 +2124,11 @@ function ScreenHome({ onNav = () => {} }) {
             <button onClick={() => onNav('trigger')} className="ps-tap" style={{ height: 36, padding: '0 14px', borderRadius: 999, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 12 }}>대응</button>
           </div>
 
-          {/* 자동 추시 알림 시스템 */}
+          {/* 위험 알림 */}
           <div style={{ marginTop: 14, background: 'white', borderRadius: 22, padding: 18, boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 800 }}>🤖 AI 자동 알림</div>
+                <div style={{ fontSize: 14, fontWeight: 800 }}>⚠️ 위험 알림</div>
                 <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>패턴 학습 기반 · 7일 분석</div>
               </div>
               <button className="ps-tap" style={{ padding: '6px 12px', borderRadius: 999, background: 'var(--green-50)', border: 'none', fontSize: 11, fontWeight: 800, color: 'var(--green-700)' }}>설정</button>
@@ -2161,25 +2161,6 @@ function ScreenHome({ onNav = () => {} }) {
                   </div>
                 );
               })}
-            </div>
-
-            {/* 통계 요약 */}
-            <div style={{ marginTop: 14, padding: '12px 14px', background: 'linear-gradient(135deg, #6F44E2, #A89BF5)', borderRadius: 14, color: 'white' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, opacity: 0.9 }}>이번 주 알림 효과</div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>18회</div>
-                  <div style={{ fontSize: 10, opacity: 0.8 }}>사전 알림</div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>83%</div>
-                  <div style={{ fontSize: 10, opacity: 0.8 }}>대응 성공률</div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>12분</div>
-                  <div style={{ fontSize: 10, opacity: 0.8 }}>평균 대응시간</div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -2290,31 +2271,31 @@ function Sparkline({ up = true, color = '#5BC23B' }) {
   );
 }
 
-function StreakCard({ days = 27, week = [], todayIdx = 5 }) {
+function StreakCard({ days = 14, week = [], todayIdx = 5 }) {
   const labels = ['월','화','수','목','금','토','일'];
   return (
     <div style={{
-      background: 'white',
+      background: 'linear-gradient(135deg, #E5F8F5 0%, #F0F9F4 100%)',
       borderRadius: 22,
-      padding: '18px 18px 16px',
+      padding: '20px 22px 18px',
       boxShadow: 'var(--shadow-sm)',
-      border: '1px solid var(--line)',
+      border: '1px solid rgba(127,216,208,.2)',
     }}>
       {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        {/* Number + flame */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {/* Number + flame emoji */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
-            fontSize: 44,
+            fontSize: 56,
             fontWeight: 800,
             letterSpacing: '-0.04em',
             lineHeight: 1,
-            background: 'linear-gradient(180deg, #FFB930 0%, #FF7A2E 100%)',
+            background: 'linear-gradient(180deg, #FFB930 0%, #FF8A3D 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>{days}</span>
-          <Flame3D size={42}/>
+          <span style={{ fontSize: 42, lineHeight: 1 }}>🔥</span>
         </div>
         {/* Title */}
         <div style={{ flex: 1, textAlign: 'right' }}>
@@ -2323,31 +2304,32 @@ function StreakCard({ days = 27, week = [], todayIdx = 5 }) {
         </div>
       </div>
 
-      {/* 7-day row */}
-      <div style={{ marginTop: 14, display: 'flex', gap: 6, justifyContent: 'space-between' }}>
+      {/* 7-day row - pill style */}
+      <div style={{ marginTop: 16, display: 'flex', gap: 6, justifyContent: 'center' }}>
         {labels.map((d, i) => {
           const completed = week[i];
           const isToday = i === todayIdx;
-          let bg, fg, ring;
-          if (completed) {
-            bg = isToday ? '#5BC23B' : '#A5E66B';
+          let bg, fg;
+          if (isToday) {
+            bg = '#7FD8D0';  // Cyan/teal for today
             fg = 'white';
-          } else if (isToday) {
-            bg = 'white'; fg = 'var(--green-700)'; ring = '2px solid var(--green-500)';
+          } else if (completed) {
+            bg = '#FFB930';  // Orange for completed days
+            fg = 'white';
           } else {
-            bg = '#E4EFE6'; fg = 'var(--ink-3)';
+            bg = 'rgba(255,255,255,.6)';  // Light transparent for future days
+            fg = 'var(--ink-3)';
           }
           return (
             <div key={d} style={{
-              flex: 1, aspectRatio: '1 / 1',
-              maxWidth: 38,
-              borderRadius: '50%',
+              minWidth: 42,
+              height: 42,
+              borderRadius: 12,
               background: bg,
               color: fg,
-              border: ring || 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 800,
-              boxShadow: completed && isToday ? '0 4px 10px rgba(91,194,59,.35)' : 'none',
+              fontSize: 14, fontWeight: 800,
+              boxShadow: isToday ? '0 4px 12px rgba(127,216,208,.4)' : 'none',
             }}>{d}</div>
           );
         })}
@@ -3533,7 +3515,7 @@ function ScreenCalendar({ onNav = () => {} }) {
 
         {/* Streak banner */}
         <div style={{ margin: '14px 20px 0' }}>
-          <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
+          <StreakCard days={14} week={[true, true, true, true, true, true, false]} todayIdx={5}/>
         </div>
 
         {/* Month selector */}
