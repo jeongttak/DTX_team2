@@ -2493,6 +2493,36 @@ function COIdle({ onStart, onNav }) {
         </div>
 
         <div style={{ padding: '0 20px 30px' }}>
+          {/* 블루투스 연결 안내 */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '12px 14px',
+            background: 'rgba(165,230,107,.12)',
+            borderRadius: 16,
+            border: '1px solid rgba(165,230,107,.25)',
+            marginBottom: 12,
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: 'rgba(165,230,107,.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A5E66B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 7l10 10-5 5V2l5 5L7 17"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#A5E66B', letterSpacing: '.03em' }}>측정기 연결됨 · CO-100</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 2, lineHeight: 1.4 }}>블루투스 권한을 허용해야 측정이 가능해요</div>
+            </div>
+            <div style={{
+              width: 8, height: 8, borderRadius: 999,
+              background: '#A5E66B',
+              boxShadow: '0 0 8px rgba(165,230,107,.8)',
+            }}/>
+          </div>
+
           <button onClick={onStart} className="ps-cta green ps-tap" style={{ height: 60 }}>
             <Icon name="wind" size={20}/>측정 시작
           </button>
@@ -2701,8 +2731,8 @@ Object.assign(window, { ScreenCOFlow, ScreenCOWarnings });
 
 const ITEMS = {
   color: [
-    { id: 'green',  label: '초록색', swatch: '#7DD957', locked: false },
-    { id: 'green',  label: '연두',     swatch: '#7DD957', locked: false },
+    { id: 'green',  label: '초록',     swatch: '#7DD957', locked: false },
+    { id: 'kiwi',   label: '키위',     swatch: '#5BC23B', locked: false },
     { id: 'yellow', label: '병아리',   swatch: '#FFB930', locked: false },
     { id: 'blue',   label: '하늘',     swatch: '#7FB8D9', locked: false },
     { id: 'pink',   label: '체리',     swatch: '#FF9DBF', locked: false },
@@ -2920,8 +2950,8 @@ function Capybara({ size = 180, mood = 'happy', accent = '#C8956A' }) {
 }
 
 // ── Character renderer with equipped items ──────────────────────────
-function DressedCapybara({ size, equip }) {
-  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#C8956A';
+function DressedSoomi({ size, equip }) {
+  const color = ITEMS.color.find(c => c.id === equip.color)?.swatch || '#7DD957';
   const mood  = ITEMS.face.find(f => f.id === equip.face)?.mood || 'happy';
   const tail  = ITEMS.tail.find(t => t.id === equip.tail);
   const horn  = ITEMS.horn.find(h => h.id === equip.horn);
@@ -2931,17 +2961,17 @@ function DressedCapybara({ size, equip }) {
   return (
     <div style={{ position: 'relative', width: size, height: size * 1.05 }}>
       {tail && tail.preview ? (
-        <div style={{ position: 'absolute', right: -10*s, bottom: 30*s, zIndex: 0 }}>{tail.preview(color, s)}</div>
+        <div style={{ position: 'absolute', right: -8*s, bottom: 38*s, zIndex: 0 }}>{tail.preview(color, s)}</div>
       ) : null}
-      <Capybara size={size} mood={mood} accent={color}/>
+      <Soomi size={size} mood={mood} accent={color}/>
       {pat && pat.preview ? (
-        <div style={{ position: 'absolute', left: 38*s, top: 82*s, width: 124*s, height: 80*s, zIndex: 1 }}>{pat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 40*s, top: 95*s, width: 120*s, height: 70*s, zIndex: 1, pointerEvents: 'none' }}>{pat.preview(color, s)}</div>
       ) : null}
       {horn && horn.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 2*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 18*s, top: 8*s, zIndex: 2 }}>{horn.preview(color, s)}</div>
       ) : null}
       {hat && hat.preview ? (
-        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -8*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
+        <div style={{ position: 'absolute', left: 100*s - 35*s, top: -4*s, zIndex: 3 }}>{hat.preview(color, s)}</div>
       ) : null}
     </div>
   );
@@ -2996,7 +3026,7 @@ function ScreenCharacter({ onNav = () => {} }) {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 6, position: 'relative', zIndex: 1 }}>
-            <div className="ps-anim-bob"><Soomi size={200} mood="happy" accent="#7DD957"/></div>
+            <div className="ps-anim-bob"><DressedSoomi size={200} equip={equip}/></div>
           </div>
 
           <div style={{ position: 'relative', zIndex: 1, marginTop: 4, display: 'flex', gap: 8 }}>
