@@ -3647,8 +3647,8 @@ function MobileApp({ initialRoute = 'splash' }) {
 
   const nav = (r) => {
     setRoute(r);
-    // Update URL hash to sync with App component
-    try { history.replaceState(null, '', '#' + r); } catch(_) {}
+    // Update URL hash to trigger hashchange event
+    try { location.hash = r; } catch(_) {}
     setTimeout(() => {
       const el = document.querySelector('[data-screen-label] .ps-content.scroll');
       if (el) el.scrollTop = 0;
