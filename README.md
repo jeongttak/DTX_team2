@@ -19,15 +19,20 @@
 
 ## 프로토타입 바로 열기
 
-### 환자 앱
-`share-patient.html` 을 브라우저에서 열거나, 아래 Netlify 배포 버전 사용:
+### 🌐 GitHub Pages 배포 버전
+**환자 앱**: https://jeongttak.github.io/DTX_team2/share-patient.html  
+**의사 대시보드**: https://jeongttak.github.io/DTX_team2/share-doctor.html  
+**랜딩 페이지**: https://jeongttak.github.io/DTX_team2/
+
+### 로컬 실행
+`docs/share-patient.html` 을 브라우저에서 열기
 
 ```
-netlify-deploy/
+docs/
 ├── index.html           ← 랜딩 페이지
 ├── share-patient.html   ← 환자 앱 풀 플로우
 ├── share-doctor.html    ← 의사 대시보드
-└── assets/logo.png
+└── assets/              ← 이미지 리소스
 ```
 
 ---
@@ -60,9 +65,16 @@ netlify-deploy/
 
 ## 실행 방법
 
+### 온라인 (권장)
+위의 GitHub Pages 배포 버전 URL 접속
+
+### 로컬
 ```bash
-# 그냥 브라우저에서 열면 됩니다
-open share-patient.html
+# docs 폴더에서 파일 열기
+open docs/share-patient.html
+# 또는
+cd docs && python -m http.server 8000
+# → http://localhost:8000/share-patient.html
 ```
 
 > ⚠️ CDN 로드를 위해 인터넷 연결 필요 (React, Babel)
