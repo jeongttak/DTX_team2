@@ -3647,6 +3647,8 @@ function MobileApp({ initialRoute = 'splash' }) {
 
   const nav = (r) => {
     setRoute(r);
+    // Update URL hash to sync with App component
+    try { history.replaceState(null, '', '#' + r); } catch(_) {}
     setTimeout(() => {
       const el = document.querySelector('[data-screen-label] .ps-content.scroll');
       if (el) el.scrollTop = 0;
@@ -3714,6 +3716,13 @@ Object.assign(window, { MobileApp });
       const [route, setRoute] = useState(hashRoute || 'splash');
 
       useEffect(() => {
+        // Listen to hash changes (from MobileApp nav calls)
+        const onHashChange = () => {
+          const newRoute = (location.hash || '').replace('#', '') || 'splash';
+          setRoute(newRoute);
+        };
+        window.addEventListener('hashchange', onHashChange);
+
         const onClick = (e) => {
           const btn = e.target.closest('[data-route]');
           if (!btn) return;
@@ -3723,7 +3732,10 @@ Object.assign(window, { MobileApp });
           try { history.replaceState(null, '', '#' + r); } catch(_) {}
         };
         document.getElementById('quick').addEventListener('click', onClick);
-        return () => document.getElementById('quick').removeEventListener('click', onClick);
+        return () => {
+          window.removeEventListener('hashchange', onHashChange);
+          document.getElementById('quick').removeEventListener('click', onClick);
+        };
       }, []);
 
       useEffect(() => {
