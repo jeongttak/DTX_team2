@@ -359,6 +359,7 @@
         <div class="quick" id="quick">
           <button data-route="splash" class="is-active"><span class="dot"></span>처음부터 (스플래시)</button>
           <button data-route="login"><span class="dot"></span>로그인</button>
+          <button data-route="signup"><span class="dot"></span>회원가입</button>
           <button data-route="onboarding"><span class="dot"></span>온보딩</button>
           <button data-route="home"><span class="dot"></span>홈</button>
           <button data-route="mission"><span class="dot"></span>미션</button>
@@ -643,7 +644,7 @@ Object.assign(window, { ScreenSplash });
 // Patient: doctor-pairing code + ID + password
 // Doctor: ID + password
 
-function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {} }) {
+function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {}, onSignup = () => {} }) {
   const [role, setRole] = React.useState('patient'); // 'patient' | 'doctor'
   const [doctorCode, setDoctorCode] = React.useState('');
   const [id, setId] = React.useState('');
@@ -653,6 +654,10 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {} }) {
     e.preventDefault();
     if (role === 'doctor') onDoctorLogin();
     else onPatientLogin();
+  };
+
+  const handleSignup = () => {
+    onSignup(role);
   };
 
   // shared input style
@@ -813,7 +818,7 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {} }) {
           }}>
             <span style={{ cursor: 'pointer' }}>비밀번호 찾기</span>
             <span style={{ width: 3, height: 3, borderRadius: 999, background: 'var(--ink-4)' }}/>
-            <span style={{ cursor: 'pointer', color: 'var(--green-700)' }}>
+            <span onClick={handleSignup} className="ps-tap" style={{ cursor: 'pointer', color: 'var(--green-700)' }}>
               {role === 'doctor' ? '의사 회원가입' : '환자 가입하기'}
             </span>
           </div>
@@ -831,6 +836,507 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {} }) {
 }
 
 Object.assign(window, { ScreenLogin });
+
+  </script>
+
+  <script type="text/babel">
+// screen-signup.jsx — 환자/의사 회원가입 with 의료동의서
+
+function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack = () => {} }) {
+  const [role, setRole] = React.useState(initialRole);
+  const [step, setStep] = React.useState(1); // 1: 정보입력, 2: 동의서
+
+  // Form fields
+  const [doctorCode, setDoctorCode] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [birthdate, setBirthdate] = React.useState('');
+  const [id, setId] = React.useState('');
+  const [pw, setPw] = React.useState('');
+  const [pwConfirm, setPwConfirm] = React.useState('');
+
+  // Consent checkboxes
+  const [agreePrivacy, setAgreePrivacy] = React.useState(false);
+  const [agreeMedical, setAgreeMedical] = React.useState(false);
+  const [agreeMarketing, setAgreeMarketing] = React.useState(false);
+
+  // Modal state
+  const [showModal, setShowModal] = React.useState(null); // 'privacy' | 'medical' | 'marketing'
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    if (step === 1) {
+      // Validate form
+      if (!name || !id || !pw || !pwConfirm) {
+        alert('필수 항목을 모두 입력해주세요.');
+        return;
+      }
+      if (pw !== pwConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+      if (role === 'patient' && !doctorCode) {
+        alert('의사 코드를 입력해주세요.');
+        return;
+      }
+      setStep(2);
+    } else {
+      // Validate consent
+      if (!agreePrivacy || !agreeMedical) {
+        alert('필수 동의 항목에 체크해주세요.');
+        return;
+      }
+      onComplete();
+    }
+  };
+
+  const handleAgreeAll = () => {
+    const allChecked = agreePrivacy && agreeMedical && agreeMarketing;
+    setAgreePrivacy(!allChecked);
+    setAgreeMedical(!allChecked);
+    setAgreeMarketing(!allChecked);
+  };
+
+  // Shared styles
+  const inputWrap = {
+    background: '#F4F7F5',
+    borderRadius: 16,
+    padding: '12px 16px',
+    border: '1.5px solid transparent',
+    transition: 'border-color .15s, background .15s',
+  };
+  const inputBase = {
+    width: '100%',
+    border: 'none',
+    background: 'transparent',
+    outline: 'none',
+    fontSize: 15,
+    fontWeight: 600,
+    color: 'var(--ink)',
+    fontFamily: 'inherit',
+    padding: 0,
+  };
+  const labelStyle = {
+    fontSize: 11, fontWeight: 800, color: 'var(--ink-3)',
+    letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 6,
+  };
+
+  return (
+    <div className="ps-screen" data-screen-label="회원가입" style={{
+      background: 'linear-gradient(180deg, #F2FBE6 0%, #FFFFFF 40%, #FFFFFF 100%)',
+      display: 'flex', flexDirection: 'column', position: 'relative',
+    }}>
+      <StatusBar />
+
+      <div style={{ flex: 1, overflow: 'auto', padding: '8px 28px 28px', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+          <button onClick={step === 1 ? onBack : () => setStep(1)} className="ps-tap" style={{
+            width: 36, height: 36, borderRadius: 999,
+            background: 'rgba(47,138,62,0.1)',
+            border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Icon name="back" size={18} color="var(--green-700)"/>
+          </button>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em' }}>
+              {step === 1 ? '계정 정보 입력' : '약관 동의'}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '.05em' }}>
+              {step}/2 단계
+            </div>
+          </div>
+        </div>
+
+        {step === 1 ? (
+          // Step 1: 정보 입력
+          <>
+            {/* Role toggle */}
+            <div className="ps-anim-fade-up" style={{
+              marginTop: 22,
+              background: '#EAF1EC',
+              borderRadius: 14, padding: 4,
+              display: 'flex', gap: 4,
+              animationDelay: '.05s',
+            }}>
+              {[
+                { v: 'patient', label: '환자' },
+                { v: 'doctor',  label: '의사' },
+              ].map(t => {
+                const on = role === t.v;
+                return (
+                  <button
+                    key={t.v}
+                    type="button"
+                    onClick={() => setRole(t.v)}
+                    className="ps-tap"
+                    style={{
+                      flex: 1, height: 40, border: 'none',
+                      borderRadius: 11,
+                      background: on ? 'white' : 'transparent',
+                      color: on ? 'var(--ink)' : 'var(--ink-3)',
+                      fontWeight: 800, fontSize: 13,
+                      boxShadow: on ? '0 2px 6px rgba(15,42,30,.06)' : 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    }}
+                  >
+                    <Icon name={t.v === 'doctor' ? 'shield' : 'heart'} size={14}/>
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Title */}
+            <div className="ps-anim-fade-up" style={{ marginTop: 28, animationDelay: '.1s' }}>
+              <h1 className="ps-h1" style={{ fontSize: 28, lineHeight: 1.15 }}>
+                {role === 'doctor' ? <>의료진<br/>회원가입</> : <>함께<br/>시작해볼까요?</>}
+              </h1>
+              <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, fontWeight: 500, lineHeight: 1.55 }}>
+                {role === 'doctor'
+                  ? '환자 모니터링을 위한 계정을 생성합니다.'
+                  : '금연 여정을 함께할 계정을 만들어요.'}
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleNext} className="ps-anim-fade-up" style={{
+              marginTop: 22, display: 'flex', flexDirection: 'column', gap: 14, animationDelay: '.15s',
+            }}>
+              {role === 'patient' && (
+                <div>
+                  <div style={labelStyle}>의사 코드 *</div>
+                  <div style={inputWrap}>
+                    <input
+                      type="text"
+                      value={doctorCode}
+                      onChange={e => setDoctorCode(e.target.value)}
+                      placeholder="예) DR-0427-MJ"
+                      style={inputBase}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div style={labelStyle}>이름 *</div>
+                <div style={inputWrap}>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="실명을 입력해주세요"
+                    style={inputBase}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={labelStyle}>생년월일</div>
+                <div style={inputWrap}>
+                  <input
+                    type="date"
+                    value={birthdate}
+                    onChange={e => setBirthdate(e.target.value)}
+                    style={inputBase}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={labelStyle}>아이디 (이메일) *</div>
+                <div style={inputWrap}>
+                  <input
+                    type="email"
+                    value={id}
+                    onChange={e => setId(e.target.value)}
+                    placeholder={role === 'doctor' ? '병원 이메일' : 'example@email.com'}
+                    autoComplete="username"
+                    style={inputBase}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={labelStyle}>비밀번호 *</div>
+                <div style={inputWrap}>
+                  <input
+                    type="password"
+                    value={pw}
+                    onChange={e => setPw(e.target.value)}
+                    placeholder="8자 이상 입력"
+                    autoComplete="new-password"
+                    style={inputBase}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={labelStyle}>비밀번호 확인 *</div>
+                <div style={inputWrap}>
+                  <input
+                    type="password"
+                    value={pwConfirm}
+                    onChange={e => setPwConfirm(e.target.value)}
+                    placeholder="비밀번호 재입력"
+                    autoComplete="new-password"
+                    style={inputBase}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="ps-cta green ps-tap" style={{ marginTop: 20, height: 54, fontSize: 16 }}>
+                다음 단계
+                <Icon name="chev" size={18} color="white"/>
+              </button>
+            </form>
+          </>
+        ) : (
+          // Step 2: 약관 동의
+          <>
+            {/* Title */}
+            <div className="ps-anim-fade-up" style={{ marginTop: 28, animationDelay: '.1s' }}>
+              <h1 className="ps-h1" style={{ fontSize: 28, lineHeight: 1.15 }}>
+                서비스 이용을 위한<br/>약관 동의
+              </h1>
+              <p style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 8, fontWeight: 500, lineHeight: 1.55 }}>
+                디지털 치료제 특성상 의료정보 수집이 필요합니다.
+              </p>
+            </div>
+
+            {/* 전체 동의 */}
+            <div className="ps-anim-fade-up" style={{
+              marginTop: 22, padding: '16px 18px',
+              background: 'var(--green-50)',
+              borderRadius: 16,
+              display: 'flex', alignItems: 'center', gap: 12,
+              animationDelay: '.1s',
+              border: '2px solid var(--green-200)',
+            }}>
+              <input
+                type="checkbox"
+                id="agree-all"
+                checked={agreePrivacy && agreeMedical && agreeMarketing}
+                onChange={handleAgreeAll}
+                style={{ width: 22, height: 22, cursor: 'pointer', accentColor: 'var(--green-600)' }}
+              />
+              <label htmlFor="agree-all" style={{ flex: 1, fontSize: 15, fontWeight: 800, color: 'var(--green-700)', cursor: 'pointer' }}>
+                전체 동의
+              </label>
+            </div>
+
+            {/* 개별 동의 항목 */}
+            <div className="ps-anim-fade-up" style={{
+              marginTop: 16, display: 'flex', flexDirection: 'column', gap: 12, animationDelay: '.15s',
+            }}>
+              {/* 개인정보 수집·이용 동의 */}
+              <div style={{
+                padding: '14px 16px',
+                background: 'white',
+                borderRadius: 14,
+                border: '1.5px solid var(--line)',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <input
+                  type="checkbox"
+                  id="agree-privacy"
+                  checked={agreePrivacy}
+                  onChange={e => setAgreePrivacy(e.target.checked)}
+                  style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--green-600)' }}
+                />
+                <label htmlFor="agree-privacy" style={{ flex: 1, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  개인정보 수집·이용 동의 <span style={{ color: 'var(--danger)' }}>(필수)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowModal('privacy')}
+                  className="ps-tap"
+                  style={{
+                    padding: '4px 10px',
+                    background: 'var(--line)',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--ink-2)',
+                  }}
+                >
+                  보기
+                </button>
+              </div>
+
+              {/* 의료정보 제3자 제공 동의 */}
+              <div style={{
+                padding: '14px 16px',
+                background: 'white',
+                borderRadius: 14,
+                border: '1.5px solid var(--line)',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <input
+                  type="checkbox"
+                  id="agree-medical"
+                  checked={agreeMedical}
+                  onChange={e => setAgreeMedical(e.target.checked)}
+                  style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--green-600)' }}
+                />
+                <label htmlFor="agree-medical" style={{ flex: 1, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  의료정보 제3자 제공 동의 <span style={{ color: 'var(--danger)' }}>(필수)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowModal('medical')}
+                  className="ps-tap"
+                  style={{
+                    padding: '4px 10px',
+                    background: 'var(--line)',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--ink-2)',
+                  }}
+                >
+                  보기
+                </button>
+              </div>
+
+              {/* 마케팅 정보 수신 동의 */}
+              <div style={{
+                padding: '14px 16px',
+                background: 'white',
+                borderRadius: 14,
+                border: '1.5px solid var(--line)',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <input
+                  type="checkbox"
+                  id="agree-marketing"
+                  checked={agreeMarketing}
+                  onChange={e => setAgreeMarketing(e.target.checked)}
+                  style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--green-600)' }}
+                />
+                <label htmlFor="agree-marketing" style={{ flex: 1, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  마케팅 정보 수신 동의 <span style={{ color: 'var(--ink-3)' }}>(선택)</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowModal('marketing')}
+                  className="ps-tap"
+                  style={{
+                    padding: '4px 10px',
+                    background: 'var(--line)',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--ink-2)',
+                  }}
+                >
+                  보기
+                </button>
+              </div>
+            </div>
+
+            <button onClick={handleNext} className="ps-cta green ps-tap" style={{ marginTop: 'auto', height: 54, fontSize: 16 }}>
+              가입 완료
+              <Icon name="chev" size={18} color="white"/>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* 동의서 상세 모달 */}
+      {showModal && (
+        <div style={{
+          position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'flex-end', zIndex: 100,
+        }} onClick={() => setShowModal(null)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: '100%', maxHeight: '80%',
+            background: 'white', borderRadius: '24px 24px 0 0',
+            padding: '24px 28px 32px',
+            overflow: 'auto',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)' }}>
+                {showModal === 'privacy' && '개인정보 수집·이용 동의'}
+                {showModal === 'medical' && '의료정보 제3자 제공 동의'}
+                {showModal === 'marketing' && '마케팅 정보 수신 동의'}
+              </h2>
+              <button onClick={() => setShowModal(null)} className="ps-tap" style={{
+                width: 32, height: 32, borderRadius: 999,
+                background: 'var(--line)', border: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Icon name="close" size={16}/>
+              </button>
+            </div>
+            <div style={{ fontSize: 13, lineHeight: 1.8, color: 'var(--ink-2)', whiteSpace: 'pre-line' }}>
+              {showModal === 'privacy' && `
+1. 수집 항목
+- 필수: 이름, 생년월일, 이메일, 비밀번호
+- 선택: 의사 매칭 코드
+
+2. 수집 목적
+- 회원 관리 및 본인 확인
+- 금연 치료 서비스 제공
+- 의사-환자 매칭
+
+3. 보유 기간
+- 회원 탈퇴 시까지 (단, 관련 법령에 따라 일부 정보는 보관)
+
+4. 동의 거부 권리
+- 귀하는 개인정보 수집·이용에 동의하지 않을 권리가 있습니다.
+- 다만, 필수 항목 미동의 시 서비스 이용이 제한됩니다.
+              `}
+              {showModal === 'medical' && `
+1. 제공받는 자
+- 담당 의사 및 의료기관
+
+2. 제공 항목
+- 금연 진행 상황 (CO 측정값, 흡연 기록)
+- 미션 수행 내역
+- CBT 대화 기록
+- 건강 지표 변화
+
+3. 제공 목적
+- 의료진의 환자 모니터링
+- 맞춤형 처방 및 코칭
+- 금연 성공률 향상
+
+4. 보유 기간
+- 치료 종료 후 5년 (의료법 준수)
+
+5. 동의 거부 권리
+- 귀하는 의료정보 제공에 동의하지 않을 권리가 있습니다.
+- 다만, 미동의 시 의사 연동 서비스 이용이 불가능합니다.
+              `}
+              {showModal === 'marketing' && `
+1. 수신 내용
+- 금연 관련 건강 정보
+- 이벤트 및 혜택 안내
+- 서비스 업데이트 소식
+
+2. 수신 방법
+- 이메일, 앱 푸시 알림
+
+3. 동의 철회
+- 앱 설정 > 알림 설정에서 언제든 철회 가능
+
+4. 동의 거부 권리
+- 귀하는 마케팅 정보 수신에 동의하지 않을 권리가 있습니다.
+- 미동의 시에도 서비스 이용에는 제한이 없습니다.
+              `}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { ScreenSignup });
 
   </script>
 
@@ -3138,6 +3644,7 @@ const PS_VISITED_KEY = 'ps_visited_v1';
 
 function MobileApp({ initialRoute = 'splash' }) {
   const [route, setRoute] = useState(initialRoute);
+  const [signupRole, setSignupRole] = useState('patient');
 
   const nav = (r) => {
     setRoute(r);
@@ -3148,6 +3655,15 @@ function MobileApp({ initialRoute = 'splash' }) {
   };
 
   const handleSplashDone = () => nav('login');
+
+  const handleSignup = (role) => {
+    setSignupRole(role);
+    nav('signup');
+  };
+
+  const handleSignupComplete = () => {
+    nav('onboarding');
+  };
 
   const handlePatientLogin = () => {
     let visited = false;
@@ -3172,7 +3688,8 @@ function MobileApp({ initialRoute = 'splash' }) {
   return (
     <div key={route} className="ps-anim-fade-up" style={{ width: '100%', height: '100%' }}>
       {route === 'splash'     && <ScreenSplash onComplete={handleSplashDone}/>}
-      {route === 'login'      && <ScreenLogin onPatientLogin={handlePatientLogin} onDoctorLogin={handleDoctorLogin}/>}
+      {route === 'login'      && <ScreenLogin onPatientLogin={handlePatientLogin} onDoctorLogin={handleDoctorLogin} onSignup={handleSignup}/>}
+      {route === 'signup'     && <ScreenSignup initialRole={signupRole} onComplete={handleSignupComplete} onBack={() => nav('login')}/>}
       {route === 'onboarding' && <ScreenOnboarding onComplete={handleOnboardingComplete}/>}
       {route === 'home'       && <ScreenHome onNav={nav}/>}
       {route === 'mission'    && <ScreenMissions onNav={nav}/>}

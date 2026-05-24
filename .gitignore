@@ -2,5 +2,14 @@
 .DS_Store
 Thumbs.db
 
+# 문서 파일 (컨텍스트 크기 줄이기)
+교안/
+과제/
+*.hwp
+*.pptx
+
+# 이미지 파일 (필요시 제외)
+퓨어리숨*.png
+
 # Local Netlify folder
 .netlify
