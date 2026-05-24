@@ -2951,8 +2951,8 @@ const ITEMS = {
     { id: 'yellow', label: '병아리',   swatch: '#FFB930', locked: false },
     { id: 'blue',   label: '하늘',     swatch: '#7FB8D9', locked: false },
     { id: 'pink',   label: '체리',     swatch: '#FF9DBF', locked: false },
-    { id: 'purple', label: '라벤더',   swatch: '#A89BF5', locked: true },
-    { id: 'orange', label: '감귤',     swatch: '#FF7A2E', locked: true },
+    { id: 'purple', label: '라벤더',   swatch: '#A89BF5', locked: true, cost: 300 },
+    { id: 'orange', label: '감귤',     swatch: '#FF7A2E', locked: true, cost: 500 },
   ],
   tail: [
     { id: 'none',   label: '없음',     locked: false, preview: () => null },
@@ -2974,12 +2974,12 @@ const ITEMS = {
               fill="none" stroke="#6F44E2" strokeWidth="8" strokeLinecap="round"/>
       </svg>
     )},
-    { id: 'spike',  label: '뾰족 꼬리', locked: true, preview: (c, s = 1) => (
+    { id: 'spike',  label: '뾰족 꼬리', locked: true, cost: 400, preview: (c, s = 1) => (
       <svg width={50*s} height={30*s} viewBox="0 0 50 30">
         <path d="M5 20 L 30 6 L 35 14 L 45 4 L 42 18 L 28 18 Z" fill="#0F2A1E"/>
       </svg>
     )},
-    { id: 'glow',   label: '반딧불 꼬리', locked: true, preview: (c, s = 1) => (
+    { id: 'glow',   label: '반딧불 꼬리', locked: true, cost: 800, preview: (c, s = 1) => (
       <svg width={56*s} height={36*s} viewBox="0 0 56 36">
         <circle cx="48" cy="14" r="8" fill="#FFE066"/>
         <circle cx="48" cy="14" r="14" fill="#FFE066" opacity="0.3"/>
@@ -3006,14 +3006,14 @@ const ITEMS = {
         <path d="M22 18 Q 22 4 28 6 Q 30 14 30 18 Z" fill="#A89BF5"/>
       </svg>
     )},
-    { id: 'crystal',label: '크리스탈',  locked: true, preview: (c, s = 1) => (
+    { id: 'crystal',label: '크리스탈',  locked: true, cost: 600, preview: (c, s = 1) => (
       <svg width={32*s} height={42*s} viewBox="0 0 32 42">
         <path d="M16 0 L 26 14 L 22 40 L 10 40 L 6 14 Z" fill="#7FB8D9"/>
         <path d="M16 0 L 26 14 L 16 18 Z" fill="#A8D4ED"/>
         <path d="M16 0 L 6 14 L 16 18 Z" fill="#5A9DC4"/>
       </svg>
     )},
-    { id: 'branch', label: '나뭇가지',  locked: true, preview: (c, s = 1) => (
+    { id: 'branch', label: '나뭇가지',  locked: true, cost: 700, preview: (c, s = 1) => (
       <svg width={42*s} height={44*s} viewBox="0 0 42 44">
         <path d="M21 42 L 21 14 M 21 26 L 10 16 M 21 22 L 32 12 M 21 18 L 14 8 M 21 14 L 28 6"
               stroke="#6B4423" strokeWidth="4" strokeLinecap="round" fill="none"/>
@@ -3045,7 +3045,7 @@ const ITEMS = {
         <path d="M55 55 l2 4 4 0.5 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -0.5z" fill="white" opacity=".85"/>
       </svg>
     )},
-    { id: 'leaf',   label: '잎무늬',    locked: true, preview: (c, s = 1) => (
+    { id: 'leaf',   label: '잎무늬',    locked: true, cost: 350, preview: (c, s = 1) => (
       <svg width={120*s} height={80*s} viewBox="0 0 120 80" style={{ pointerEvents: 'none' }}>
         <path d="M20 30 q10 -14 22 -4 q-2 14 -22 4z" fill="rgba(47,138,62,.4)"/>
         <path d="M70 50 q10 -14 22 -4 q-2 14 -22 4z" fill="rgba(47,138,62,.4)"/>
@@ -3057,7 +3057,7 @@ const ITEMS = {
     { id: 'chill',   label: '심심',   locked: false, mood: 'chill' },
     { id: 'sleepy',  label: '꾸벅',   locked: false, mood: 'sleepy' },
     { id: 'proud',   label: '뿌듯',   locked: false, mood: 'proud' },
-    { id: 'worried', label: '걱정',   locked: true,  mood: 'worried' },
+    { id: 'worried', label: '걱정',   locked: true,  cost: 200, mood: 'worried' },
   ],
   hat: [
     { id: 'none',   label: '없음',     locked: false, preview: () => null },
@@ -3075,14 +3075,14 @@ const ITEMS = {
         <path d="M40 34 L 78 32 L 78 26 L 40 24 Z" fill="#0F2A1E"/>
       </svg>
     )},
-    { id: 'crown',  label: '왕관',     locked: true,  preview: (c, s = 1) => (
+    { id: 'crown',  label: '왕관',     locked: true,  cost: 1000, preview: (c, s = 1) => (
       <svg width={70*s} height={32*s} viewBox="0 0 70 32">
         <path d="M5 28 L 10 6 L 22 18 L 35 4 L 48 18 L 60 6 L 65 28 Z" fill="#FFB930"/>
         <rect x="5" y="26" width="60" height="4" fill="#D08A00"/>
         <circle cx="35" cy="14" r="3" fill="#E65A4A"/>
       </svg>
     )},
-    { id: 'top',    label: '실크햇',   locked: true,  preview: (c, s = 1) => (
+    { id: 'top',    label: '실크햇',   locked: true,  cost: 900, preview: (c, s = 1) => (
       <svg width={70*s} height={42*s} viewBox="0 0 70 42">
         <rect x="20" y="2" width="30" height="28" fill="#0F2A1E"/>
         <rect x="20" y="22" width="30" height="4" fill="#E65A4A"/>
@@ -3378,6 +3378,17 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
           <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>{items.filter(i => !i.locked).length} / {items.length} 보유</div>
         </div>
 
+        {/* 잠금 해제 안내 */}
+        {items.some(i => i.locked) && (
+          <div style={{ marginTop: 10, padding: '10px 12px', background: 'linear-gradient(135deg, #FFF4DC, #FFE6E1)', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 20 }}>💡</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>미션·인증으로 포인트를 모아 해금하세요!</div>
+              <div style={{ fontSize: 10, color: 'var(--ink-3)', marginTop: 2 }}>현재 보유: <strong>1,240</strong> <Icon name="bolt" size={10} color="#FFB930"/> (상단 표시)</div>
+            </div>
+          </div>
+        )}
+
         {/* Item grid */}
         <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {items.map(it => {
@@ -3390,10 +3401,19 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
                    : it.id === 'none' ? <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>
                    : it.preview ? <div style={{ transform: 'scale(0.85)' }}>{it.preview('', 0.85)}</div>
                    : null}
-                  {it.locked ? <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔒</div> : null}
+                  {it.locked ? (
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,.85)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 2 }}>
+                      <div style={{ fontSize: 24 }}>🔒</div>
+                    </div>
+                  ) : null}
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: it.locked ? 'var(--ink-3)' : 'var(--ink)' }}>{it.label}</div>
-                {it.locked ? <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>500P</div> : isPicked ? <div style={{ fontSize: 9, color: 'var(--green-700)', fontWeight: 800 }}>착용 중</div> : null}
+                {it.locked ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 8px', borderRadius: 999, background: '#FFB930', marginTop: 2 }}>
+                    <Icon name="bolt" size={10} color="white"/>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: 'white' }}>{it.cost}</span>
+                  </div>
+                ) : isPicked ? <div style={{ fontSize: 9, color: 'var(--green-700)', fontWeight: 800 }}>착용 중</div> : null}
               </button>
             );
           })}
