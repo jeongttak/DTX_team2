@@ -698,7 +698,7 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {}, onSi
         {/* Brand */}
         <div className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 11,
+            width: 36, height: 36, borderRadius: 12,
             background: 'linear-gradient(135deg, #7DD957, #5BC23B)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 12px rgba(91,194,59,.25)',
@@ -715,7 +715,7 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {}, onSi
         <div className="ps-anim-fade-up" style={{
           marginTop: 22,
           background: '#EAF1EC',
-          borderRadius: 14, padding: 4,
+          borderRadius: 16, padding: 4,
           display: 'flex', gap: 4,
           animationDelay: '.05s',
         }}>
@@ -732,7 +732,7 @@ function ScreenLogin({ onPatientLogin = () => {}, onDoctorLogin = () => {}, onSi
                 className="ps-tap"
                 style={{
                   flex: 1, height: 40, border: 'none',
-                  borderRadius: 11,
+                  borderRadius: 12,
                   background: on ? 'white' : 'transparent',
                   color: on ? 'var(--ink)' : 'var(--ink-3)',
                   fontWeight: 800, fontSize: 13,
@@ -955,7 +955,7 @@ function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack =
             <div className="ps-anim-fade-up" style={{
               marginTop: 22,
               background: '#EAF1EC',
-              borderRadius: 14, padding: 4,
+              borderRadius: 16, padding: 4,
               display: 'flex', gap: 4,
               animationDelay: '.05s',
             }}>
@@ -972,7 +972,7 @@ function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack =
                     className="ps-tap"
                     style={{
                       flex: 1, height: 40, border: 'none',
-                      borderRadius: 11,
+                      borderRadius: 12,
                       background: on ? 'white' : 'transparent',
                       color: on ? 'var(--ink)' : 'var(--ink-3)',
                       fontWeight: 800, fontSize: 13,
@@ -1133,7 +1133,7 @@ function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack =
               <div style={{
                 padding: '14px 16px',
                 background: 'white',
-                borderRadius: 14,
+                borderRadius: 16,
                 border: '1.5px solid var(--line)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
@@ -1169,7 +1169,7 @@ function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack =
               <div style={{
                 padding: '14px 16px',
                 background: 'white',
-                borderRadius: 14,
+                borderRadius: 16,
                 border: '1.5px solid var(--line)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
@@ -1205,7 +1205,7 @@ function ScreenSignup({ initialRole = 'patient', onComplete = () => {}, onBack =
               <div style={{
                 padding: '14px 16px',
                 background: 'white',
-                borderRadius: 14,
+                borderRadius: 16,
                 border: '1.5px solid var(--line)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
@@ -1345,7 +1345,7 @@ Object.assign(window, { ScreenSignup });
 const onboardingStyles = {
   bg: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #E5F8D0 0%, #F2FBE6 40%, #FFFFFF 100%)', zIndex: 0 },
   resultBg: { position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #C9F08D 0%, #E5F8D0 30%, #FFFFFF 60%)', zIndex: 0 },
-  qcard: { background: 'white', borderRadius: 26, padding: 24, boxShadow: 'var(--shadow-md)', marginTop: 22 },
+  qcard: { background: 'white', borderRadius: 24, padding: 24, boxShadow: 'var(--shadow-md)', marginTop: 22 },
   qnum:  { display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--green-700)', fontWeight: 800, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' },
   qbody: { fontSize: 21, fontWeight: 700, color: 'var(--ink)', lineHeight: 1.3, letterSpacing: '-0.02em', marginTop: 14, marginBottom: 22 },
 };
@@ -1534,7 +1534,7 @@ function OnboardingResult({ answers, onReset, onComplete }) {
         </div>
 
         {/* One-liner summary card */}
-        <div style={{ marginTop: 16, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', borderLeft: `4px solid ${top?.color}` }}>
+        <div style={{ marginTop: 16, background: 'white', borderRadius: 16, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', borderLeft: `4px solid ${top?.color}` }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', textTransform: 'uppercase' }}>한 줄 요약</div>
           <div style={{ fontSize: 13, marginTop: 4, color: 'var(--ink)', lineHeight: 1.5 }}>당신의 흡연 패턴은 <strong>{summaryLine}</strong>입니다.</div>
         </div>
@@ -1542,8 +1542,8 @@ function OnboardingResult({ answers, onReset, onComplete }) {
         {/* Breakdown list */}
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {breakdown.map((t, i) => (
-            <div key={t.key} className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', animationDelay: (i * 80) + 'ms' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 14, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+            <div key={t.key} className="ps-anim-fade-up" style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'white', borderRadius: 16, padding: '14px 16px', boxShadow: 'var(--shadow-sm)', animationDelay: (i * 80) + 'ms' }}>
+              <div style={{ width: 44, height: 44, borderRadius: 16, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
                 <Icon name={t.icon} size={22}/>
               </div>
               <div style={{ flex: 1 }}>
@@ -1559,13 +1559,13 @@ function OnboardingResult({ answers, onReset, onComplete }) {
         {top ? (
           <div style={{ marginTop: 16, background: 'white', borderRadius: 22, padding: 16, boxShadow: 'var(--shadow-md)', border: '1.5px solid ' + top.color + '55' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: top.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="sparkle" size={16}/></div>
+              <div style={{ width: 32, height: 32, borderRadius: 12, background: top.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="sparkle" size={16}/></div>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 800, color: top.color, letterSpacing: '.05em', textTransform: 'uppercase' }}>맞춤 코칭 미리보기</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{top.label}을 위한 코칭</div>
               </div>
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--ink)', padding: '12px 14px', background: 'var(--green-50)', borderRadius: 14 }}>"{top.coach}"</div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--ink)', padding: '12px 14px', background: 'var(--green-50)', borderRadius: 16 }}>"{top.coach}"</div>
 
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 6 }}>추천 미션</div>
@@ -1691,7 +1691,7 @@ function StepStateCheck({ urge, setUrge, emo, setEmo, onNext }) {
           {emotions.map(e => {
             const on = emo.includes(e.id);
             return (
-              <button key={e.id} onClick={() => toggle(e.id)} className="ps-tap" style={{ background: on ? 'var(--ink)' : 'white', color: on ? 'white' : 'var(--ink)', border: '1.5px solid ' + (on ? 'var(--ink)' : 'var(--line)'), borderRadius: 18, padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <button key={e.id} onClick={() => toggle(e.id)} className="ps-tap" style={{ background: on ? 'var(--ink)' : 'white', color: on ? 'white' : 'var(--ink)', border: '1.5px solid ' + (on ? 'var(--ink)' : 'var(--line)'), borderRadius: 16, padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 12, background: on ? 'rgba(255,255,255,.12)' : e.color + '22', color: on ? 'white' : e.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name={e.icon} size={20}/></div>
                 <div style={{ fontSize: 12, fontWeight: 700 }}>{e.label}</div>
               </button>
@@ -1763,7 +1763,7 @@ function StepTriggerLog({ where, setWhere, who, setWho, didSmoke, setDidSmoke, o
       </div>
 
       {/* Free note */}
-      <div style={{ marginTop: 16, background: 'white', borderRadius: 18, padding: 14, border: '1px solid var(--line)' }}>
+      <div style={{ marginTop: 16, background: 'white', borderRadius: 16, padding: 14, border: '1px solid var(--line)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink-3)', letterSpacing: '.05em' }}>한 줄 메모 (선택)</div>
         <div style={{ marginTop: 6, fontSize: 13, color: 'var(--ink-3)' }}>3시 회의 끝나고 옥상 갈 뻔…</div>
       </div>
@@ -1786,17 +1786,17 @@ function StepSocratic({ answer, setAnswer, onNext }) {
       </div>
 
       <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 14, padding: '10px 14px', border: '1px solid var(--line)' }}>
+        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 16, padding: '10px 14px', border: '1px solid var(--line)' }}>
           <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q1 · 어떤 생각이 떠올랐나요?</div>
           <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"한 대만 피우면 진정될 거야"</div>
         </div>
-        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 14, padding: '10px 14px', border: '1px solid var(--line)' }}>
+        <div style={{ background: 'rgba(255,255,255,.6)', borderRadius: 16, padding: '10px 14px', border: '1px solid var(--line)' }}>
           <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>Q2 · 그 생각이 사실이라는 근거는?</div>
           <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>"지금까지 진정됐던 기억이 많아서"</div>
         </div>
       </div>
 
-      <div style={{ marginTop: 14, background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)', border: '2px solid var(--green-400)' }}>
+      <div style={{ marginTop: 14, background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-sm)', border: '2px solid var(--green-400)' }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green-700)', letterSpacing: '.05em', textTransform: 'uppercase' }}>당신의 답변</div>
         <textarea
           value={answer}
@@ -1825,11 +1825,11 @@ function StepDone({ onReset, onComplete }) {
       <div className="ps-muted" style={{ fontSize: 14, marginTop: 8 }}>충동은 보통 3–5분이면 사라져요.<br/>한 번 더 폐가 회복할 시간을 벌었어요.</div>
 
       <div style={{ marginTop: 26, display: 'flex', gap: 10, padding: '0 4px' }}>
-        <div style={{ flex: 1, background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ flex: 1, background: 'white', borderRadius: 16, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>획득 XP</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#9A6A00', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}><Icon name="bolt" size={18}/>+90</div>
         </div>
-        <div style={{ flex: 1, background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ flex: 1, background: 'white', borderRadius: 16, padding: 14, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>스트릭</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green-700)', marginTop: 2 }}>27일</div>
         </div>
@@ -1866,12 +1866,12 @@ const homeStyles = {
   metric: {
     flex: 1,
     background: 'white',
-    borderRadius: 20,
+    borderRadius: 16,
     padding: '14px 14px 12px',
     boxShadow: 'var(--shadow-sm)',
     display: 'flex', flexDirection: 'column', gap: 4,
   },
-  metricIcon: (bg, fg) => ({ width: 32, height: 32, borderRadius: 10, background: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }),
+  metricIcon: (bg, fg) => ({ width: 32, height: 32, borderRadius: 12, background: bg, color: fg, display: 'flex', alignItems: 'center', justifyContent: 'center' }),
 };
 
 function ScreenHome({ onNav = () => {} }) {
@@ -1910,7 +1910,7 @@ function ScreenHome({ onNav = () => {} }) {
                 />
                 <div className="ps-anim-fade-up" style={{
                   position: 'absolute', top: 52, left: 20, zIndex: 19,
-                  width: 240, background: 'white', borderRadius: 18,
+                  width: 240, background: 'white', borderRadius: 16,
                   boxShadow: '0 12px 32px rgba(15,42,30,.18), 0 2px 8px rgba(15,42,30,.06)',
                   border: '1px solid rgba(15,42,30,0.06)',
                   padding: 6,
@@ -1984,8 +1984,8 @@ function ScreenHome({ onNav = () => {} }) {
           {/* Streak card — new */}
           <StreakCard days={5} week={[true, true, true, true, true, false, false]} todayIdx={4}/>
           {/* Trigger alert banner */}
-          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #FFF4DC 0%, #FFE6E1 100%)', borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(242,169,59,.3)' }}>
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D08A3D', flexShrink: 0 }}><Icon name="bolt" size={22}/></div>
+          <div style={{ marginTop: 14, background: 'linear-gradient(135deg, #FFF4DC 0%, #FFE6E1 100%)', borderRadius: 16, padding: 16, display: 'flex', alignItems: 'center', gap: 12, border: '1px solid rgba(242,169,59,.3)' }}>
+            <div style={{ width: 44, height: 44, borderRadius: 16, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D08A3D', flexShrink: 0 }}><Icon name="bolt" size={22}/></div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#D08A3D', letterSpacing: '.05em', textTransform: 'uppercase' }}>오늘의 트리거 감지</div>
               <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: 'var(--ink)' }}>점심 직후, 충동이 올 시간이에요</div>
@@ -2029,7 +2029,7 @@ function ScreenHome({ onNav = () => {} }) {
 
           {/* Daily CO check CTA */}
           <button onClick={() => onNav('co')} className="ps-tap" style={{ marginTop: 16, width: '100%', background: 'linear-gradient(135deg, #7DD957 0%, #5BC23B 100%)', border: 'none', borderRadius: 24, padding: '18px 18px', display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 10px 24px rgba(91,194,59,.30)', color: 'white', textAlign: 'left' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 18, background: 'rgba(255,255,255,.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Icon name="wind" size={28} color="white"/>
             </div>
             <div style={{ flex: 1 }}>
@@ -2053,7 +2053,7 @@ function ScreenHome({ onNav = () => {} }) {
               { rk: 3, name: '민준 (나)', days: 5,  mine: true,  color: '#D08A3D' },
               { rk: 4, name: '서연',     days: 3,  mine: false, color: 'transparent' },
             ].map(r => (
-              <div key={r.rk} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: r.mine ? 'var(--green-50)' : 'transparent', borderRadius: 14, margin: '2px 8px' }}>
+              <div key={r.rk} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: r.mine ? 'var(--green-50)' : 'transparent', borderRadius: 16, margin: '2px 8px' }}>
                 <div style={{ width: 28, height: 28, borderRadius: 9, background: r.color === 'transparent' ? 'var(--green-50)' : r.color, color: r.color === 'transparent' ? 'var(--ink-2)' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13 }}>
                   {r.rk <= 3 ? (r.rk === 1 ? <Icon name="crown" size={16} color="white"/> : r.rk) : r.rk}
                 </div>
@@ -2290,7 +2290,7 @@ function ScreenMissions({ onNav = () => {} }) {
             </div>
 
             {/* XP summary */}
-            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, background: 'white', borderRadius: 18, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, background: 'white', borderRadius: 16, padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FFEFC8', color: '#9A6A00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bolt" size={20}/></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700 }}>오늘 획득 XP</div>
@@ -2310,9 +2310,9 @@ function ScreenMissions({ onNav = () => {} }) {
 
         {/* Tabs */}
         <div style={{ padding: '18px 20px 0', position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
-          <div style={{ display: 'flex', background: 'var(--green-50)', borderRadius: 14, padding: 4, gap: 4 }}>
+          <div style={{ display: 'flex', background: 'var(--green-50)', borderRadius: 16, padding: 4, gap: 4 }}>
             {[{id:'daily',label:'일일'},{id:'weekly',label:'주간'},{id:'monthly',label:'월간'}].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, height: 38, border: 'none', borderRadius: 11, background: tab === t.id ? 'white' : 'transparent', color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)', fontWeight: 700, fontSize: 14, boxShadow: tab === t.id ? '0 2px 6px rgba(15,42,30,.06)' : 'none', cursor: 'pointer' }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, height: 38, border: 'none', borderRadius: 12, background: tab === t.id ? 'white' : 'transparent', color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)', fontWeight: 700, fontSize: 14, boxShadow: tab === t.id ? '0 2px 6px rgba(15,42,30,.06)' : 'none', cursor: 'pointer' }}>{t.label}</button>
             ))}
           </div>
 
@@ -2344,7 +2344,7 @@ function MissionRow({ m, done, onAction }) {
   return (
     <div className="ps-anim-fade-up" style={{
       background: 'white',
-      borderRadius: 20,
+      borderRadius: 16,
       padding: 14,
       boxShadow: 'var(--shadow-sm)',
       border: done ? '1.5px solid var(--green-300)' : auto ? '1px solid var(--lung-blue-50)' : '1px solid var(--line)',
@@ -2353,7 +2353,7 @@ function MissionRow({ m, done, onAction }) {
       position: 'relative',
       transition: 'all .25s',
     }}>
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: m.iconBg, color: m.iconFg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name={m.icon} size={24}/></div>
+      <div style={{ width: 48, height: 48, borderRadius: 16, background: m.iconBg, color: m.iconFg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name={m.icon} size={24}/></div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -2503,7 +2503,7 @@ function COIdle({ onStart, onNav }) {
             marginBottom: 12,
           }}>
             <div style={{
-              width: 32, height: 32, borderRadius: 10,
+              width: 32, height: 32, borderRadius: 12,
               background: 'rgba(165,230,107,.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
@@ -2586,7 +2586,7 @@ function COMeasuring({ progress, coVal, onCancel }) {
         </div>
 
         <div style={{ padding: '0 20px 30px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', borderRadius: 18, padding: 14, color: 'white', fontSize: 12, display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(255,255,255,0.12)' }}>
+          <div style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', borderRadius: 16, padding: 14, color: 'white', fontSize: 12, display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(255,255,255,0.12)' }}>
             <Icon name="shield" size={18} color="#A5E66B"/>
             <span style={{ opacity: .8 }}>측정기가 자동으로 결과를 기록해요. 의사에게 공유됩니다.</span>
           </div>
@@ -2629,7 +2629,7 @@ function COResult({ onReset, onNav }) {
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                   <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--ink)' }}>{v}</div>
                   <div className="ps-anim-fade-up" style={{ width: '100%', height: v * 6 + 'px', background: tone, borderRadius: '8px 8px 4px 4px', position: 'relative', animationDelay: (i * 50) + 'ms' }}>
-                    {i === 6 ? <div style={{ position: 'absolute', inset: -3, borderRadius: 10, border: '2px dashed var(--green-700)' }}/> : null}
+                    {i === 6 ? <div style={{ position: 'absolute', inset: -3, borderRadius: 12, border: '2px dashed var(--green-700)' }}/> : null}
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{['월','화','수','목','금','토','오늘'][i]}</div>
                 </div>
@@ -2648,10 +2648,10 @@ function COResult({ onReset, onNav }) {
         </div>
 
         <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
-          <button className="ps-tap" style={{ flex: 1, height: 56, borderRadius: 18, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 700, color: 'var(--ink)' }}>
+          <button className="ps-tap" style={{ flex: 1, height: 56, borderRadius: 16, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 700, color: 'var(--ink)' }}>
             <Icon name="bolt" size={18} color="#9A6A00"/>+50 XP 획득
           </button>
-          <button className="ps-tap" style={{ width: 56, height: 56, borderRadius: 18, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="arrow-up" size={20}/></button>
+          <button className="ps-tap" style={{ width: 56, height: 56, borderRadius: 16, background: 'white', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="arrow-up" size={20}/></button>
         </div>
 
         <button onClick={onReset} className="ps-cta green ps-tap" style={{ marginTop: 12 }}>다시 측정</button>
@@ -2674,8 +2674,8 @@ function ScreenCOWarnings({ onNav = () => {} }) {
 
         <div style={{ marginTop: 16, fontSize: 12, color: 'var(--ink-3)', fontWeight: 600 }}>오늘 측정을 하지 않으면 시간대에 따라 다음 알림이 표시돼요.</div>
 
-        <div className="ps-anim-fade-up" style={{ marginTop: 14, background: '#FFF4DC', border: '1.5px solid #F2A93B', borderRadius: 20, padding: 16, display: 'flex', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: '#F2A93B', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
+        <div className="ps-anim-fade-up" style={{ marginTop: 14, background: '#FFF4DC', border: '1.5px solid #F2A93B', borderRadius: 16, padding: 16, display: 'flex', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 16, background: '#F2A93B', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#A06A00', letterSpacing: '.05em' }}>1단계 · 오후 10시 이전</div>
             <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: '#5A3F00' }}>아직 오늘 CO 측정 전이에요</div>
@@ -2684,8 +2684,8 @@ function ScreenCOWarnings({ onNav = () => {} }) {
           </div>
         </div>
 
-        <div className="ps-anim-fade-up" style={{ animationDelay: '60ms', marginTop: 12, background: '#FFE6E1', border: '1.5px solid #E65A4A', borderRadius: 20, padding: 16, display: 'flex', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: '#E65A4A', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
+        <div className="ps-anim-fade-up" style={{ animationDelay: '60ms', marginTop: 12, background: '#FFE6E1', border: '1.5px solid #E65A4A', borderRadius: 16, padding: 16, display: 'flex', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 16, background: '#E65A4A', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon name="bell" size={22}/></div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#A8331C', letterSpacing: '.05em' }}>2단계 · 오후 10시 이후</div>
             <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2, color: '#5C1D10' }}>23:59까지 인증하지 않으면 실패로 기록돼요</div>
@@ -2702,7 +2702,7 @@ function ScreenCOWarnings({ onNav = () => {} }) {
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>2월 14일 인증 실패</div>
             </div>
           </div>
-          <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 14, display: 'flex', gap: 10 }}>
+          <div style={{ marginTop: 14, padding: 14, background: 'var(--green-50)', borderRadius: 16, display: 'flex', gap: 10 }}>
             <div className="ps-anim-bob-sm"><Soomi size={56} mood="happy" accent="#7DD957"/></div>
             <div style={{ flex: 1, fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>
               "오늘은 어려운 하루였어요. <strong>실패는 데이터예요</strong> — 어떤 트리거가 있었는지 한 번만 기록해볼까요?"
@@ -2999,7 +2999,7 @@ function ScreenCharacter({ onNav = () => {} }) {
         </div>
 
         {/* Hero stage */}
-        <div style={{ position: 'relative', margin: '14px 20px 0', borderRadius: 28, padding: 20, overflow: 'hidden', background: 'linear-gradient(180deg, #FFFFFF 0%, #F2FBE6 100%)', boxShadow: 'var(--shadow-md)', minHeight: 320 }}>
+        <div style={{ position: 'relative', margin: '14px 20px 0', borderRadius: 24, padding: 20, overflow: 'hidden', background: 'linear-gradient(180deg, #FFFFFF 0%, #F2FBE6 100%)', boxShadow: 'var(--shadow-md)', minHeight: 320 }}>
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 90, background: 'linear-gradient(180deg, transparent, rgba(165,230,107,.35))' }}/>
           <div style={{ position: 'absolute', right: 24, top: 24, width: 36, height: 36, borderRadius: '50%', background: 'radial-gradient(circle, #FFE0A1, #FFC56B)', boxShadow: '0 0 30px rgba(255,201,107,.6)' }}/>
           <div style={{ position: 'absolute', left: 30, top: 36, color: '#fff', fontSize: 24, opacity: .9 }}><Icon name="cloud" size={28} color="rgba(255,255,255,.95)"/></div>
@@ -3011,7 +3011,7 @@ function ScreenCharacter({ onNav = () => {} }) {
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-3)' }}>· 27일째 함께</span>
             </div>
             {/* XP Bar */}
-            <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.6)', borderRadius: 14, padding: '8px 12px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.6)', borderRadius: 16, padding: '8px 12px', backdropFilter: 'blur(8px)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 22, height: 22, borderRadius: 7, background: '#FFEFC8', color: '#9A6A00', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="bolt" size={13}/></div>
@@ -3044,7 +3044,7 @@ function ScreenCharacter({ onNav = () => {} }) {
             { id: 'dress',  icon: 'gift',  label: '꾸미기',    cost: null, fn: () => setPickerCat('color') },
             { id: 'name',   icon: 'note',  label: '이름',     cost: null, fn: () => {} },
           ].map(b => (
-            <button key={b.id} onClick={b.fn} className="ps-tap" style={{ flex: 1, height: 72, background: 'white', border: '1px solid var(--line)', borderRadius: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6, color: 'var(--ink)', cursor: 'pointer' }}>
+            <button key={b.id} onClick={b.fn} className="ps-tap" style={{ flex: 1, height: 72, background: 'white', border: '1px solid var(--line)', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: 6, color: 'var(--ink)', cursor: 'pointer' }}>
               <Icon name={b.icon} size={20}/>
               <div style={{ fontSize: 10, fontWeight: 700 }}>{b.label}</div>
               {b.cost != null ? (b.cost > 0 ? <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700 }}>{b.cost}P</div> : <div style={{ fontSize: 9, color: 'var(--green-700)', fontWeight: 700 }}>무료</div>) : null}
@@ -3075,7 +3075,7 @@ function ScreenCharacter({ onNav = () => {} }) {
 
 function Meter({ icon, label, value, color }) {
   return (
-    <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', borderRadius: 14, padding: '8px 10px' }}>
+    <div style={{ flex: 1, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', borderRadius: 16, padding: '8px 10px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <Icon name={icon} size={13} color={color}/>
@@ -3105,7 +3105,7 @@ function DressUpGrid({ equip, onOpenCat }) {
           const unlocked = items.filter(i => !i.locked).length;
           const total = items.length;
           return (
-            <button key={c.id} onClick={() => onOpenCat(c.id)} className="ps-tap" style={{ background: 'white', borderRadius: 18, padding: 14, boxShadow: 'var(--shadow-sm)', border: 'none', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button key={c.id} onClick={() => onOpenCat(c.id)} className="ps-tap" style={{ background: 'white', borderRadius: 16, padding: 14, boxShadow: 'var(--shadow-sm)', border: 'none', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 18 }}>{c.icon}</span>
@@ -3114,7 +3114,7 @@ function DressUpGrid({ equip, onOpenCat }) {
                 <Icon name="chev" size={14} color="var(--ink-3)"/>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ width: 52, height: 36, background: 'var(--green-50)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <div style={{ width: 52, height: 36, background: 'var(--green-50)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {c.id === 'color' ? <div style={{ width: 22, height: 22, borderRadius: 8, background: equipped?.swatch }}/> :
                    c.id === 'face'  ? <span style={{ fontSize: 18 }}>{equipped?.id === 'happy' ? '😊' : equipped?.id === 'chill' ? '😌' : equipped?.id === 'sleepy' ? '😴' : equipped?.id === 'proud' ? '🥰' : '😟'}</span> :
                    equipped?.preview ? <div style={{ transform: 'scale(0.6)' }}>{equipped.preview('', 0.6)}</div> :
@@ -3145,7 +3145,7 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
       <div className="ps-sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '85%', overflowY: 'auto', paddingBottom: 40 }}>
         <div className="ps-sheet-handle"/>
         {/* Live preview */}
-        <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 18, padding: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, var(--green-50), white)', borderRadius: 16, padding: 14 }}>
           <div className="ps-anim-bob-sm"><Soomi size={110} mood="happy" accent="#7DD957"/></div>
         </div>
 
@@ -3168,8 +3168,8 @@ function CategoryPicker({ cat, equip, onPick, onSwitchCat, onClose }) {
           {items.map(it => {
             const isPicked = it.id === equippedId;
             return (
-              <button key={it.id} onClick={() => !it.locked && onPick(it.id)} className="ps-tap" style={{ background: 'white', borderRadius: 14, padding: 10, border: isPicked ? '2px solid var(--green-500)' : '2px solid var(--line)', boxShadow: isPicked ? '0 6px 16px rgba(91,194,59,.22)' : 'none', cursor: it.locked ? 'not-allowed' : 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{ width: '100%', height: 56, borderRadius: 10, background: cat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+              <button key={it.id} onClick={() => !it.locked && onPick(it.id)} className="ps-tap" style={{ background: 'white', borderRadius: 16, padding: 10, border: isPicked ? '2px solid var(--green-500)' : '2px solid var(--line)', boxShadow: isPicked ? '0 6px 16px rgba(91,194,59,.22)' : 'none', cursor: it.locked ? 'not-allowed' : 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: '100%', height: 56, borderRadius: 12, background: cat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                   {cat === 'color' ? null
                    : cat === 'face' ? <span style={{ fontSize: 28 }}>{it.id === 'happy' ? '😊' : it.id === 'chill' ? '😌' : it.id === 'sleepy' ? '😴' : it.id === 'proud' ? '🥰' : '😟'}</span>
                    : it.id === 'none' ? <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>
@@ -3229,7 +3229,7 @@ function CategorizedDex({ equip }) {
           return (
             <div key={it.id} style={{ position: 'relative', background: 'white', borderRadius: 16, padding: 10, boxShadow: 'var(--shadow-sm)', border: isEq ? '1.5px solid var(--green-500)' : it.locked ? '1.5px dashed var(--line)' : '1.5px solid var(--green-200)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
               {isEq ? <div style={{ position: 'absolute', top: 6, right: 6, fontSize: 9, fontWeight: 800, color: 'white', background: 'var(--green-500)', padding: '2px 6px', borderRadius: 999 }}>착용</div> : null}
-              <div style={{ width: '100%', height: 60, borderRadius: 10, background: dexCat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', filter: it.locked ? 'grayscale(1) brightness(.8)' : 'none' }}>
+              <div style={{ width: '100%', height: 60, borderRadius: 12, background: dexCat === 'color' ? it.swatch : 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', filter: it.locked ? 'grayscale(1) brightness(.8)' : 'none' }}>
                 {dexCat === 'color' ? null
                  : dexCat === 'face' ? <span style={{ fontSize: 26 }}>{it.id === 'happy' ? '😊' : it.id === 'chill' ? '😌' : it.id === 'sleepy' ? '😴' : it.id === 'proud' ? '🥰' : '😟'}</span>
                  : it.id === 'none' ? <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700 }}>없음</span>
@@ -3288,7 +3288,7 @@ function ScreenCalendar({ onNav = () => {} }) {
         </div>
 
         {/* 월간/주간 탭 */}
-        <div style={{ margin: '14px 20px 0', display: 'flex', background: 'var(--green-50)', borderRadius: 14, padding: 4, gap: 4 }}>
+        <div style={{ margin: '14px 20px 0', display: 'flex', background: 'var(--green-50)', borderRadius: 16, padding: 4, gap: 4 }}>
           {[{id:'monthly',label:'📅 월간'},{id:'weekly',label:'📊 주간 리포트'}].map(t=>(
             <button key={t.id} onClick={()=>setCalTab(t.id)} className="ps-tap" style={{ flex:1, height:38, border:'none', borderRadius:11, background:calTab===t.id?'white':'transparent', color:calTab===t.id?'var(--ink)':'var(--ink-3)', fontWeight:700, fontSize:13, boxShadow:calTab===t.id?'0 2px 6px rgba(15,42,30,.06)':'none' }}>{t.label}</button>
           ))}
@@ -3335,7 +3335,7 @@ function ScreenCalendar({ onNav = () => {} }) {
               return (
                 <div key={d} onClick={() => !isFuture && setSheetDay(d)} className={!isFuture ? 'ps-tap' : ''} style={{
                   position: 'relative', aspectRatio: '1 / 1',
-                  borderRadius: 11,
+                  borderRadius: 12,
                   background: isVerified ? '#5BC23B' :
                               isSmoke    ? '#E65A4A' :
                               isMissing  ? 'white' :
@@ -3379,7 +3379,7 @@ function ScreenCalendar({ onNav = () => {} }) {
         </div>
 
         {/* Recent failures + reflection */}
-        <div style={{ margin: '14px 20px 0', background: 'white', borderRadius: 20, padding: 16, boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ margin: '14px 20px 0', background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>이번 달 미달성일 회고</div>
             <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green-700)' }}>전체 →</span>
@@ -3393,7 +3393,7 @@ function ScreenCalendar({ onNav = () => {} }) {
               const smoke = r.kind === 'smoke';
               return (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: i ? '1px solid var(--line)' : 'none' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 11, background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#E65A4A' : '#A06A00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 12, background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#E65A4A' : '#A06A00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {smoke ? <Icon name="cig" size={18} stroke={2.2}/> : <span style={{ fontSize: 16, fontWeight: 800 }}>?</span>}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -3454,7 +3454,7 @@ function WeeklyReport() {
           { label: '버텨낸 횟수', value: '26', unit: '회', color: '#5BC23B', sub: '89% 성공률' },
           { label: '인증 완료',   value: '5',  unit: '일', color: '#FF7A2E', sub: '목표 7일' },
         ].map((s,i)=>(
-          <div key={i} style={{ background: 'white', borderRadius: 18, padding: '14px 12px', boxShadow: 'var(--shadow-sm)', textAlign: 'center' }}>
+          <div key={i} style={{ background: 'white', borderRadius: 16, padding: '14px 12px', boxShadow: 'var(--shadow-sm)', textAlign: 'center' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', marginBottom: 4 }}>{s.label}</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: s.color, letterSpacing: '-0.02em' }}>
               {s.value}<span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-3)', marginLeft: 2 }}>{s.unit}</span>
@@ -3521,7 +3521,7 @@ function WeeklyReport() {
             return (
               <div key={t.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                 <div style={{ fontSize: 14 }}>{t.icon}</div>
-                <div style={{ width: '100%', height: 60, background: 'var(--green-50)', borderRadius: 10, overflow: 'hidden', display: 'flex', alignItems: 'flex-end' }}>
+                <div style={{ width: '100%', height: 60, background: 'var(--green-50)', borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'flex-end' }}>
                   <div style={{ width: '100%', height: (pct*100)+'%', background: color, borderRadius: '6px 6px 0 0', transition: 'height .5s' }}/>
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 800, color }}>{t.count}</div>
@@ -3598,8 +3598,8 @@ function DayDetailSheet({ day, note, isToday, onClose }) {
               <div style={{ marginTop: 8 }}><span className="ps-chip" style={{ background: smoke ? '#FFE6E1' : '#FFF1C2', color: smoke ? '#A8331C' : '#A06A00' }}>#{note.tag}</span></div>
             </div>
             <div style={{ marginTop: 12, display: 'flex', gap: 10 }}>
-              <button className="ps-tap" style={{ flex: 1, height: 48, borderRadius: 14, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 14 }}>{smoke ? 'CBT 코칭 받기' : '내일 잊지 않게 알림'}</button>
-              <button onClick={onClose} className="ps-tap" style={{ width: 48, height: 48, borderRadius: 14, background: 'white', border: '1px solid var(--line)' }}><Icon name="kebab" size={18}/></button>
+              <button className="ps-tap" style={{ flex: 1, height: 48, borderRadius: 16, background: 'var(--ink)', color: 'white', border: 'none', fontWeight: 700, fontSize: 14 }}>{smoke ? 'CBT 코칭 받기' : '내일 잊지 않게 알림'}</button>
+              <button onClick={onClose} className="ps-tap" style={{ width: 48, height: 48, borderRadius: 16, background: 'white', border: '1px solid var(--line)' }}><Icon name="kebab" size={18}/></button>
             </div>
           </React.Fragment>
         ) : (
@@ -3637,7 +3637,7 @@ function SheetStat({ label, value, unit, tone }) {
     gray:   { bg: '#F0F4F1',          fg: 'var(--ink-3)' },
   }[tone];
   return (
-    <div style={{ flex: 1, background: tones.bg, borderRadius: 14, padding: '10px 12px' }}>
+    <div style={{ flex: 1, background: tones.bg, borderRadius: 16, padding: '10px 12px' }}>
       <div style={{ fontSize: 10, fontWeight: 800, color: tones.fg, letterSpacing: '.02em' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginTop: 4 }}>
         <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.02em' }}>{value}</span>
