@@ -20,6 +20,9 @@
       display: flex; align-items: center; justify-content: center;
       padding: 40px 24px;
     }
+    @media (max-width: 480px) {
+      body { padding: 24px 16px; }
+    }
 
     .wrap { width: 100%; max-width: 1080px; }
     header.head {
@@ -32,8 +35,8 @@
     header.head p { font-size: 11px; margin: 2px 0 0; color: #4A5B55; font-weight: 700; }
 
     .hero {
-      font-size: clamp(36px, 5vw, 56px); font-weight: 800;
-      letter-spacing: -0.03em; line-height: 1.05;
+      font-size: clamp(28px, 7vw, 56px); font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.15;
       text-wrap: balance; margin: 0 0 14px;
     }
     .hero em {
@@ -44,6 +47,10 @@
     .sub {
       font-size: 16px; color: #3A4A44; line-height: 1.55; font-weight: 500;
       max-width: 620px; margin: 0 0 36px;
+    }
+    @media (max-width: 480px) {
+      .hero { line-height: 1.25; margin: 0 0 12px; }
+      .sub { font-size: 14px; margin: 0 0 24px; }
     }
 
     .team {
