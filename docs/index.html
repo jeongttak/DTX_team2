@@ -8,7 +8,7 @@
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; min-height: 100%; }
+    html, body { margin: 0; padding: 0; min-height: 100%; overflow-x: hidden; }
     body {
       font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', system-ui, sans-serif;
       color: #0F2A1E;
@@ -28,11 +28,17 @@
     header.head {
       display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
     }
-    header.head img { height: 44px; }
+    header.head img { height: 44px; max-width: 44px; object-fit: contain; }
     header.head h1 {
       font-size: 13px; margin: 0; font-weight: 800; letter-spacing: -0.01em;
     }
     header.head p { font-size: 11px; margin: 2px 0 0; color: #4A5B55; font-weight: 700; }
+    @media (max-width: 480px) {
+      header.head { gap: 10px; margin-bottom: 20px; }
+      header.head img { height: 36px; max-width: 36px; }
+      header.head h1 { font-size: 12px; }
+      header.head p { font-size: 10px; }
+    }
 
     .hero {
       font-size: clamp(28px, 7vw, 56px); font-weight: 800;
@@ -98,7 +104,9 @@
     .cards {
       display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
     }
-    @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) {
+      .cards { grid-template-columns: 1fr; gap: 14px; }
+    }
 
     .card {
       position: relative; display: block; text-decoration: none; color: inherit;
@@ -107,6 +115,11 @@
       box-shadow: 0 8px 30px -10px rgba(15,42,30,0.1);
       transition: all .2s ease;
       overflow: hidden;
+    }
+    @media (max-width: 480px) {
+      .card { padding: 20px 18px 18px; border-radius: 20px; }
+      .card h2 { font-size: 20px; }
+      .card .desc { font-size: 12px; }
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 18px 50px -15px rgba(15,42,30,0.18); }
     .card .tag {
