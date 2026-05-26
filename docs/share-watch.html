@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Purely:SOOM · 스마트워치 알림</title>
+  <style>
+/* ── design tokens (Purely:SOOM) ── */
+:root {
+  --green-700: #2F8A3E;
+  --green-600: #3FAA48;
+  --green-500: #5BC23B;
+  --green-400: #7DD957;
+  --green-300: #A5E66B;
+  --green-200: #C9F08D;
+  --green-100: #E5F8D0;
+  --green-50:  #F2FBE6;
+  --ink:    #0F2A1E;
+  --ink-2:  #3F5A50;
+  --ink-3:  #8A9E94;
+  --ink-4:  #C6D0CB;
+  --warn:   #F2A93B;
+  --danger: #E65A4A;
+  --white:  #FFFFFF;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a1a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 24px 64px;
+  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Pretendard', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  gap: 56px;
+}
+
+/* ── page header ── */
+.page-header {
+  text-align: center;
+}
+.page-header .app-label {
+  font-size: 13px; font-weight: 700; letter-spacing: .08em;
+  color: var(--green-400); text-transform: uppercase; margin-bottom: 6px;
+}
+.page-header h1 {
+  font-size: 22px; font-weight: 800; color: #fff;
+  letter-spacing: -.02em; line-height: 1.2;
+}
+.page-header p {
+  font-size: 13px; color: #888; margin-top: 6px;
+}
+
+/* ── section label ── */
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  color: #555; text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+}
+
+/* ══════════════════════════════
+   WATCH BODY
+══════════════════════════════ */
+.watch-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.watch-body {
+  width: 200px;
+  height: 242px;
+  background: #1c1c1e;
+  border-radius: 62px;
+  position: relative;
+  box-shadow:
+    0 0 0 2.5px #3a3a3c,
+    0 0 0 5px #2c2c2e,
+    0 24px 60px rgba(0,0,0,.7),
+    0 8px 20px rgba(0,0,0,.5);
+  overflow: visible;
+}
+
+/* Digital Crown */
+.crown {
+  position: absolute;
+  right: -10px; top: 56px;
+  width: 11px; height: 42px;
+  background: linear-gradient(180deg, #4a4a4c 0%, #3a3a3c 40%, #4a4a4c 100%);
+  border-radius: 6px;
+  box-shadow: 2px 0 4px rgba(0,0,0,.5);
+}
+.crown::after {
+  content: '';
+  position: absolute;
+  left: 2px; right: 2px; top: 4px; bottom: 4px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,.08) 0px, rgba(255,255,255,.08) 2px,
+    transparent 2px, transparent 4px
+  );
+}
+
+/* Side button */
+.side-btn {
+  position: absolute;
+  right: -8px; top: 110px;
+  width: 9px; height: 26px;
+  background: linear-gradient(180deg, #4a4a4c 0%, #3a3a3c 100%);
+  border-radius: 4px;
+  box-shadow: 2px 0 4px rgba(0,0,0,.4);
+}
+
+/* Watch strap */
+.strap {
+  width: 152px; height: 80px;
+  background: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
+  border-radius: 0 0 20px 20px;
+  position: relative;
+  box-shadow: 0 10px 24px rgba(0,0,0,.5);
+}
+.strap.top {
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(180deg, #1a1a1a 0%, #222 100%);
+}
+.strap::after {
+  content: '';
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  width: 40px; height: 5px;
+  background: #2a2a2a;
+  border-radius: 3px;
+  top: 50%;
+}
+
+/* Screen inner */
+.watch-screen {
+  position: absolute;
+  inset: 6px;
+  border-radius: 56px;
+  overflow: hidden;
+  background: #000;
+}
+
+/* ══════════════════════════════
+   SCREEN STATES
+══════════════════════════════ */
+
+/* ── State 0: idle watch face ── */
+.face-idle {
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 50% 20%, #1a3528 0%, #0a1a10 60%, #000 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  position: relative;
+}
+.face-idle .time-big {
+  font-size: 46px; font-weight: 300; color: #fff;
+  letter-spacing: -.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.face-idle .date-small {
+  font-size: 13px; color: rgba(255,255,255,.5);
+  font-weight: 500; letter-spacing: .01em;
+}
+.face-idle .complication-row {
+  display: flex; gap: 18px; margin-top: 10px;
+}
+.face-idle .comp {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.face-idle .comp-val {
+  font-size: 18px; font-weight: 600; color: #fff;
+}
+.face-idle .comp-val.green { color: var(--green-400); }
+.face-idle .comp-val.blue  { color: #7FB8D9; }
+.face-idle .comp-lbl {
+  font-size: 9px; font-weight: 700; letter-spacing: .05em;
+  color: rgba(255,255,255,.4); text-transform: uppercase;
+}
+/* green ring */
+.face-idle .activity-ring {
+  position: absolute; bottom: 14px;
+  display: flex; gap: 3px;
+}
+.ring-dot { width: 5px; height: 5px; border-radius: 999px; background: rgba(255,255,255,.2); }
+.ring-dot.fill { background: var(--green-400); }
+
+/* ── State 1: notification banner (top) ── */
+.face-notif {
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse at 50% 20%, #1a3528 0%, #0a1a10 60%, #000 100%);
+  display: flex; flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.notif-banner {
+  position: absolute; top: 0; left: 0; right: 0;
+  background: rgba(30,30,30,.97);
+  backdrop-filter: blur(12px);
+  border-radius: 0 0 22px 22px;
+  padding: 12px 14px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: slideDown .4s cubic-bezier(.34,1.2,.64,1) both;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+.notif-header {
+  display: flex; align-items: center; gap: 7px;
+}
+.notif-icon {
+  width: 22px; height: 22px; border-radius: 7px;
+  background: linear-gradient(135deg, var(--green-500), var(--green-700));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.notif-app {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.5);
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.notif-time {
+  font-size: 10px; color: rgba(255,255,255,.35); margin-left: auto;
+}
+.notif-title {
+  font-size: 14px; font-weight: 700; color: #fff;
+  letter-spacing: -.01em; line-height: 1.25;
+}
+.notif-body {
+  font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.45;
+}
+/* underlying watch face (dimmed) */
+.face-notif .face-idle {
+  width: 100%; height: 100%;
+  opacity: .3;
+  position: absolute; inset: 0;
+}
+
+/* ── State 2: full-screen notification ── */
+.face-full {
+  width: 100%; height: 100%;
+  background: #000;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 14px 12px 12px;
+  gap: 0;
+}
+.full-top {
+  display: flex; align-items: center; gap: 7px;
+  width: 100%; margin-bottom: 10px;
+}
+.full-icon {
+  width: 28px; height: 28px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--green-500), var(--green-700));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.full-app-name {
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,.55);
+  letter-spacing: .03em; text-transform: uppercase;
+}
+.full-time-badge {
+  margin-left: auto;
+  font-size: 10px; color: rgba(255,255,255,.35);
+}
+.full-title {
+  font-size: 16px; font-weight: 800; color: #fff;
+  letter-spacing: -.02em; line-height: 1.2;
+  text-align: center; margin-bottom: 7px;
+}
+.full-body {
+  font-size: 11px; color: rgba(255,255,255,.55);
+  line-height: 1.5; text-align: center;
+  margin-bottom: 14px;
+}
+.watch-btn-row {
+  display: flex; gap: 6px; width: 100%;
+}
+.watch-btn {
+  flex: 1; height: 36px; border-radius: 14px; border: none;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; letter-spacing: -.01em;
+}
+.watch-btn.primary {
+  background: var(--green-500);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(91,194,59,.4);
+}
+.watch-btn.secondary {
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.7);
+}
+/* haptic line */
+.haptic-divider {
+  width: 100%; height: 1px;
+  background: rgba(255,255,255,.07);
+  margin: 10px 0;
+}
+.full-stat-row {
+  display: flex; gap: 8px; width: 100%;
+}
+.full-stat {
+  flex: 1;
+  background: rgba(255,255,255,.07);
+  border-radius: 13px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.full-stat-val {
+  font-size: 17px; font-weight: 700; color: var(--green-400);
+  letter-spacing: -.02em;
+}
+.full-stat-lbl {
+  font-size: 9px; font-weight: 600; color: rgba(255,255,255,.35);
+  letter-spacing: .04em; text-transform: uppercase; margin-top: 2px;
+}
+
+/* ── State 3: trigger CBT on watch ── */
+.face-cbt {
+  width: 100%; height: 100%;
+  background: linear-gradient(160deg, #0d2b1e 0%, #000 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 14px 12px 12px;
+}
+.cbt-top { width: 100%; display: flex; align-items: center; }
+.cbt-back {
+  width: 22px; height: 22px; border-radius: 7px;
+  background: rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: rgba(255,255,255,.6);
+  cursor: pointer;
+}
+.cbt-step-label {
+  flex: 1; text-align: center;
+  font-size: 10px; font-weight: 700; color: var(--green-400);
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.cbt-question {
+  font-size: 14px; font-weight: 700; color: #fff;
+  text-align: center; line-height: 1.35;
+  letter-spacing: -.01em;
+  padding: 0 4px;
+}
+.cbt-options {
+  display: flex; flex-direction: column; gap: 5px; width: 100%;
+}
+.cbt-opt {
+  height: 32px; border-radius: 12px;
+  background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.06);
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,.75);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  letter-spacing: -.005em;
+}
+.cbt-opt.selected {
+  background: rgba(91,194,59,.2);
+  border-color: var(--green-500);
+  color: var(--green-300);
+}
+.cbt-progress {
+  display: flex; gap: 4px; align-items: center;
+}
+.cbt-prog-dot {
+  width: 5px; height: 5px; border-radius: 999px;
+  background: rgba(255,255,255,.2);
+}
+.cbt-prog-dot.done { background: var(--green-500); }
+.cbt-prog-dot.active { background: var(--green-300); width: 16px; }
+
+/* ── State 4: CO alert ── */
+.face-alert {
+  width: 100%; height: 100%;
+  background: linear-gradient(160deg, #2a0d0d 0%, #000 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 14px 12px 12px;
+}
+.alert-icon-ring {
+  width: 52px; height: 52px; border-radius: 999px;
+  border: 2px solid rgba(230,90,74,.4);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.alert-icon-ring::before {
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 999px;
+  border: 1px solid rgba(230,90,74,.15);
+}
+.alert-icon-ring .icon { font-size: 26px; }
+.alert-title {
+  font-size: 14px; font-weight: 800; color: #fff;
+  text-align: center; letter-spacing: -.02em; line-height: 1.25;
+}
+.alert-body {
+  font-size: 10px; color: rgba(255,255,255,.5);
+  text-align: center; line-height: 1.5;
+}
+.alert-val {
+  font-size: 38px; font-weight: 300; color: var(--danger);
+  letter-spacing: -.04em; line-height: 1;
+}
+.alert-unit {
+  font-size: 11px; color: rgba(255,255,255,.4);
+  font-weight: 600; letter-spacing: .03em; text-align: center;
+}
+.alert-btn-col {
+  display: flex; flex-direction: column; gap: 5px; width: 100%;
+}
+.watch-btn.danger {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(230,90,74,.4);
+}
+
+
+/* ══════════════════════════════
+   DEMO GRID LAYOUT
+══════════════════════════════ */
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.watch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: center;
+}
+
+.watch-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.watch-card-label {
+  text-align: center;
+}
+.watch-card-label .step {
+  font-size: 10px; font-weight: 700; color: var(--green-400);
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px;
+}
+.watch-card-label .name {
+  font-size: 14px; font-weight: 700; color: #fff;
+  letter-spacing: -.01em;
+}
+.watch-card-label .desc {
+  font-size: 11px; color: #666; margin-top: 2px;
+}
+
+/* flow arrow */
+.flow-arrow {
+  font-size: 22px; color: #333; align-self: center; margin-top: 40px;
+  flex-shrink: 0;
+}
+
+/* footer */
+.page-footer {
+  font-size: 11px; color: #444; letter-spacing: .04em;
+  text-align: center;
+}
+  </style>
+</head>
+<body>
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="app-label">Purely:SOOM</div>
+  <h1>스마트워치 알림 플로우</h1>
+  <p>Apple Watch 연동 · 금연 알림 4단계</p>
+</div>
+
+<!-- ══════════════════════════════
+     WATCH FLOW
+══════════════════════════════ -->
+<div class="demo-section">
+  <div class="section-label">알림 시나리오 플로우</div>
+
+  <div class="watch-grid">
+
+    <!-- ── Step 1: 잠금 화면 (대기) ── -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Step 1</div>
+        <div class="name">잠금 화면 대기</div>
+        <div class="desc">평상시 워치 페이스</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <!-- Idle watch face -->
+            <div class="face-idle">
+              <div class="time-big">10:24</div>
+              <div class="date-small">월요일, 5월 26일</div>
+              <div class="complication-row">
+                <div class="comp">
+                  <div class="comp-val green">12일</div>
+                  <div class="comp-lbl">금연</div>
+                </div>
+                <div class="comp">
+                  <div class="comp-val">72<span style="font-size:11px">%</span></div>
+                  <div class="comp-lbl">미션</div>
+                </div>
+                <div class="comp">
+                  <div class="comp-val blue">3.2</div>
+                  <div class="comp-lbl">CO</div>
+                </div>
+              </div>
+              <div class="activity-ring">
+                <div class="ring-dot fill"></div>
+                <div class="ring-dot fill"></div>
+                <div class="ring-dot fill"></div>
+                <div class="ring-dot fill"></div>
+                <div class="ring-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+    <!-- flow arrow -->
+    <div class="flow-arrow">›</div>
+
+    <!-- ── Step 2: 알림 배너 ── -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Step 2</div>
+        <div class="name">알림 배너 표시</div>
+        <div class="desc">흡연 트리거 감지 시</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-notif">
+              <!-- 배경 워치페이스 (흐릿) -->
+              <div class="face-idle" style="position:absolute;inset:0;opacity:.25;">
+                <div class="time-big">10:24</div>
+                <div class="date-small">월요일, 5월 26일</div>
+              </div>
+              <!-- 알림 배너 -->
+              <div class="notif-banner">
+                <div class="notif-header">
+                  <div class="notif-icon">🌿</div>
+                  <div class="notif-app">Purely:SOOM</div>
+                  <div class="notif-time">지금</div>
+                </div>
+                <div class="notif-title">흡연 욕구가 느껴지나요?</div>
+                <div class="notif-body">지금 이 순간을 함께 이겨낼게요. 잠깐 기록해볼까요?</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+    <!-- flow arrow -->
+    <div class="flow-arrow">›</div>
+
+    <!-- ── Step 3: 전체 화면 알림 ── -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Step 3</div>
+        <div class="name">전체 화면 알림</div>
+        <div class="desc">손목 들어올리면 확장</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-full">
+              <div class="full-top">
+                <div class="full-icon">🌿</div>
+                <div class="full-app-name">Purely:SOOM</div>
+                <div class="full-time-badge">10:24</div>
+              </div>
+              <div class="full-title">흡연 욕구가<br>느껴지나요?</div>
+              <div class="full-body">지금 기록하고<br>CBT 호흡법을 시작해요</div>
+              <div class="full-stat-row">
+                <div class="full-stat">
+                  <div class="full-stat-val">12</div>
+                  <div class="full-stat-lbl">금연일</div>
+                </div>
+                <div class="full-stat">
+                  <div class="full-stat-val">47,200</div>
+                  <div class="full-stat-lbl">절약 원</div>
+                </div>
+              </div>
+              <div class="haptic-divider"></div>
+              <div class="watch-btn-row">
+                <button class="watch-btn primary">기록하기</button>
+                <button class="watch-btn secondary">괜찮아요</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+    <!-- flow arrow -->
+    <div class="flow-arrow">›</div>
+
+    <!-- ── Step 4: CBT 호흡 ── -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Step 4</div>
+        <div class="name">워치 CBT 질문</div>
+        <div class="desc">"기록하기" 탭 후 진입</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-cbt">
+              <div class="cbt-top">
+                <div class="cbt-back">‹</div>
+                <div class="cbt-step-label">트리거 체크</div>
+              </div>
+              <div class="cbt-question">지금 무엇이<br>흡연하고 싶게<br>만드나요?</div>
+              <div class="cbt-options">
+                <div class="cbt-opt selected">😤 스트레스·긴장</div>
+                <div class="cbt-opt">☕ 식후·커피</div>
+                <div class="cbt-opt">🤝 사람 만남</div>
+                <div class="cbt-opt">🕐 습관·지루함</div>
+              </div>
+              <div class="cbt-progress">
+                <div class="cbt-prog-dot done"></div>
+                <div class="cbt-prog-dot active"></div>
+                <div class="cbt-prog-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+  </div><!-- /watch-grid -->
+</div>
+
+<!-- ══════════════════════════════
+     CO 경고 알림
+══════════════════════════════ -->
+<div class="demo-section">
+  <div class="section-label">CO 경고 알림</div>
+
+  <div class="watch-grid">
+
+    <!-- CO 경고 -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">CO Alert</div>
+        <div class="name">CO 수치 경고</div>
+        <div class="desc">미인증 3일 에스컬레이션</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-alert">
+              <div class="alert-icon-ring">
+                <div class="icon">⚠️</div>
+              </div>
+              <div class="alert-title">CO 인증 필요</div>
+              <div style="text-align:center;">
+                <div class="alert-val">7.2</div>
+                <div class="alert-unit">ppm · 3일 미측정</div>
+              </div>
+              <div class="alert-body">지금 호기 측정으로<br>담당 의사에게 리포트를<br>전송해주세요</div>
+              <div class="alert-btn-col">
+                <button class="watch-btn danger">지금 측정하기</button>
+                <button class="watch-btn secondary">나중에</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+    <!-- 금연 스트릭 달성 -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Achievement</div>
+        <div class="name">스트릭 달성 알림</div>
+        <div class="desc">금연 N일 완료 시</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-full" style="background: linear-gradient(160deg,#0d2b1e 0%,#000 100%);">
+              <div class="full-top">
+                <div class="full-icon">🏆</div>
+                <div class="full-app-name">Purely:SOOM</div>
+                <div class="full-time-badge">오전 9:00</div>
+              </div>
+              <div class="full-title" style="font-size:15px;">🎉 금연 2주 달성!</div>
+              <div class="full-body">14일 연속 성공했어요.<br>캐릭터가 한 단계 성장했어요!</div>
+              <div class="full-stat-row">
+                <div class="full-stat">
+                  <div class="full-stat-val">14</div>
+                  <div class="full-stat-lbl">연속일</div>
+                </div>
+                <div class="full-stat">
+                  <div class="full-stat-val" style="font-size:13px;">+200</div>
+                  <div class="full-stat-lbl">XP 획득</div>
+                </div>
+              </div>
+              <div class="haptic-divider"></div>
+              <div class="watch-btn-row">
+                <button class="watch-btn primary" style="flex:1;">앱에서 확인</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+    <!-- 미션 리마인더 -->
+    <div class="watch-card">
+      <div class="watch-card-label">
+        <div class="step">Reminder</div>
+        <div class="name">미션 리마인더</div>
+        <div class="desc">오늘 미완료 미션 알림</div>
+      </div>
+      <div class="watch-wrap">
+        <div class="strap top"></div>
+        <div class="watch-body">
+          <div class="crown"></div>
+          <div class="side-btn"></div>
+          <div class="watch-screen">
+            <div class="face-full" style="background: linear-gradient(160deg,#1a1a0d 0%,#000 100%);">
+              <div class="full-top">
+                <div class="full-icon" style="background:linear-gradient(135deg,#F2A93B,#e67e22);">📋</div>
+                <div class="full-app-name">Purely:SOOM</div>
+                <div class="full-time-badge">오후 8:00</div>
+              </div>
+              <div class="full-title" style="font-size:14px;">오늘 미션 2개<br>남았어요!</div>
+              <div class="full-body">물 8잔 마시기<br>10분 걷기</div>
+              <div class="full-stat-row">
+                <div class="full-stat">
+                  <div class="full-stat-val" style="color:#F2A93B;">2</div>
+                  <div class="full-stat-lbl">미완료</div>
+                </div>
+                <div class="full-stat">
+                  <div class="full-stat-val">3/5</div>
+                  <div class="full-stat-lbl">완료</div>
+                </div>
+              </div>
+              <div class="haptic-divider"></div>
+              <div class="watch-btn-row">
+                <button class="watch-btn primary">미션 보기</button>
+                <button class="watch-btn secondary">내일</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strap"></div>
+      </div>
+    </div>
+
+  </div><!-- /watch-grid -->
+</div>
+
+<div class="page-footer">Purely:SOOM · v1.2.0 · Prototype only — 실 데이터 아님</div>
+
+</body>
+</html>
