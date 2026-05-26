@@ -106,10 +106,10 @@
 
 ---
 
-## 🚀 배포 환경 변경 (완료)
+## 🚀 배포 환경
 - ❌ Netlify 제거
-- ✅ GitHub Pages
-- ✅ Vercel 자동 배포 (https://docs-blush-nu.vercel.app)
+- ❌ Vercel 제거
+- ✅ GitHub Pages (https://jeongttak.github.io/DTX_team2/)
 
 ---
 
