@@ -26,13 +26,34 @@ label{display:block;font-size:11px;font-weight:800;color:var(--i3);margin-bottom
 @media (max-width: 768px) {
   .mo{width:calc(100vw - 32px);max-width:480px;padding:20px;}
 }
-@media (max-width: 640px) {
-  body{overflow-x:hidden;}
-  .mo{width:calc(100vw - 24px);padding:16px;}
+@media (max-width: 900px) {
+  /* 모바일: 가로 스크롤로 데스크탑 레이아웃 보여주기 */
+  body { overflow-x: auto; min-width: 1100px; }
+  #root { min-width: 1100px; }
+  /* 데스크탑 권장 안내 */
+  .mobile-notice {
+    display: block !important;
+  }
+}
+.mobile-notice {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #FFB930, #FF8A3D);
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 </style>
 </head>
 <body>
+<div class="mobile-notice">💻 의사 대시보드는 데스크탑에 최적화 · 좌우 스크롤로 확인하세요</div>
 <div id="root"></div>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
