@@ -2806,16 +2806,13 @@ function COIdle({ onStart, onNav }) {
 function VisionTree({ progress, totalSec = 8 }) {
   const videoRef = React.useRef(null);
 
-  // progress(0~1)에 따라 영상 currentTime 동기화
+  // 측정 시작(progress===0) 시 영상 처음부터 재생
   React.useEffect(() => {
     const v = videoRef.current;
-    if (!v || !v.duration || isNaN(v.duration)) return;
-    const target = progress * v.duration;
-    // 부드러운 동기화: 0.15초 이상 차이날 때만 보정
-    if (Math.abs(v.currentTime - target) > 0.15) {
-      v.currentTime = target;
-    }
-  }, [progress]);
+    if (!v) return;
+    v.currentTime = 0;
+    v.play().catch(() => {});
+  }, []);
 
   return (
     <div style={{ position: 'relative', width: 280, height: 280, borderRadius: 24, overflow: 'hidden', background: 'rgba(0,0,0,0.2)' }}>
@@ -2824,9 +2821,8 @@ function VisionTree({ progress, totalSec = 8 }) {
         src="assets/tree-grow.mp4"
         muted
         playsInline
-        autoPlay
-        loop
         preload="auto"
+        loop
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
       />
       {/* 어두운 오버레이 (텍스트 가독성) */}
