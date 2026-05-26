@@ -4320,13 +4320,17 @@ Object.assign(window, { MobileApp });
           if (!btn) return;
           const r = btn.getAttribute('data-route');
           setRoute(r);
+          // 모바일 메뉴 닫기
+          const mobileMenu = document.getElementById('mobileMenu');
+          if (mobileMenu) mobileMenu.classList.remove('open');
+          // 데스크탑 사이드바 active 상태 업데이트
           document.querySelectorAll('#quick button').forEach(b => b.classList.toggle('is-active', b === btn));
           try { history.replaceState(null, '', '#' + r); } catch(_) {}
         };
-        document.getElementById('quick').addEventListener('click', onClick);
+        document.addEventListener('click', onClick);
         return () => {
           window.removeEventListener('hashchange', onHashChange);
-          document.getElementById('quick').removeEventListener('click', onClick);
+          document.removeEventListener('click', onClick);
         };
       }, []);
 
