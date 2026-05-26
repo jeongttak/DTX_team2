@@ -2798,6 +2798,8 @@ function COIdle({ onStart, onNav }) {
           </button>
         </div>
       </div>
+      {/* 영상 미리 버퍼링 — 측정 시작 시 즉시 재생되도록 */}
+      <video src="assets/tree-grow.mp4" preload="auto" muted playsInline style={{ display: 'none', width: 0, height: 0 }}/>
     </div>
   );
 }
@@ -2806,12 +2808,18 @@ function COIdle({ onStart, onNav }) {
 function VisionTree({ progress, totalSec = 8 }) {
   const videoRef = React.useRef(null);
 
-  // 측정 시작(progress===0) 시 영상 처음부터 재생
   React.useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.currentTime = 0;
-    v.play().catch(() => {});
+    const tryPlay = () => {
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    };
+    if (v.readyState >= 3) {
+      tryPlay();
+    } else {
+      v.addEventListener('canplay', tryPlay, { once: true });
+    }
   }, []);
 
   return (
