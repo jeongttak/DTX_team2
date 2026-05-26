@@ -102,7 +102,10 @@
     }
 
     .cards {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px;
+    }
+    @media (max-width: 960px) {
+      .cards { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 760px) {
       .cards { grid-template-columns: 1fr; gap: 14px; }
@@ -194,6 +197,57 @@
       font-size: 13px; font-weight: 800; color: #2F8A3E;
     }
 
+    .preview.watch {
+      background:
+        radial-gradient(50% 60% at 50% 50%, rgba(15,42,30,0.15) 0%, transparent 70%),
+        #1a1a1a;
+      display: flex; align-items: center; justify-content: center; gap: 0;
+    }
+    .watch-mini-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+    .watch-mini-strap {
+      width: 52px; height: 22px;
+      background: #222; border-radius: 6px 6px 0 0;
+    }
+    .watch-mini-strap.bot { border-radius: 0 0 6px 6px; }
+    .watch-mini-body {
+      width: 66px; height: 78px;
+      background: #1c1c1e;
+      border-radius: 20px;
+      border: 2px solid #3a3a3c;
+      box-shadow: 0 8px 24px rgba(0,0,0,.6);
+      padding: 4px;
+      position: relative;
+    }
+    .watch-mini-crown {
+      position: absolute; right: -5px; top: 16px;
+      width: 4px; height: 14px;
+      background: #3a3a3c; border-radius: 2px;
+    }
+    .watch-mini-screen {
+      width: 100%; height: 100%; border-radius: 16px;
+      background: linear-gradient(160deg, #0d2b1e 0%, #000 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      overflow: hidden; padding: 4px;
+    }
+    .wm-notif {
+      width: 100%; background: rgba(40,40,40,.97);
+      border-radius: 0 0 8px 8px;
+      padding: 4px 5px 5px;
+      position: absolute; top: 0; left: 0; right: 0;
+    }
+    .wm-notif-row { display: flex; align-items: center; gap: 3px; margin-bottom: 2px; }
+    .wm-icon { width: 8px; height: 8px; border-radius: 2px; background: #5BC23B; flex-shrink: 0; }
+    .wm-app { font-size: 5px; font-weight: 800; color: rgba(255,255,255,.5); letter-spacing: .04em; }
+    .wm-title { font-size: 6px; font-weight: 700; color: #fff; line-height: 1.3; }
+    .wm-btn-row { display: flex; gap: 2px; margin-top: 3px; }
+    .wm-btn { flex: 1; height: 10px; border-radius: 4px; font-size: 5px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; }
+    .wm-btn.g { background: #5BC23B; color: #fff; }
+    .wm-btn.s { background: rgba(255,255,255,.15); color: rgba(255,255,255,.7); }
+
     footer {
       margin-top: 40px;
       font-size: 11px; color: #6B7B75; font-weight: 600;
@@ -270,6 +324,35 @@
           </div>
         </div>
         <div class="arrow">대시보드 열기 →</div>
+      </a>
+
+      <a class="card" href="share-watch.html">
+        <span class="tag">스마트워치 · Apple Watch</span>
+        <h2>워치 알림 플로우</h2>
+        <p class="desc">흡연 트리거 감지 → 배너 알림 → CBT 질문까지 — 워치 연동 알림 7개 화면.</p>
+        <div class="preview watch">
+          <div class="watch-mini-wrap">
+            <div class="watch-mini-strap"></div>
+            <div class="watch-mini-body">
+              <div class="watch-mini-crown"></div>
+              <div class="watch-mini-screen">
+                <div class="wm-notif">
+                  <div class="wm-notif-row">
+                    <div class="wm-icon"></div>
+                    <div class="wm-app">PURELY:SOOM</div>
+                  </div>
+                  <div class="wm-title">흡연 욕구가<br>느껴지나요?</div>
+                  <div class="wm-btn-row">
+                    <div class="wm-btn g">기록</div>
+                    <div class="wm-btn s">나중에</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="watch-mini-strap bot"></div>
+          </div>
+        </div>
+        <div class="arrow">워치 알림 보기 →</div>
       </a>
     </div>
 
