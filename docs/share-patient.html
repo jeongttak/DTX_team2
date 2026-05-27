@@ -2712,7 +2712,7 @@ function ScreenCOFlow({ onNav = () => {} }) {
     setProgress(0);
     setCoVal(0);
     const start = performance.now();
-    const dur = 8000; // 8초 측정 (나무 영상 길이에 맞춤)
+    const dur = 10000; // 10초 측정 (나무 영상 길이에 맞춤)
     let raf;
     const tick = (t) => {
       const p = Math.min(1, (t - start) / dur);
@@ -2882,7 +2882,7 @@ function COIdle({ onStart, onNav }) {
 }
 
 // ── CO 측정 비주얼: 나무 자라기 (영상) ──
-function VisionTree({ progress, totalSec = 8 }) {
+function VisionTree({ progress, totalSec = 10 }) {
   const videoRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -2929,7 +2929,7 @@ function VisionTree({ progress, totalSec = 8 }) {
 
 function COMeasuring({ progress, coVal, onCancel }) {
   const dashTotal = 691;
-  const totalSec = 8;
+  const totalSec = 10;
   const seconds = Math.ceil(totalSec - progress * totalSec);
 
   return (
