@@ -2736,6 +2736,11 @@ function ScreenCOFlow({ onNav = () => {} }) {
 }
 
 function COIdle({ onStart, onNav }) {
+  const [showBtPopup, setShowBtPopup] = React.useState(false);
+
+  const handleAllow = () => { setShowBtPopup(false); onStart(); };
+  const handleDeny  = () => setShowBtPopup(false);
+
   return (
     <div className="ps-screen" data-screen-label="05 CO 측정 · 시작">
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #1B5240 0%, #0E3A2C 50%, #061E18 100%)', zIndex: 0 }}/>
@@ -2763,7 +2768,7 @@ function COIdle({ onStart, onNav }) {
         </div>
 
         <div style={{ padding: '0 20px 30px' }}>
-          {/* 블루투스 연결 안내 */}
+          {/* 블루투스 연결 상태 배지 */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '12px 14px',
@@ -2772,34 +2777,106 @@ function COIdle({ onStart, onNav }) {
             border: '1px solid rgba(165,230,107,.25)',
             marginBottom: 12,
           }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 12,
-              background: 'rgba(165,230,107,.2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}>
+            <div style={{ width: 32, height: 32, borderRadius: 12, background: 'rgba(165,230,107,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A5E66B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M7 7l10 10-5 5V2l5 5L7 17"/>
               </svg>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: '#A5E66B', letterSpacing: '.03em' }}>측정기 연결됨 · CO-100</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 2, lineHeight: 1.4 }}>블루투스 권한을 허용해야 측정이 가능해요</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 2, lineHeight: 1.4 }}>블루투스 연결 상태 양호</div>
             </div>
-            <div style={{
-              width: 8, height: 8, borderRadius: 999,
-              background: '#A5E66B',
-              boxShadow: '0 0 8px rgba(165,230,107,.8)',
-            }}/>
+            <div style={{ width: 8, height: 8, borderRadius: 999, background: '#A5E66B', boxShadow: '0 0 8px rgba(165,230,107,.8)' }}/>
           </div>
 
-          <button onClick={onStart} className="ps-cta green ps-tap" style={{ height: 60 }}>
+          <button onClick={() => setShowBtPopup(true)} className="ps-cta green ps-tap" style={{ height: 60 }}>
             <Icon name="wind" size={20}/>측정 시작
           </button>
         </div>
       </div>
+
       {/* 영상 미리 버퍼링 — 측정 시작 시 즉시 재생되도록 */}
       <video src="assets/tree-grow.mp4" preload="auto" muted playsInline style={{ display: 'none', width: 0, height: 0 }}/>
+
+      {/* ── 블루투스 권한 팝업 ── */}
+      {showBtPopup && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '0 28px',
+          animation: 'ps-fade-up .2s ease both',
+        }}>
+          <div style={{
+            width: '100%',
+            background: 'rgba(242,242,247,0.97)',
+            borderRadius: 22,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+            animation: 'ps-pop .25s cubic-bezier(.2,.9,.3,1.2) both',
+          }}>
+            {/* 팝업 본문 */}
+            <div style={{ padding: '28px 20px 20px', textAlign: 'center' }}>
+              {/* 블루투스 아이콘 */}
+              <div style={{
+                width: 56, height: 56, borderRadius: 16,
+                background: 'linear-gradient(135deg, #007AFF, #0055CC)',
+                margin: '0 auto 16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(0,122,255,.35)',
+              }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 7l10 10-5 5V2l5 5L7 17"/>
+                </svg>
+              </div>
+
+              {/* 제목 */}
+              <div style={{ fontSize: 17, fontWeight: 700, color: '#000', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+                "Purely:SOOM"이(가)<br/>블루투스에 접근하려고 합니다
+              </div>
+
+              {/* 설명 */}
+              <div style={{ fontSize: 13, color: '#3C3C43', marginTop: 10, lineHeight: 1.55, opacity: .75 }}>
+                CO-100 측정기와 연결하여<br/>호기 일산화탄소 수치를 측정합니다.<br/>블루투스 권한이 필요합니다.
+              </div>
+            </div>
+
+            {/* 구분선 */}
+            <div style={{ height: 1, background: 'rgba(0,0,0,0.12)' }}/>
+
+            {/* 버튼 영역 */}
+            <div style={{ display: 'flex' }}>
+              <button
+                onClick={handleDeny}
+                className="ps-tap"
+                style={{
+                  flex: 1, height: 52,
+                  background: 'transparent', border: 'none',
+                  fontSize: 17, fontWeight: 400, color: '#007AFF',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  borderRight: '0.5px solid rgba(0,0,0,0.12)',
+                }}
+              >
+                허용 안 함
+              </button>
+              <button
+                onClick={handleAllow}
+                className="ps-tap"
+                style={{
+                  flex: 1, height: 52,
+                  background: 'transparent', border: 'none',
+                  fontSize: 17, fontWeight: 700, color: '#007AFF',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                허용
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
